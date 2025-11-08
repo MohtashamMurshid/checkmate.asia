@@ -3,9 +3,8 @@ import { v } from "convex/values";
 import { Resend } from "@convex-dev/resend";
 import { components, internal } from "./_generated/api";
 
-const resend = new Resend((components as any).resend, {
-  testMode: process.env.NODE_ENV === "development",
-});
+// Initialize Resend at module level
+const resend = new Resend((components as any).resend, {});
 
 export const submitContactForm = mutation({
   args: {

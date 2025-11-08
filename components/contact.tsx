@@ -6,8 +6,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { useState } from 'react'
-import { useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
 
 export default function ContactSection() {
     const [currentStep, setCurrentStep] = useState(0)
@@ -20,8 +18,6 @@ export default function ContactSection() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
     const [errorMessage, setErrorMessage] = useState('')
-
-    const submitContactForm = useMutation(api.contacts.submitContactForm)
 
     const useCases = [
         { 
@@ -57,17 +53,35 @@ export default function ContactSection() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        
+        // Only submit if we're on the last step
+        if (currentStep !== totalSteps - 1) {
+            return
+        }
+        
         setIsSubmitting(true)
         setSubmitStatus('idle')
         setErrorMessage('')
 
         try {
-            await submitContactForm({
-                name: formData.name,
-                email: formData.email,
-                useCase: formData.useCase,
-                message: formData.message,
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    useCase: formData.useCase,
+                    message: formData.message,
+                }),
             })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Failed to submit form')
+            }
+
             setSubmitStatus('success')
             // Reset form
             setFormData({
@@ -82,6 +96,14 @@ export default function ContactSection() {
             setErrorMessage(error instanceof Error ? error.message : 'Failed to submit form. Please try again.')
         } finally {
             setIsSubmitting(false)
+        }
+    }
+    
+    const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        // Prevent form submission when Enter is pressed in textarea
+        // Allow Shift+Enter for new line, but prevent Enter alone from submitting
+        if (e.key === 'Enter' && !e.shiftKey && currentStep === totalSteps - 1) {
+            e.preventDefault()
         }
     }
 
@@ -227,6 +249,7 @@ export default function ContactSection() {
                                         rows={5}
                                         value={formData.message}
                                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                        onKeyDown={handleTextareaKeyDown}
                                         className="mt-2"
                                         autoFocus
                                     />
