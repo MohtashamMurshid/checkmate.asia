@@ -15,7 +15,7 @@ export function LandingHero() {
   };
 
   return (
-    <section className="relative min-h-[calc(100vh-88px)] flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-[calc(100vh-88px)] flex items-center justify-center overflow-hidden">
       {/* Dotted Surface Background */}
       <DottedSurface className="absolute inset-0" />
       
@@ -29,7 +29,7 @@ export function LandingHero() {
           </div>
 
           {/* Headline */}
-          <h1 className={`max-w-3xl mx-auto text-5xl md:text-7xl font-semibold tracking-tight mb-2 `}>
+          <h1 className={`max-w-3xl mx-auto text-5xl md:text-6xl font-semibold tracking-tight mb-2 `}>
             Verify Information in <span className="text-primary">
                 Seconds
             </span>

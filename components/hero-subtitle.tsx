@@ -1,0 +1,13 @@
+export function HeroSubtitle() {
+  return (
+    <section id="about" className="my-20 flex flex-col items-center justify-center">
+      <h2 className="text-2xl md:text-4xl font-semibold text-center mb-3 tracking-tight">
+        Noisy world, noisy data
+      </h2>
+      <p className="text-lg md:text-xl text-primary font-medium text-center max-w-2xl">
+        Quality decisions require factually&nbsp;accurate data
+      </p>
+    </section>
+  );
+}
+
