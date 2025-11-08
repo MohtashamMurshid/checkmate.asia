@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { useState } from 'react'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 export default function ContactSection() {
     const [currentStep, setCurrentStep] = useState(0)
@@ -15,6 +17,11 @@ export default function ContactSection() {
         useCase: '',
         message: '',
     })
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+    const [errorMessage, setErrorMessage] = useState('')
+
+    const submitContactForm = useMutation(api.contacts.submitContactForm)
 
     const useCases = [
         { 
@@ -48,10 +55,34 @@ export default function ContactSection() {
         }
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        // Handle form submission here
-        console.log('Form submitted:', formData)
+        setIsSubmitting(true)
+        setSubmitStatus('idle')
+        setErrorMessage('')
+
+        try {
+            await submitContactForm({
+                name: formData.name,
+                email: formData.email,
+                useCase: formData.useCase,
+                message: formData.message,
+            })
+            setSubmitStatus('success')
+            // Reset form
+            setFormData({
+                name: '',
+                email: '',
+                useCase: '',
+                message: '',
+            })
+            setCurrentStep(0)
+        } catch (error) {
+            setSubmitStatus('error')
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to submit form. Please try again.')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const canProceed = () => {
@@ -105,6 +136,22 @@ export default function ContactSection() {
                             Step {currentStep + 1} of {totalSteps}
                         </p>
                     </div>
+
+                    {submitStatus === 'success' && (
+                        <div className="mt-8 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <p className="text-green-800 dark:text-green-200 text-sm">
+                                Thank you! Your message has been sent successfully. We'll get back to you soon.
+                            </p>
+                        </div>
+                    )}
+
+                    {submitStatus === 'error' && (
+                        <div className="mt-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                            <p className="text-red-800 dark:text-red-200 text-sm">
+                                {errorMessage || 'Failed to submit form. Please try again.'}
+                            </p>
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="mt-8">
                         {/* Step 1: Name/Company name */}
@@ -201,7 +248,9 @@ export default function ContactSection() {
                                     Next
                                 </Button>
                             ) : (
-                                <Button type="submit">Submit</Button>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                                </Button>
                             )}
                         </div>
                     </form>
