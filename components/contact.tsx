@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { useState } from 'react'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 export default function ContactSection() {
     const [currentStep, setCurrentStep] = useState(0)
@@ -18,6 +20,7 @@ export default function ContactSection() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
     const [errorMessage, setErrorMessage] = useState('')
+    const submitContactForm = useMutation(api.contacts.submitContactForm)
 
     const useCases = [
         { 
@@ -41,13 +44,13 @@ export default function ContactSection() {
 
     const handleNext = () => {
         if (currentStep < totalSteps - 1) {
-            setCurrentStep(currentStep + 1)
+            setCurrentStep((prevStep) => Math.min(prevStep + 1, totalSteps - 1))
         }
     }
 
     const handlePrevious = () => {
         if (currentStep > 0) {
-            setCurrentStep(currentStep - 1)
+            setCurrentStep((prevStep) => Math.max(prevStep - 1, 0))
         }
     }
 
@@ -56,6 +59,7 @@ export default function ContactSection() {
         
         // Only submit if we're on the last step
         if (currentStep !== totalSteps - 1) {
+            handleNext()
             return
         }
         
@@ -64,23 +68,13 @@ export default function ContactSection() {
         setErrorMessage('')
 
         try {
-            const response = await fetch('/api/contact', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    useCase: formData.useCase,
-                    message: formData.message,
-                }),
+            // Persist to Convex DB and trigger emails via internal action
+            await submitContactForm({
+                name: formData.name,
+                email: formData.email,
+                useCase: formData.useCase,
+                message: formData.message,
             })
-
-            if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to submit form')
-            }
 
             setSubmitStatus('success')
             // Reset form
@@ -98,12 +92,16 @@ export default function ContactSection() {
             setIsSubmitting(false)
         }
     }
-    
-    const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        // Prevent form submission when Enter is pressed in textarea
-        // Allow Shift+Enter for new line, but prevent Enter alone from submitting
-        if (e.key === 'Enter' && !e.shiftKey && currentStep === totalSteps - 1) {
-            e.preventDefault()
+
+    const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+        if (e.key === 'Enter') {
+            // Prevent Enter from submitting the entire form before the last step.
+            if (currentStep < totalSteps - 1) {
+                e.preventDefault()
+                if (canProceed()) {
+                    handleNext()
+                }
+            }
         }
     }
 
@@ -175,7 +173,7 @@ export default function ContactSection() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="mt-8">
+                    <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="mt-8">
                         {/* Step 1: Name/Company name */}
                         {currentStep === 0 && (
                             <div className="space-y-4">
@@ -249,7 +247,6 @@ export default function ContactSection() {
                                         rows={5}
                                         value={formData.message}
                                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                        onKeyDown={handleTextareaKeyDown}
                                         className="mt-2"
                                         autoFocus
                                     />
@@ -267,11 +264,20 @@ export default function ContactSection() {
                                 <div />
                             )}
                             {currentStep < totalSteps - 1 ? (
-                                <Button type="button" onClick={handleNext} disabled={!canProceed()}>
+                                <Button
+                                    key="next"
+                                    type="button"
+                                    onClick={handleNext}
+                                    disabled={!canProceed()}
+                                >
                                     Next
                                 </Button>
                             ) : (
-                                <Button type="submit" disabled={isSubmitting}>
+                                <Button
+                                    key="submit"
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                >
                                     {isSubmitting ? 'Submitting...' : 'Submit'}
                                 </Button>
                             )}
