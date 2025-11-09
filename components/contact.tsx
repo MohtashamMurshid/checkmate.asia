@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/card'
 import { useState } from 'react'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
+import { Logo } from './logo'
+import FooterSection from './footer'
 
 export default function ContactSection() {
     const [currentStep, setCurrentStep] = useState(0)
@@ -121,12 +123,19 @@ export default function ContactSection() {
     }
 
     return (
-        <section >
-            <div className="mx-auto max-w-5xl px-8 lg:px-0">
-                <h1 className="text-center text-3xl font-semibold lg:text-4xl">Contact Sales</h1>
-                <p className="mt-4 text-center">We'll help you find the right plan and pricing for your business.</p>
+        <div className="min-h-screen bg-background flex flex-col">
+            <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 md:py-16">
+                <div className="w-full max-w-5xl">
+                    <div className="mb-8 flex justify-center">
+                        <Logo />
+                    </div>
+                    
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-semibold lg:text-4xl">Contact Sales</h1>
+                        <p className="mt-4 text-muted-foreground">We'll help you find the right plan and pricing for your business.</p>
+                    </div>
 
-                <Card className="mx-auto mt-12 max-w-3xl p-8 shadow-md sm:p-16">
+                    <Card className="mx-auto max-w-3xl p-8 shadow-md sm:p-16">
                     <div>
                         <h2 className="text-lg font-semibold">Let's get you to the right place</h2>
                         <p className="mt-4 text-sm">Reach out to our sales team! We're eager to learn more about how you plan to use our application.</p>
@@ -283,8 +292,10 @@ export default function ContactSection() {
                             )}
                         </div>
                     </form>
-                </Card>
+                    </Card>
+                </div>
             </div>
-        </section>
+            <FooterSection />
+        </div>
     )
 }

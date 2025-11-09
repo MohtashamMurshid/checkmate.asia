@@ -7,6 +7,8 @@ import Features from "@/components/features-12";
 import Features10 from "@/components/features-10";
 import { SourcesSection } from "@/components/sources-section";
 import { useEffect } from "react";
+import FooterSection from "@/components/footer";
+import { Header } from "@/components/header";
 
 export default function LandingContent() {
   useEffect(() => {
@@ -24,12 +26,15 @@ export default function LandingContent() {
 
   return (
     <div className="relative">
+                <Header />
+
       <LandingHero />
       <HeroSubtitle />
       <Features />
       <Features10 />
       <SourcesSection />
       <CTASection />
+      <FooterSection />
     </div>
   );
 }
