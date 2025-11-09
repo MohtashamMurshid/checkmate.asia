@@ -21,7 +21,7 @@ export default function Features10() {
                         <div className="relative border-t border-dashed max-sm:mb-6">
                             <div
                                 aria-hidden
-                                className="absolute inset-0 [background:radial-gradient(125%_125%_at_50%_0%,transparent_40%,var(--color-blue-600),var(--color-white)_100%)]"
+                                className="absolute inset-0 [background:radial-gradient(125%_125%_at_50%_0%,transparent_40%,var(--color-primary),var(--color-white)_100%)]"
                             />
                             <div className="aspect-76/59 p-1 px-6">
                                 <DualModeImage
@@ -184,7 +184,7 @@ const CircularUI = ({ label, circles, className }: CircularUIProps) => (
                             'border-primary': circle.pattern === 'none',
                             'border-primary bg-[repeating-linear-gradient(-45deg,var(--color-border),var(--color-border)_1px,transparent_1px,transparent_4px)]': circle.pattern === 'border',
                             'border-primary bg-background bg-[repeating-linear-gradient(-45deg,var(--color-primary),var(--color-primary)_1px,transparent_1px,transparent_4px)]': circle.pattern === 'primary',
-                            'bg-background z-1 border-blue-500 bg-[repeating-linear-gradient(-45deg,var(--color-blue-500),var(--color-blue-500)_1px,transparent_1px,transparent_4px)]': circle.pattern === 'blue',
+                            'bg-background z-1 border-primary bg-[repeating-linear-gradient(-45deg,var(--color-primary),var(--color-primary)_1px,transparent_1px,transparent_4px)]': circle.pattern === 'blue',
                         })}></div>
                 ))}
             </div>

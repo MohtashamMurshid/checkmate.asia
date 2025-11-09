@@ -127,7 +127,7 @@ export default function ContactSection() {
             <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 md:py-16">
                 <div className="w-full max-w-5xl">
                     <div className="mb-8 flex justify-center">
-                        <Logo />
+                        <Logo clickable={true} href="/" />
                     </div>
                     
                     <div className="text-center mb-8">
