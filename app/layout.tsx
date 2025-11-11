@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Investigating Information in Seconds ",
+  title: "Checkmate - Investigating Information in Seconds ",
   description: "Comprehensive AI-powered tools to investigate your information's accuracy and bias from credible sources. Due diligence, trace your data, political bias detection, and data compliance.",
 };
 

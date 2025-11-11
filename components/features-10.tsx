@@ -7,64 +7,14 @@ import { ReactNode } from 'react'
 export default function Features10() {
     return (
         <section id="solutions" className="bg-zinc-50 py-16 md:py-32 dark:bg-transparent">
-            <div className="mx-auto max-w-2xl px-6 lg:max-w-5xl">
-                <div className="mx-auto grid gap-4 lg:grid-cols-2">
+            <div className="mx-auto max-w-2xl px-6 lg:max-w-6xl">
+                <div className="mx-auto grid gap-4 lg:grid-cols-3">
                     <FeatureCard>
-                        <CardHeader className="pb-3">
-                            <CardHeading
-                                icon={Code}
-                                title="Enterprise API"
-                                description="Integrate Checkmate seamlessly with your existing infrastructure through our powerful REST API."
-                            />
-                        </CardHeader>
-
-                        <div className="relative border-t border-dashed max-sm:mb-6">
-                            <div
-                                aria-hidden
-                                className="absolute inset-0 [background:radial-gradient(125%_125%_at_50%_0%,transparent_40%,var(--color-primary),var(--color-white)_100%)]"
-                            />
-                            <div className="aspect-76/59 p-1 px-6">
-                                <DualModeImage
-                                    darkSrc="/enterprise-api.png"
-                                    lightSrc="/enterprise-api.png"
-                                    alt="enterprise api illustration"
-                                    width={1207}
-                                    height={929}
-                                />
-                            </div>
-                        </div>
-                    </FeatureCard>
-
-                    <FeatureCard>
-                        <CardHeader className="pb-3">
-                            <CardHeading
-                                icon={Server}
-                                title="On prem Agent Deployment"
-                                description="Deploy Checkmate agents directly on your infrastructure for complete data control and security."
-                            />
-                        </CardHeader>
-
-                        <CardContent>
-                            <div className="mask-radial-at-right mask-radial-from-75% mask-radial-[75%_75%] relative max-sm:mb-6">
-                                <div className="aspect-76/59 overflow-hidden rounded-lg border">
-                                    <DualModeImage
-                                        darkSrc="/agent-deploy.png"
-                                        lightSrc="/agent-deploy.png"
-                                        alt="agent deploy illustration"
-                                        width={1207}
-                                        height={929}
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </FeatureCard>
-
-                    <FeatureCard className="p-6 lg:col-span-2">
                         <CardHeader className="pb-3">
                             <CardHeading
                                 icon={Globe}
                                 title="SAAS Enterprise"
-                                description="Fully managed cloud solution with enterprise-grade security, scalability, and support."
+                                description="Fully managed cloud solution with enterprise-grade security, scalability, and support"
                             />
                         </CardHeader>
 
@@ -90,6 +40,56 @@ export default function Features10() {
                                 className="hidden sm:block"
                             />
                         </div>
+                    </FeatureCard>
+
+                    <FeatureCard>
+                        <CardHeader className="pb-3">
+                            <CardHeading
+                                icon={Code}
+                                title="Enterprise API"
+                                description="Integrate Checkmate seamlessly with your existing infrastructure through our powerful REST API"
+                            />
+                        </CardHeader>
+
+                        <div className="relative border-t border-dashed max-sm:mb-6">
+                            <div
+                                aria-hidden
+                                className="absolute inset-0 [background:radial-gradient(125%_125%_at_50%_0%,transparent_40%,var(--color-primary),var(--color-white)_100%)]"
+                            />
+                            <div className="aspect-76/59 p-1 px-6">
+                                <DualModeImage
+                                    darkSrc="/enterprise-api.png"
+                                    lightSrc="/enterprise-api.png"
+                                    alt="enterprise api illustration"
+                                    width={1207}
+                                    height={929}
+                                />
+                            </div>
+                        </div>
+                    </FeatureCard>
+
+                    <FeatureCard>
+                        <CardHeader className="pb-3">
+                            <CardHeading
+                                icon={Server}
+                                title="On prem Agent Deployment"
+                                description="Deploy Checkmate agents directly on your infrastructure for complete data control and security"
+                            />
+                        </CardHeader>
+
+                        <CardContent>
+                            <div className="mask-radial-at-right mask-radial-from-75% mask-radial-[75%_75%] relative max-sm:mb-6">
+                                <div className="aspect-76/59 overflow-hidden rounded-lg border">
+                                    <DualModeImage
+                                        darkSrc="/agent-deploy.png"
+                                        lightSrc="/agent-deploy.png"
+                                        alt="agent deploy illustration"
+                                        width={1207}
+                                        height={929}
+                                    />
+                                </div>
+                            </div>
+                        </CardContent>
                     </FeatureCard>
 
                 </div>

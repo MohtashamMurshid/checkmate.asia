@@ -28,30 +28,26 @@ export default function Features() {
         key: ImageKey
         icon: React.ReactNode
         title: string
-        subtitle: string
         description: string
     }> = [
         {
             key: 'item-1',
             icon: <FileText className="size-4 text-primary" />,
-            title: 'Investment/Consulting',
-            subtitle: 'Due diligence',
+            title: 'Due diligence',
             description:
                 'Checkmate helps businesses validate claims and assumptions found in pitch decks, reports, or market research. It reviews external documents, identifies exaggeration or weak evidence, and provides clearer context to decision-makers.',
         },
         {
             key: 'item-2',
             icon: <Network className="size-4 text-primary" />,
-            title: 'Info platforms (news, socmed)',
-            subtitle: 'Source tracing & political bias',
+            title: 'Source tracing & political bias',
             description:
                 'Checkmate maps how information spreads—tracing original sources, incentives, and potential agendas—to reveal bias and provide clearer context.',
         },
         {
             key: 'item-4',
             icon: <CheckCircle2 className="size-4 text-primary" />,
-            title: 'Data compliance (enterprise data preprocessing)',
-            subtitle: 'Data Compliance',
+            title: 'Data Compliance',
             description:
                 'Checkmate integrates with your enterprise data to filter and correct inaccurate data, ensuring it reflects the real world.',
         },
@@ -99,7 +95,7 @@ export default function Features() {
                                                     ? 'text-foreground'
                                                     : 'text-muted-foreground group-hover:text-foreground/80'
                                             }`}>
-                                                <span className="text-primary font-semibold">{f.subtitle}</span> — {f.description}
+                                                {f.description}
                                             </p>
                                         </div>
                                     )

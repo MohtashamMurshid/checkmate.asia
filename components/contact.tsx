@@ -131,14 +131,14 @@ export default function ContactSection() {
                     </div>
                     
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-semibold lg:text-4xl">Contact Sales</h1>
-                        <p className="mt-4 text-muted-foreground">We'll help you find the right plan and pricing for your business.</p>
+                        <h1 className="text-3xl font-semibold lg:text-4xl">Get in Touch</h1>
+                        <p className="mt-4 text-muted-foreground">We'd love to hear from you and learn how we can help.</p>
                     </div>
 
                     <Card className="mx-auto max-w-3xl p-8 shadow-md sm:p-16">
                     <div>
                         <h2 className="text-lg font-semibold">Let's get you to the right place</h2>
-                        <p className="mt-4 text-sm">Reach out to our sales team! We're eager to learn more about how you plan to use our application.</p>
+                        <p className="mt-4 text-sm">Tell us a bit about yourself and how you'd like to use our application.</p>
                     </div>
 
                     {/* Progress indicator */}

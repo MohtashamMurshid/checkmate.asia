@@ -25,12 +25,14 @@ export function LandingHero() {
           {/* Top badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1.5 backdrop-blur-sm">
             <Sparkles className="h-4 w-4" />
-            <span className="text-xs sm:text-sm text-muted-foreground">New: External API & Dashboard updates</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">
+              New: Book a Demo
+            </span>
           </div>
 
           {/* Headline */}
           <h1 className={`max-w-3xl mx-auto text-5xl md:text-6xl font-semibold tracking-tight mb-2 `}>
-            Verify Information in <span className="text-primary">
+            Investigate Information in <span className="text-primary">
                 Seconds
             </span>
 

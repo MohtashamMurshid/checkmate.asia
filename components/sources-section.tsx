@@ -1,19 +1,39 @@
 export function SourcesSection() {
-  const primarySources: Array<{ label: string; caption: string }> = [
-    { label: "X (Twitter)", caption: "Tweets from Prime Ministers" },
-    { label: "TikTok", caption: "Posts from brand accounts" },
-    { label: "Published Research", caption: "Peer‑reviewed journals / DOI" },
-  ]
-
-  const otherSources: string[] = [
-    "Government portals",
-    "Reputable newsrooms",
-    "SEC / EDGAR filings",
-    "Company press releases",
-    "GitHub releases",
-    "arXiv preprints",
-    "Court records",
-    "Public datasets",
+  const sourceCategories: Array<{
+    title: string
+    items: Array<{ label: string; caption?: string }>
+  }> = [
+    {
+      title: "Social Media",
+      items: [
+        { label: "X (Twitter)", caption: "Tweets from Prime Ministers" },
+        { label: "TikTok", caption: "Posts from brand accounts" },
+      ],
+    },
+    {
+      title: "Gov & Court Records",
+      items: [
+        { label: "Government portals" },
+        { label: "SEC / EDGAR filings" },
+        { label: "Court records" },
+      ],
+    },
+    {
+      title: "Press",
+      items: [
+        { label: "Reputable newsrooms" },
+        { label: "Company press releases" },
+      ],
+    },
+    {
+      title: "Research Papers",
+      items: [
+        { label: "Published Research", caption: "Peer‑reviewed journals / DOI" },
+        { label: "arXiv preprints" },
+        { label: "Public datasets" },
+        { label: "GitHub releases" },
+      ],
+    },
   ]
 
   return (
@@ -29,30 +49,28 @@ export function SourcesSection() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {primarySources.map((s) => (
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {sourceCategories.map((category) => (
             <div
-              key={s.label}
+              key={category.title}
               className="bg-card/50 hover:bg-card transition-colors rounded-2xl border p-5 md:p-6"
             >
-              <div className="flex items-center gap-3">
-                <span className="inline-flex items-center justify-center rounded-md border px-2.5 py-1 text-sm font-medium">
-                  {s.label}
-                </span>
+              <h3 className="text-lg font-semibold mb-4">{category.title}</h3>
+              <div className="space-y-3">
+                {category.items.map((item) => (
+                  <div key={item.label}>
+                    <span className="inline-flex items-center justify-center rounded-md border px-2.5 py-1 text-sm font-medium">
+                      {item.label}
+                    </span>
+                    {item.caption && (
+                      <p className="text-muted-foreground mt-2 text-xs">
+                        {item.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-              <p className="text-muted-foreground mt-3 text-sm">{s.caption}</p>
             </div>
-          ))}
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          {otherSources.map((label) => (
-            <span
-              key={label}
-              className="text-sm rounded-full border bg-background px-3 py-1.5 text-foreground/80 hover:text-foreground transition-colors"
-            >
-              {label}
-            </span>
           ))}
         </div>
       </div>
