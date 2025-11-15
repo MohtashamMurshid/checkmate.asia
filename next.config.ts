@@ -1,8 +1,6 @@
+import { NextConfig } from "next";
 
-const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+const nextConfig: NextConfig = {
   // Externalize packages that use native Node.js modules
   // This works for both webpack and Turbopack
   serverExternalPackages: [
@@ -10,9 +8,6 @@ const nextConfig = {
     'jsdom',
     '@tobyg74/tiktok-api-dl',
   ],
-  // Add empty turbopack config to silence the warning
-  // The serverExternalPackages above will handle externalization for both bundlers
-  turbopack: {},
 };
 
 export default nextConfig;

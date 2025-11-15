@@ -2,6 +2,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { generateText } from 'ai';
 import { getOpenRouterProvider, getModelConfig } from './config';
+import { stepCountIs } from 'ai';
 
 /**
  * Analysis agent tools - used by the nested analysis agent
@@ -324,7 +325,7 @@ export async function runAnalysisAgent(
       },
     ],
     tools: analysisTools,
-    maxSteps: 10, // Allow multiple tool calls for comprehensive analysis
+    stopWhen: stepCountIs(10),
   });
 
   return result.text;

@@ -3,8 +3,8 @@ import { getOpenRouterProvider, getModelConfig, AI_CONFIG } from '@/lib/ai/confi
 import { investigateTools } from '@/lib/ai/tools';
 import { extractContent } from '@/lib/ai/extractors';
 
-// Use maxDuration from config
-export const maxDuration = AI_CONFIG.maxDuration;
+// Route segment config - must be statically analyzable in Next.js 16
+export const maxDuration = 30;
 
 // Ensure Node.js runtime (not edge) for native module support
 export const runtime = 'nodejs';
