@@ -5,6 +5,9 @@ import { investigateTools } from '@/lib/ai/tools';
 // Use maxDuration from config
 export const maxDuration = AI_CONFIG.maxDuration;
 
+// Ensure Node.js runtime (not edge) for native module support
+export const runtime = 'nodejs';
+
 export async function POST(req: Request) {
   try {
     const { messages, model }: { messages: UIMessage[]; model?: string } =

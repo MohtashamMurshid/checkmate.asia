@@ -28,6 +28,12 @@ Create a `.env.local` file in the root directory with the following variables:
 # OpenRouter API Key for AI functionality (required for /investigate page)
 OPENROUTER_API_KEY=your_openrouter_api_key_here
 
+# Exa API Key for web search and blog post content retrieval (required for /investigate page)
+EXA_API_KEY=your_exa_api_key_here
+
+# OpenAI API Key for Whisper transcription (required for TikTok video transcription)
+OPENAI_API_KEY=your_openai_api_key_here
+
 # Convex (if using)
 NEXT_PUBLIC_CONVEX_URL=your_convex_url_here
 
@@ -37,7 +43,9 @@ RESEND_FROM_EMAIL=your_verified_email@example.com
 RESEND_TO_EMAIL=recipient@example.com
 ```
 
-### Getting an OpenRouter API Key
+### Getting API Keys
+
+#### OpenRouter API Key
 
 1. Visit [OpenRouter](https://openrouter.ai/)
 2. Sign up or log in
@@ -46,6 +54,26 @@ RESEND_TO_EMAIL=recipient@example.com
 5. Copy the key and add it to your `.env.local` file
 
 The `/investigate` page requires the `OPENROUTER_API_KEY` to function.
+
+#### Exa API Key
+
+1. Visit [Exa AI](https://exa.ai/)
+2. Sign up or log in
+3. Navigate to your API keys section
+4. Create a new API key
+5. Copy the key and add it to your `.env.local` file
+
+The `/investigate` page uses Exa for web search and blog post content retrieval.
+
+#### OpenAI API Key
+
+1. Visit [OpenAI Platform](https://platform.openai.com/)
+2. Sign up or log in
+3. Navigate to API keys section
+4. Create a new API key
+5. Copy the key and add it to your `.env.local` file
+
+The `/investigate` page uses OpenAI's Whisper API for transcribing TikTok videos.
 
 ### Installing AI Elements Components
 
