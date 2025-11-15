@@ -4,7 +4,7 @@ import { investigateTools } from '@/lib/ai/tools';
 import { extractContent } from '@/lib/ai/extractors';
 
 // Route segment config - must be statically analyzable in Next.js 16
-export const maxDuration = 30;
+export const maxDuration = 59;
 
 // Ensure Node.js runtime (not edge) for native module support
 export const runtime = 'nodejs';
