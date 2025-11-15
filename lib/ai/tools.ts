@@ -2,6 +2,8 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { Scraper } from '@the-convocation/twitter-scraper';
 import OpenAI from 'openai';
+import { generateObject } from 'ai';
+import { getOpenRouterProvider, getModelConfig } from './config';
 import {
   extractTwitterId,
   extractTikTokId,
@@ -506,6 +508,272 @@ ${metadata ? `Metadata: ${JSON.stringify(parsedMetadata)}` : ''}`,
 
 Content: ${text}`,
       });
+    },
+  }),
+
+  search_news_parallel: tool({
+    description:
+      'Searches for related news articles using 2 parallel Exa queries from different angles. Returns compiled citations and summaries. Use this after content extraction to find comprehensive news coverage.',
+    inputSchema: z.object({
+      content: z
+        .string()
+        .describe('The extracted content to search news for'),
+      sourceType: z
+        .enum(['twitter', 'tiktok', 'blog', 'text'])
+        .describe('The type of source the content came from'),
+    }),
+    execute: async ({ content, sourceType }) => {
+      try {
+        const exaApiKey = process.env.EXA_API_KEY;
+        if (!exaApiKey) {
+          return JSON.stringify({
+            error: 'EXA_API_KEY not configured',
+            content: content.substring(0, 200),
+          });
+        }
+
+        // Generate 2 different search angles
+        const searchAngles = [
+          content.substring(0, 200), // Main claim/content
+          `${content.substring(0, 150)} news recent`, // Recent news angle
+        ];
+
+        // Run 2 parallel Exa searches
+        const searchPromises = searchAngles.map(async (query) => {
+          try {
+            const response = await fetch('https://api.exa.ai/search', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': exaApiKey,
+              },
+              body: JSON.stringify({
+                query,
+                num_results: 2,
+                contents: {
+                  text: {
+                    max_characters: 5000,
+                  },
+                },
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error(`Exa API error: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return {
+              query,
+              results: (data.results || []).map((r: any) => ({
+                title: r.title || '',
+                url: r.url || '',
+                text: r.text || '',
+                publishedDate: r.publishedDate || null,
+              })),
+            };
+          } catch (error) {
+            return {
+              query,
+              error: error instanceof Error ? error.message : 'Unknown error',
+              results: [],
+            };
+          }
+        });
+
+        const searchResults = await Promise.all(searchPromises);
+
+        // Deduplicate results by URL
+        const urlMap = new Map<string, any>();
+        for (const searchResult of searchResults) {
+          for (const result of searchResult.results) {
+            if (result.url && !urlMap.has(result.url)) {
+              urlMap.set(result.url, result);
+            }
+          }
+        }
+
+        const uniqueCitations = Array.from(urlMap.values());
+
+        // Generate summary using AI
+        const provider = getOpenRouterProvider();
+        const modelConfig = getModelConfig();
+        
+        const summaryPrompt = `Summarize the following news articles found related to this content. Provide a concise summary highlighting key points and patterns:
+
+Content being investigated: ${content.substring(0, 500)}
+
+Found ${uniqueCitations.length} unique articles:
+${uniqueCitations.slice(0, 10).map((c, i) => `${i + 1}. ${c.title} (${c.url})`).join('\n')}
+
+Provide a 2-3 paragraph summary of what these articles reveal about the content.`;
+
+        let summary = '';
+        try {
+          const summaryResult = await generateObject({
+            model: provider.chat(modelConfig.model),
+            prompt: summaryPrompt,
+            schema: z.object({
+              summary: z.string().describe('Summary of the news articles'),
+            }),
+          });
+          summary = summaryResult.object.summary;
+        } catch (error) {
+          summary = `Found ${uniqueCitations.length} related articles. Summary generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        }
+
+        return JSON.stringify({
+          citations: uniqueCitations,
+          summary,
+          totalResults: uniqueCitations.length,
+          searchAngles: searchAngles.length,
+        });
+      } catch (error) {
+        return JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+          content: content.substring(0, 200),
+        });
+      }
+    },
+  }),
+
+  analyze_sentiment_political: tool({
+    description:
+      'Analyzes text for sentiment (positive/negative/neutral) and political leaning (left/center/right) using structured output. Returns detailed analysis with confidence scores and reasoning.',
+    inputSchema: z.object({
+      text: z.string().describe('The text to analyze for sentiment and political leaning'),
+      context: z
+        .string()
+        .optional()
+        .describe('Optional context about the text (e.g., source type, author)'),
+    }),
+    execute: async ({ text, context }) => {
+      try {
+        const provider = getOpenRouterProvider();
+        const modelConfig = getModelConfig();
+
+        const analysisPrompt = `Analyze the following text for sentiment and political leaning.
+
+Text to analyze:
+${text}
+
+${context ? `Context: ${context}` : ''}
+
+Provide a detailed analysis with:
+1. Sentiment classification (positive, negative, or neutral) with confidence score (0-1)
+2. Political leaning classification (left, center, or right) with confidence score (0-1)
+3. Reasoning/evidence for each classification
+
+Be objective and base your analysis on the actual content, not assumptions.`;
+
+        const analysisResult = await generateObject({
+          model: provider.chat(modelConfig.model),
+          prompt: analysisPrompt,
+          schema: z.object({
+            sentiment: z.object({
+              classification: z.enum(['positive', 'negative', 'neutral']),
+              confidence: z.number().min(0).max(1),
+              reasoning: z.string(),
+            }),
+            politicalLeaning: z.object({
+              classification: z.enum(['left', 'center', 'right']),
+              confidence: z.number().min(0).max(1),
+              reasoning: z.string(),
+            }),
+          }),
+        });
+
+        return JSON.stringify(analysisResult.object);
+      } catch (error) {
+        return JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+          text: text.substring(0, 200),
+        });
+      }
+    },
+  }),
+
+  generate_visualization: tool({
+    description:
+      'Compiles all investigation analysis results into a visualization-ready JSON structure. Includes sentiment comparison, political leaning distribution, and citation sources. Use this after completing sentiment analysis on both initial content and Exa results.',
+    inputSchema: z.object({
+      initialAnalysis: z
+        .string()
+        .describe('JSON string of sentiment/political analysis for initial content'),
+      exaAnalysis: z
+        .string()
+        .describe('JSON string of sentiment/political analysis for Exa results summary'),
+      citations: z
+        .string()
+        .optional()
+        .describe('JSON string of citations array from Exa search'),
+      exaSummary: z
+        .string()
+        .optional()
+        .describe('Summary text from Exa search results'),
+    }),
+    execute: async ({ initialAnalysis, exaAnalysis, citations, exaSummary }) => {
+      try {
+        // Parse inputs
+        let initialData: any = {};
+        let exaData: any = {};
+        let citationsArray: any[] = [];
+
+        try {
+          initialData = JSON.parse(initialAnalysis);
+        } catch {
+          initialData = { error: 'Failed to parse initial analysis' };
+        }
+
+        try {
+          exaData = JSON.parse(exaAnalysis);
+        } catch {
+          exaData = { error: 'Failed to parse Exa analysis' };
+        }
+
+        if (citations) {
+          try {
+            const parsedCitations = JSON.parse(citations);
+            citationsArray = Array.isArray(parsedCitations) ? parsedCitations : parsedCitations.citations || [];
+          } catch {
+            citationsArray = [];
+          }
+        }
+
+        // Build visualization structure
+        const visualization = {
+          type: 'investigation_visualization',
+          initialContent: {
+            sentiment: initialData.sentiment || null,
+            politicalLeaning: initialData.politicalLeaning || null,
+          },
+          exaResults: {
+            sentiment: exaData.sentiment || null,
+            politicalLeaning: exaData.politicalLeaning || null,
+            citations: citationsArray,
+            summary: exaSummary || null,
+          },
+          comparison: {
+            sentimentDiff: {
+              initial: initialData.sentiment?.classification || null,
+              exa: exaData.sentiment?.classification || null,
+              match: initialData.sentiment?.classification === exaData.sentiment?.classification,
+            },
+            politicalDiff: {
+              initial: initialData.politicalLeaning?.classification || null,
+              exa: exaData.politicalLeaning?.classification || null,
+              match: initialData.politicalLeaning?.classification === exaData.politicalLeaning?.classification,
+            },
+          },
+        };
+
+        return JSON.stringify(visualization, null, 2);
+      } catch (error) {
+        return JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+          type: 'investigation_visualization',
+        });
+      }
     },
   }),
 };

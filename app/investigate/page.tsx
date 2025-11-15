@@ -219,17 +219,34 @@ function InvestigatePageContent() {
                               const toolName = part.type.replace('tool-', '');
                               // Open tools by default if they have results
                               const hasResults = !!(toolPart.output || toolPart.errorText);
+                              // Check if this is a visualization tool or has visualization output
+                              const isVisualizationTool = toolName === 'generate_visualization' || 
+                                                         toolName === 'analyze_sentiment_political';
+                              let isVisualizationOutput = false;
+                              if (toolPart.output) {
+                                try {
+                                  const output = typeof toolPart.output === 'string' 
+                                    ? JSON.parse(toolPart.output) 
+                                    : toolPart.output;
+                                  isVisualizationOutput = output?.type === 'investigation_visualization' || 
+                                                         (output?.sentiment && output?.politicalLeaning);
+                                } catch {
+                                  // Not JSON, skip
+                                }
+                              }
+                              // Open by default if has results OR is visualization tool/output
+                              const shouldOpen = hasResults || isVisualizationTool || isVisualizationOutput;
                               return (
-                                <Tool key={`${message.id}-${i}`} defaultOpen={hasResults}>
+                                <Tool key={`${message.id}-${i}`} defaultOpen={shouldOpen}>
                                   <ToolHeader
-                                    title={toolName}
                                     type={toolPart.type}
                                     state={toolPart.state}
+                                    input={toolPart.input}
                                   />
                                   <ToolContent>
-                                    {toolPart.input && (
-                                      <ToolInput input={toolPart.input} />
-                                    )}
+                                    {toolPart.input && typeof toolPart.input === 'object' && !isVisualizationTool && !isVisualizationOutput ? (
+                                      <ToolInput input={toolPart.input as ToolUIPart["input"]} />
+                                    ) : null}
                                     {(toolPart.output || toolPart.errorText) && (
                                       <ToolOutput
                                         output={toolPart.output}

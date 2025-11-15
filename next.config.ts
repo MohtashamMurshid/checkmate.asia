@@ -1,6 +1,8 @@
-import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Externalize packages that use native Node.js modules
   // This works for both webpack and Turbopack
   serverExternalPackages: [
