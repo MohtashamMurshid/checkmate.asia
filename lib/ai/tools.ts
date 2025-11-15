@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { Scraper } from '@the-convocation/twitter-scraper';
 import OpenAI from 'openai';
 import {
-  detectInputType,
   extractTwitterId,
   extractTikTokId,
 } from './utils';
@@ -22,19 +21,52 @@ const twitterScraper = new Scraper();
  */
 
 export const investigateTools = {
-  detect_input_type: tool({
+  comprehensive_analysis: tool({
     description:
-      'Detects the type of input (Twitter link, TikTok link, blog post link, or plain text). Use this first to determine which tool to use.',
+      'Performs comprehensive analysis of extracted content using a specialized analysis agent. This agent will search the web, find agreeing/disagreeing sources, compare them, and provide a detailed credibility assessment.',
     inputSchema: z.object({
-      input: z.string().describe('The user input to analyze'),
+      content: z
+        .string()
+        .describe('The extracted content to analyze (tweet text, TikTok transcription, blog post, etc.)'),
+      metadata: z
+        .string()
+        .optional()
+        .describe('Additional metadata in JSON format (username, author, description, etc.)'),
+      sourceType: z
+        .enum(['twitter', 'tiktok', 'blog', 'text'])
+        .describe('The type of source the content came from'),
     }),
-    execute: async ({ input }) => {
-      const detection = detectInputType(input);
-      return JSON.stringify({
-        type: detection.type,
-        isUrl: detection.isUrl,
-        url: detection.url || null,
-      });
+    execute: async ({ content, metadata, sourceType }) => {
+      try {
+        // Import and run the analysis agent
+        const { runAnalysisAgent } = await import('./analysis-agent');
+        
+        // Parse metadata if provided
+        let parsedMetadata: Record<string, any> = {};
+        try {
+          if (metadata) {
+            parsedMetadata = JSON.parse(metadata);
+          }
+        } catch {
+          // Ignore parsing errors
+        }
+
+        // Run the analysis agent
+        // Map 'text' to 'web_search' for the analysis agent
+        const agentSourceType = sourceType === 'text' ? 'web_search' : sourceType;
+        const analysisResult = await runAnalysisAgent(
+          content,
+          parsedMetadata,
+          agentSourceType
+        );
+
+        return analysisResult;
+      } catch (error) {
+        return JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+          content: content.substring(0, 200),
+        });
+      }
     },
   }),
 

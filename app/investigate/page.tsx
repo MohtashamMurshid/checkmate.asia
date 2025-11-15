@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Conversation,
   ConversationContent,
@@ -12,7 +12,16 @@ import {
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Response } from '@/components/ai-elements/response';
 import {
+  Tool,
+  ToolHeader,
+  ToolContent,
+  ToolInput,
+  ToolOutput,
+} from '@/components/ai-elements/tool';
+import type { ToolUIPart } from 'ai';
+import {
   PromptInput,
+  PromptInputProvider,
   PromptInputTextarea,
   PromptInputFooter,
   PromptInputTools,
@@ -23,19 +32,37 @@ import {
   PromptInputSelectTrigger,
   PromptInputSelectValue,
   type PromptInputMessage,
+  usePromptInputController,
 } from '@/components/ai-elements/prompt-input';
 import { Loader } from '@/components/ai-elements/loader';
 import { SearchIcon } from 'lucide-react';
 import { AI_CONFIG } from '@/lib/ai/config';
+import { detectInputType } from '@/lib/ai/utils';
+import {
+  LinkPreview,
+  LinkPreviewLoading,
+  LinkPreviewError,
+  type LinkPreviewData,
+} from '@/components/link-preview';
+import { LinkChip } from '@/components/link-chip';
 
-export default function InvestigatePage() {
+function InvestigatePageContent() {
   const [selectedModel, setSelectedModel] = useState<string>(
     AI_CONFIG.defaultModel,
   );
+  const [linkPreview, setLinkPreview] = useState<LinkPreviewData | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [detectedLinks, setDetectedLinks] = useState<string[]>([]);
+  const [hoveredUrl, setHoveredUrl] = useState<string | null>(null);
   
   // Use ref to ensure the model is always current
   const selectedModelRef = useRef(selectedModel);
   selectedModelRef.current = selectedModel;
+
+  const { textInput } = usePromptInputController();
+  const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hidePreviewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { messages, status, sendMessage, error } = useChat({
     transport: new DefaultChatTransport({
@@ -46,10 +73,111 @@ export default function InvestigatePage() {
     }),
   });
 
+  const fetchPreview = useCallback(async (url: string) => {
+    setPreviewLoading(true);
+    setPreviewError(null);
+    
+    try {
+      const response = await fetch('/api/preview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch preview');
+      }
+
+      const data = await response.json();
+      setLinkPreview(data);
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : 'Failed to load preview');
+      setLinkPreview(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, []);
+
+  const handleLinkHover = useCallback((url: string) => {
+    setHoveredUrl(url);
+    // Clear any existing timeouts
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current);
+    }
+    if (hidePreviewTimeoutRef.current) {
+      clearTimeout(hidePreviewTimeoutRef.current);
+    }
+    // Debounce the preview fetch
+    previewTimeoutRef.current = setTimeout(() => {
+      fetchPreview(url);
+    }, 300);
+  }, [fetchPreview]);
+
+  const handleLinkLeave = useCallback(() => {
+    // Clear timeout if user leaves before preview loads
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current);
+    }
+    // Hide preview when mouse leaves (with a small delay to allow moving to preview)
+    if (hidePreviewTimeoutRef.current) {
+      clearTimeout(hidePreviewTimeoutRef.current);
+    }
+    hidePreviewTimeoutRef.current = setTimeout(() => {
+      setHoveredUrl(null);
+      setLinkPreview(null);
+      setPreviewError(null);
+    }, 200);
+  }, []);
+
+  // Detect links in the input text (but don't auto-fetch previews)
+  useEffect(() => {
+    const text = textInput.value.trim();
+    
+    if (!text) {
+      setDetectedLinks([]);
+      // Clear preview if no links detected
+      if (!hoveredUrl) {
+        setLinkPreview(null);
+        setPreviewError(null);
+      }
+      return;
+    }
+
+    // Check if the text contains URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const matches = text.match(urlRegex);
+    
+    if (matches && matches.length > 0) {
+      // Filter to only Twitter and TikTok links
+      const supportedLinks = matches.filter(url => {
+        const detection = detectInputType(url);
+        return detection.type === 'twitter' || detection.type === 'tiktok';
+      });
+      
+      setDetectedLinks(supportedLinks);
+    } else {
+      setDetectedLinks([]);
+      // Clear preview if no links detected and not hovering
+      if (!hoveredUrl) {
+        setLinkPreview(null);
+        setPreviewError(null);
+      }
+    }
+  }, [textInput.value, hoveredUrl]);
+
   const handleSubmit = (message: PromptInputMessage) => {
     if (!message.text?.trim()) {
       return;
     }
+
+    // Clear preview and detected links when submitting
+    setLinkPreview(null);
+    setPreviewError(null);
+    setHoveredUrl(null);
+    setDetectedLinks([]);
 
     sendMessage({
       text: message.text,
@@ -85,12 +213,36 @@ export default function InvestigatePage() {
                                 </Response>
                               );
                             }
-                            // Tool invocations and other part types can be rendered here
+                            // Render tool calls using Tool component
                             if (part.type.startsWith('tool-')) {
+                              const toolPart = part as ToolUIPart;
+                              const toolName = part.type.replace('tool-', '');
+                              // Open tools by default if they have results
+                              const hasResults = !!(toolPart.output || toolPart.errorText);
                               return (
-                                <div key={`${message.id}-${i}`} className="text-sm text-muted-foreground py-2">
-                                  Using tool: {part.type.replace('tool-', '')}
-                                </div>
+                                <Tool key={`${message.id}-${i}`} defaultOpen={hasResults}>
+                                  <ToolHeader
+                                    title={toolName}
+                                    type={toolPart.type}
+                                    state={toolPart.state}
+                                  />
+                                  <ToolContent>
+                                    {toolPart.input && (
+                                      <ToolInput input={toolPart.input} />
+                                    )}
+                                    {(toolPart.output || toolPart.errorText) && (
+                                      <ToolOutput
+                                        output={toolPart.output}
+                                        errorText={toolPart.errorText}
+                                      />
+                                    )}
+                                    {!hasResults && toolPart.state === 'output-available' && (
+                                      <div className="p-4 text-sm text-muted-foreground">
+                                        Tool completed but no output available.
+                                      </div>
+                                    )}
+                                  </ToolContent>
+                                </Tool>
                               );
                             }
                             return null;
@@ -120,7 +272,56 @@ export default function InvestigatePage() {
         </div>
 
         {/* Input Area - Centered */}
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-4xl space-y-3">
+          {/* Detected Links */}
+          {detectedLinks.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {detectedLinks.map((url, index) => (
+                <LinkChip
+                  key={`${url}-${index}`}
+                  url={url}
+                  onHover={handleLinkHover}
+                  onLeave={handleLinkLeave}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Link Preview - shown on hover */}
+          {hoveredUrl && (
+            <div
+              onMouseEnter={() => {
+                // Cancel hide timeout when hovering over preview
+                if (hidePreviewTimeoutRef.current) {
+                  clearTimeout(hidePreviewTimeoutRef.current);
+                }
+              }}
+              onMouseLeave={handleLinkLeave}
+            >
+              {previewLoading && <LinkPreviewLoading />}
+              {previewError && (
+                <LinkPreviewError
+                  error={previewError}
+                  onClose={() => {
+                    setPreviewError(null);
+                    setLinkPreview(null);
+                    setHoveredUrl(null);
+                  }}
+                />
+              )}
+              {linkPreview && !previewLoading && (
+                <LinkPreview
+                  data={linkPreview}
+                  onClose={() => {
+                    setLinkPreview(null);
+                    setPreviewError(null);
+                    setHoveredUrl(null);
+                  }}
+                />
+              )}
+            </div>
+          )}
+
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
               placeholder="Enter your investigation query..."
@@ -159,6 +360,14 @@ export default function InvestigatePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InvestigatePage() {
+  return (
+    <PromptInputProvider>
+      <InvestigatePageContent />
+    </PromptInputProvider>
   );
 }
 
