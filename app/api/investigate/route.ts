@@ -1,53 +1,82 @@
-import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from 'ai';
 import { getOpenRouterProvider, getModelConfig, AI_CONFIG } from '@/lib/ai/config';
-import { investigateTools } from '@/lib/ai/tools';
+import { extractContent } from '@/lib/investigation/content-extractor';
+import {
+  determineInvestigationType,
+  routeToAgentWithStreaming,
+} from '@/lib/investigation/coordinator';
+import {
+  validateMessages,
+  validateLastMessage,
+  validateExtractedContent,
+  createValidationResponse,
+  parseMessageContent,
+  createErrorResponse,
+  createInvestigationSystemPrompt,
+  combineExtractedContent,
+} from '@/lib/investigation/utils';
+import type { UIMessage } from 'ai';
 
 // Use maxDuration from config
 export const maxDuration = AI_CONFIG.maxDuration;
 
 export async function POST(req: Request) {
   try {
-    const { messages, model }: { messages: UIMessage[]; model?: string } =
-      await req.json();
+    const body = await req.json();
+    const { messages, model }: { messages: UIMessage[]; model?: string } = body;
 
-    if (!messages || !Array.isArray(messages)) {
-      return new Response(
-        JSON.stringify({ error: 'Messages array is required' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
+    // Validate request
+    const messagesValidation = validateMessages(messages);
+    if (messagesValidation) {
+      return createValidationResponse(messagesValidation);
     }
 
-    // Get model configuration
+    const lastMessageValidation = validateLastMessage(messages);
+    if (lastMessageValidation) {
+      return createValidationResponse(lastMessageValidation);
+    }
+
+    // Parse message content
+    const lastMessage = messages[messages.length - 1];
+    const { text, files, links } = await parseMessageContent(lastMessage);
+
+    // Extract content from all sources
+    const extractionResults = await extractContent(
+      text,
+      files.length > 0 ? files : undefined,
+      links.length > 0 ? links : undefined
+    );
+
+    // Combine extracted content
+    const combinedContent = combineExtractedContent(extractionResults);
+
+    // Validate extracted content
+    const contentValidation = validateExtractedContent(combinedContent);
+    if (contentValidation) {
+      return createValidationResponse(contentValidation);
+    }
+
+    // Determine investigation type and route to agent
+    const investigationType = await determineInvestigationType(
+      combinedContent,
+      model
+    );
+
+    // Stream investigation results with agent actions visible
     const modelConfig = getModelConfig(model);
     const provider = getOpenRouterProvider();
 
-    // Stream the response with tools
-    const result = streamText({
-      model: provider.chat(modelConfig.model),
-      system: AI_CONFIG.systemPrompt,
-      messages: convertToModelMessages(messages),
-      tools: investigateTools,
-      stopWhen: stepCountIs(5),
-    });
+    const result = await routeToAgentWithStreaming(
+      investigationType,
+      combinedContent,
+      messages,
+      modelConfig,
+      provider
+    );
 
-    return result.toUIMessageStreamResponse();
+    return result;
   } catch (error) {
     console.error('Error in investigate API:', error);
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error
-            ? error.message
-            : 'An error occurred while processing your request',
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      },
-    );
+    return createErrorResponse(error);
   }
 }
 
