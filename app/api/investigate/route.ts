@@ -77,21 +77,38 @@ ${Object.keys(extractedContent.metadata).length > 0
   ? `**Metadata:**\n${JSON.stringify(extractedContent.metadata, null, 2)}\n\n`
   : ''}Please follow this investigation workflow in order:
 
-1. **Search for related news** (MUST RUN FIRST): Use the search_news_parallel tool with the extracted content and sourceType to find related news articles. This will return citations and a summary. WAIT for this to complete before proceeding.
+1. **Web Search** (MUST RUN FIRST): Use the search_news_parallel tool with the extracted content and sourceType to find related news articles. This will return citations and a summary. WAIT for this to complete before proceeding.
 
-2. **Analyze Exa results** (MUST WAIT FOR STEP 1): After step 1 completes, use the analyze_sentiment_political tool to analyze the summary from the Exa search results. Pass the summary text from step 1 and include context mentioning "Exa results" or "news coverage".
+2. **Research** (MUST WAIT FOR STEP 1): After web search completes, use the research_query tool to gather factual information from authoritative sources. Identify key claims, entities, or facts mentioned in the content that need verification:
+   - Company names → Research company information
+   - Economic data → Query economic indicators
+   - Scientific claims → Search academic papers
+   - Historical facts → Query historical databases
+   - General facts → Search Wikipedia/Wikidata
+   
+   Pass the web search summary and key claims from the content as context. The research agent will automatically select appropriate APIs. WAIT for this to complete.
 
-3. **Analyze initial content** (CAN RUN IN PARALLEL WITH STEP 2): Use the analyze_sentiment_political tool to analyze the sentiment and political leaning of the initial extracted content above. Include context about the source type (twitter, tiktok, blog, or text).
+3. **Analyze** (MUST WAIT FOR STEPS 1 AND 2): After both web search and research complete:
+   a. Use the analyze_sentiment_political tool to analyze the summary from the web search results. Pass the summary text from step 1 and include context mentioning "web search results" or "news coverage".
+   b. Use the analyze_sentiment_political tool to analyze the sentiment and political leaning of the initial extracted content above. Include context about the source type (twitter, tiktok, blog, or text).
+   
+   These two analyses can run in parallel, but both must wait for steps 1 and 2.
 
-4. **Generate visualization** (MUST WAIT FOR STEPS 2 AND 3): After both sentiment analyses complete, use the generate_visualization tool with:
-   - initialAnalysis: the JSON result from step 3
-   - exaAnalysis: the JSON result from step 2
-   - citations: the citations array from step 1
-   - exaSummary: the summary text from step 1
+4. **Visualize** (MUST WAIT FOR STEP 3): After both sentiment analyses complete, use the generate_visualization tool with:
+   - initialAnalysis: the JSON result from step 3b (initial content analysis)
+   - exaAnalysis: the JSON result from step 3a (web search results analysis)
+   - citations: the citations array from step 1 (web search)
+   - exaSummary: the summary text from step 1 (web search)
+   - researchResults: Include key findings from step 2 (research) in the visualization
 
-IMPORTANT: Step 2 MUST wait for step 1 to complete. Steps 2 and 3 can run in parallel. Step 4 must wait for both steps 2 and 3.
+IMPORTANT WORKFLOW ORDER:
+- Step 1 (Web Search) → Step 2 (Research) → Step 3 (Analyze) → Step 4 (Visualize)
+- Step 2 MUST wait for step 1 to complete
+- Step 3 MUST wait for both steps 1 and 2 to complete
+- Step 4 MUST wait for step 3 to complete
+- Within step 3, the two analyses can run in parallel
 
-All tools are optional - if any step fails, continue with the next step. Present the final visualization and analysis results clearly.`;
+All tools are optional - if any step fails, continue with the next step. Present the final visualization and analysis results clearly, incorporating both web search findings and research verification.`;
 
     // Get model configuration
     const modelConfig = getModelConfig(model);

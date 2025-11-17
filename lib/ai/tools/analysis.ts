@@ -183,5 +183,55 @@ Be objective and base your analysis on the actual content, not assumptions.`;
       }
     },
   }),
+
+  research_query: tool({
+    description:
+      'Performs comprehensive research on a topic using authoritative sources. This tool can query business databases, economic data, academic papers, factual knowledge bases, and historical records. Use this when you need to gather factual information, verify claims, or find authoritative sources about companies, economics, science, history, or general knowledge.',
+    inputSchema: z.object({
+      query: z
+        .string()
+        .describe('The research query or topic to investigate (e.g., "What is the GDP of France?", "Find papers about machine learning", "Search for information about Apple Inc.")'),
+      context: z
+        .string()
+        .optional()
+        .describe('Optional context about why this research is needed (e.g., "verifying a claim about company ownership", "checking economic data mentioned in content")'),
+    }),
+    execute: async ({ query, context }) => {
+      const startTime = Date.now();
+      try {
+        console.log('[research_query] Starting research query:', query.substring(0, 100));
+        
+        // Import and run the research agent
+        const { runResearchAgent } = await import('../research-agent');
+        
+        // Build the research query with context if provided
+        let researchQuery = query;
+        if (context) {
+          researchQuery = `${query}\n\nContext: ${context}`;
+        }
+
+        // Run the research agent with timeout protection
+        // This prevents the tool from hanging the entire stream
+        const researchResult = await Promise.race([
+          runResearchAgent(researchQuery),
+          new Promise<string>((_, reject) => {
+            setTimeout(() => {
+              reject(new Error('Research query timed out after 35 seconds'));
+            }, 35000); // Slightly longer than research agent timeout
+          }),
+        ]);
+
+        const duration = Date.now() - startTime;
+        console.log(`[research_query] Completed in ${duration}ms`);
+        return researchResult;
+      } catch (error) {
+        const duration = Date.now() - startTime;
+        console.error(`[research_query] Failed after ${duration}ms:`, error);
+        // Return error as string instead of JSON to avoid double-stringification
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return `Research query failed: ${errorMessage}\n\nQuery: ${query.substring(0, 200)}${context ? `\n\nContext: ${context.substring(0, 200)}` : ''}`;
+      }
+    },
+  }),
 };
 
