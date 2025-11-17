@@ -105,11 +105,11 @@ export async function runResearchAgent(
   const provider = getOpenRouterProvider();
   const modelConfig = getModelConfig(model);
 
-  // Use a timeout wrapper to prevent hanging
+  // Use a timeout wrapper to prevent hanging - reduced to 15s for faster feedback
   const timeoutPromise = new Promise<string>((_, reject) => {
     setTimeout(() => {
-      reject(new Error('Research agent timeout: exceeded 30 seconds'));
-    }, 30000); // 30 second timeout
+      reject(new Error('Research agent timeout: exceeded 15 seconds'));
+    }, 15000); // 15 second timeout for faster error feedback
   });
 
   const researchPromise = generateText({
@@ -122,17 +122,19 @@ export async function runResearchAgent(
       },
     ],
     tools: researchTools,
-    stopWhen: stepCountIs(8), // Reduced from 15 to 8 to prevent hanging in tool context
+    stopWhen: stepCountIs(6), // Reduced from 8 to 6 for faster execution
   }).then(result => result.text);
 
   try {
     return await Promise.race([researchPromise, timeoutPromise]);
   } catch (error) {
-    // Return partial results or error message instead of throwing
-    if (error instanceof Error && error.message.includes('timeout')) {
-      return `Research partially completed but timed out after 30 seconds. Please try a more specific query or break it into smaller parts.\n\nQuery: ${query.substring(0, 200)}`;
+    // Return error message immediately instead of throwing
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    if (errorMessage.includes('timeout')) {
+      return `Research timed out after 15 seconds. Please try a more specific query or break it into smaller parts.\n\nQuery: ${query.substring(0, 200)}`;
     }
-    throw error;
+    // Return error immediately for fast feedback
+    return `Research error: ${errorMessage}\n\nQuery: ${query.substring(0, 200)}`;
   }
 }
 

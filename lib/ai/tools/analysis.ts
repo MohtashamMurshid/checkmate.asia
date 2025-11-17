@@ -216,8 +216,8 @@ Be objective and base your analysis on the actual content, not assumptions.`;
           runResearchAgent(researchQuery),
           new Promise<string>((_, reject) => {
             setTimeout(() => {
-              reject(new Error('Research query timed out after 35 seconds'));
-            }, 35000); // Slightly longer than research agent timeout
+              reject(new Error('Research query timed out after 18 seconds'));
+            }, 18000); // Slightly longer than research agent timeout (15s)
           }),
         ]);
 
