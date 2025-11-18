@@ -32,6 +32,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SearchIcon, Sparkles, ChevronRight, ChevronDown, ExternalLink, Building2 } from 'lucide-react';
+import { Logo } from '@/components/logo';
 
 type TimelineEntry = {
   id: string;
@@ -99,9 +100,9 @@ function InvestigatePageContent() {
     <div className="min-h-screen bg-muted/20">
       <header className="border-b border-border/80 bg-background/90 backdrop-blur">
         <div className="mx-auto max-w-6xl px-4 py-6 md:px-8">
-          <h1 className="text-2xl font-semibold">Investigation Dashboard</h1>
+          <h1 className="text-2xl font-semibold">Checkmate</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Monitor investigation progress and analyze results.
+            Investigate information in seconds.
           </p>
         </div>
       </header>
