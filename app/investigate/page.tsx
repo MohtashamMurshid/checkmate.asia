@@ -3,7 +3,9 @@
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import type { ToolUIPart } from 'ai';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import {
   PromptInput,
   PromptInputProvider,
@@ -25,6 +27,7 @@ import { AI_CONFIG } from '@/lib/ai/config';
 import { Loader } from '@/components/ai-elements/loader';
 import { ToolOutput, getToolDisplayName, getToolIcon } from '@/components/ai-elements/tool';
 import { Visualization } from '@/components/ai-elements/visualization';
+import { MessageResponse } from '@/components/ai-elements/message';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
@@ -43,11 +46,15 @@ import {
   Check,
   CircleDashed,
   Loader2,
-  Bot
+  Bot,
+  Save,
+  TrendingUp,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type TimelineEntry = {
   id: string;
@@ -80,6 +87,9 @@ function InvestigatePageContent() {
   const [mockMessages, setMockMessages] = useState<any[]>([]);
   const [personalSource, setPersonalSource] = useState('');
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const [lastSavedTimestamp, setLastSavedTimestamp] = useState<number>(0);
+
+  const saveInvestigation = useMutation(api.investigations.save);
 
   const selectedModelRef = useRef(selectedModel);
   selectedModelRef.current = selectedModel;
@@ -96,6 +106,41 @@ function InvestigatePageContent() {
   const activeMessages = mockMode ? mockMessages : messages;
   const timelineEntries = useMemo(() => buildTimelineEntries(activeMessages), [activeMessages]);
   const investigationResults = useMemo(() => buildInvestigationResults(activeMessages), [activeMessages]);
+
+  const hasStarted = activeMessages.length > 0;
+
+  // Auto-save when investigation completes
+  useEffect(() => {
+    if (status !== 'streaming' && investigationResults.length > 0) {
+      const latestTimestamp = Math.max(...investigationResults.map(r => r.timestamp));
+      if (latestTimestamp > lastSavedTimestamp) {
+        const latestResult = investigationResults[0]; // Most recent
+        
+        // Find user query
+        const userQuery = activeMessages.find(m => m.role === 'user')?.content || 'Investigation';
+
+        // Prepare data to save - save aggregate or specific result?
+        // Let's save the latest state
+        const saveData = async () => {
+          try {
+            await saveInvestigation({
+              userQuery: userQuery.slice(0, 1000), // Limit length
+              userSourceContent: personalSource || undefined,
+              results: latestResult, // Save the latest result object
+              graphData: latestResult.graphData || undefined,
+              timestamp: Date.now(),
+            });
+            setLastSavedTimestamp(Date.now());
+            console.log('Investigation saved');
+          } catch (err) {
+            console.error('Failed to save investigation:', err);
+          }
+        };
+        
+        saveData();
+      }
+    }
+  }, [status, investigationResults, lastSavedTimestamp, activeMessages, personalSource, saveInvestigation]);
 
   const handleSubmit = (message: PromptInputMessage) => {
     if (!message.text?.trim()) return;
@@ -127,6 +172,92 @@ function InvestigatePageContent() {
   const visualResults = investigationResults.filter(r => r.visual || r.graphData);
   const dataResults = investigationResults.filter(r => r.structuredData || r.comparisonData || r.credibilityData);
 
+  if (!hasStarted) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center bg-background p-4">
+         <div className="max-w-2xl w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center space-y-4">
+               <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10 text-primary mb-4">
+                  <Sparkles className="size-8" />
+               </div>
+               <h1 className="text-3xl font-bold tracking-tight">Start your investigation</h1>
+               <p className="text-muted-foreground text-lg">
+                 Enter a topic, entity, or question to begin gathering intelligence and verifying facts.
+               </p>
+            </div>
+
+            <div className="bg-card border shadow-xl rounded-2xl p-1">
+               {personalSource && (
+                   <div className="px-4 pt-4 pb-0 animate-in slide-in-from-bottom-2 fade-in duration-200">
+                    <div className="flex justify-between items-center mb-2">
+                       <span className="text-xs text-blue-500 font-medium flex items-center gap-1"><FileText className="size-3" /> Context Active</span>
+                       <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="text-xs text-muted-foreground h-auto py-0 px-2 hover:text-foreground"
+                          onClick={() => setPersonalSource('')}
+                       >
+                          Remove
+                       </Button>
+                    </div>
+                    <Textarea
+                         placeholder="Paste personal source content here (e.g. a rumor, internal note, or hypothesis)..."
+                      value={personalSource}
+                      onChange={(e) => setPersonalSource(e.target.value)}
+                         className="min-h-[80px] text-sm resize-none bg-muted/20 focus:bg-background transition-colors border-none focus-visible:ring-0"
+                    />
+                    <Separator className="mt-4" />
+                  </div>
+                )}
+
+               <PromptInput onSubmit={handleSubmit} className="bg-transparent border-none shadow-none">
+                   <PromptInputTextarea 
+                      placeholder="What do you want to investigate?" 
+                      className="min-h-[60px] border-0 focus-visible:ring-0 resize-none py-4 px-4 text-base shadow-none"
+                   />
+                   <PromptInputFooter className="px-3 pb-3 pt-0">
+                      <div className="flex items-center gap-2">
+                        {!personalSource && (
+                           <Button
+                              variant="ghost" 
+                              size="sm"
+                              className="text-xs text-muted-foreground h-auto py-1.5 px-2 hover:bg-muted"
+                              onClick={() => setPersonalSource(' ')}
+                           >
+                              <FileText className="size-3 mr-1.5" />
+                              Add Context
+                           </Button>
+                        )}
+                        <PromptInputTools>
+                           <PromptInputSelect value={selectedModel} onValueChange={setSelectedModel}>
+                              <PromptInputSelectTrigger className="h-8 text-xs gap-1 bg-muted/50 hover:bg-muted px-2 rounded-md border-transparent">
+                              <PromptInputSelectValue />
+                            </PromptInputSelectTrigger>
+                            <PromptInputSelectContent>
+                              {AI_CONFIG.availableModels.map((model) => (
+                                 <PromptInputSelectItem key={model.value} value={model.value}>
+                                  {model.name}
+                                </PromptInputSelectItem>
+                              ))}
+                            </PromptInputSelectContent>
+                          </PromptInputSelect>
+                        </PromptInputTools>
+                      </div>
+                      <PromptInputSubmit status={mockMode ? undefined : status} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg h-8 w-8 transition-transform active:scale-95" />
+                    </PromptInputFooter>
+               </PromptInput>
+            </div>
+            
+            <div className="flex justify-center gap-4">
+               <Badge variant={mockMode ? 'secondary' : 'outline'} className="cursor-pointer" onClick={() => setMockMode(!mockMode)}>
+                  {mockMode ? 'Mock Mode Active' : 'Live Mode'}
+               </Badge>
+            </div>
+         </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-theme(spacing.16))] md:h-screen overflow-hidden bg-background">
       {/* Header Toolbar */}
@@ -156,121 +287,16 @@ function InvestigatePageContent() {
             <Settings2 className="size-4 mr-2" />
             {mockMode ? 'Switch to Live' : 'Use Mock Data'}
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isRightPanelOpen ? <PanelRightClose className="size-5" /> : <PanelRightOpen className="size-5" />}
-          </Button>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex min-h-0">
-        {/* Left Panel: Chat & Timeline */}
-        <div className="flex-1 flex flex-col min-w-0 bg-muted/5 relative">
-          <div className="flex-1 overflow-y-auto px-4 md:px-8 lg:px-12 py-6 scroll-smooth">
-            <div className="max-w-3xl mx-auto space-y-8 pb-10">
-              {timelineEntries.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 animate-in fade-in duration-500">
-                  <div className="bg-background p-4 rounded-full shadow-sm border">
-                    <SearchIcon className="size-8 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-2 max-w-md">
-                    <h3 className="text-xl font-medium">Start your investigation</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Enter a topic, entity, or question to begin gathering intelligence and verifying facts.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                timelineEntries.map((entry, index) => (
-                   <TimelineItem
-                        key={entry.id}
-                        entry={entry}
-                        index={index}
-                        isLast={index === timelineEntries.length - 1}
-                      expanded={entry.kind === 'tool' && !!expandedToolIds[entry.id]}
-                      onToggle={() => entry.kind === 'tool' && toggleToolEntry(entry.id)}
-                    />
-                ))
-              )}
-              {isInvestigating && (
-                 <div className="flex items-center gap-3 animate-pulse pl-4">
-                    <div className="bg-primary/10 p-2 rounded-full">
-                       <Loader size={16} className="text-primary" />
-                    </div>
-                    <span className="text-sm text-muted-foreground font-medium">Agent is thinking...</span>
-                </div>
-              )}
-              <div className="h-4" /> {/* Spacer */}
-            </div>
-          </div>
-
-          {/* Input Area */}
-          <div className="p-4 border-t bg-background z-20 shadow-[0_-1px_10px_rgba(0,0,0,0.03)]">
-             <div className="max-w-3xl mx-auto">
-                <div className="mb-2 flex items-center justify-between">
-                <Button
-                      variant="ghost" 
-                  size="sm"
-                      className="text-xs text-muted-foreground h-auto py-1 px-2 hover:text-foreground"
-                      onClick={() => setPersonalSource(prev => prev ? '' : ' ')}
-                   >
-                      {personalSource ? '- Remove Context' : '+ Add Personal Context'}
-                </Button>
-                   {personalSource && <span className="text-xs text-blue-500 font-medium flex items-center gap-1"><FileText className="size-3" /> Context Active</span>}
-                  </div>
-                  
-                {personalSource && (
-                   <div className="mb-3 animate-in slide-in-from-bottom-2 fade-in duration-200">
-                    <Textarea
-                         placeholder="Paste personal source content here (e.g. a rumor, internal note, or hypothesis)..."
-                      value={personalSource}
-                      onChange={(e) => setPersonalSource(e.target.value)}
-                         className="min-h-[80px] text-sm resize-none bg-muted/20 focus:bg-background transition-colors"
-                    />
-                  </div>
-                )}
-
-                <PromptInput onSubmit={handleSubmit} className="relative shadow-lg border rounded-xl overflow-hidden bg-background focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                   <PromptInputTextarea 
-                      placeholder="What do you want to investigate?" 
-                      className="min-h-[60px] border-0 focus-visible:ring-0 resize-none py-4 px-4 text-base"
-                   />
-                   <PromptInputFooter className="px-3 pb-3 pt-0">
-                      <PromptInputTools>
-                    <PromptInputSelect value={selectedModel} onValueChange={setSelectedModel}>
-                            <PromptInputSelectTrigger className="h-8 text-xs gap-1 bg-muted/50 hover:bg-muted px-2 rounded-md border-transparent">
-                            <PromptInputSelectValue />
-                          </PromptInputSelectTrigger>
-                          <PromptInputSelectContent>
-                            {AI_CONFIG.availableModels.map((model) => (
-                          <PromptInputSelectItem key={model.value} value={model.value}>
-                                {model.name}
-                              </PromptInputSelectItem>
-                            ))}
-                          </PromptInputSelectContent>
-                        </PromptInputSelect>
-                      </PromptInputTools>
-                      <PromptInputSubmit status={mockMode ? undefined : status} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg h-8 w-8 transition-transform active:scale-95" />
-                    </PromptInputFooter>
-                  </PromptInput>
-              {error && !mockMode && (
-                   <p className="text-xs text-destructive mt-2 text-center animate-in fade-in slide-in-from-top-1">{error.message}</p>
-              )}
-              </div>
-          </div>
-        </div>
-
-        {/* Right Panel: Results & Evidence */}
-        {isRightPanelOpen && (
-          <div className="w-[400px] lg:w-[480px] xl:w-[550px] border-l bg-background flex flex-col shadow-xl z-10 transition-all duration-300 ease-in-out animate-in slide-in-from-right-10">
+         {/* Left Panel: Results & Evidence (Main View) */}
+         <div className="flex-1 flex flex-col min-w-0 bg-muted/5 relative z-0">
             <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
-               <div className="p-3 border-b bg-muted/5 flex items-center justify-between gap-2 shrink-0">
-                 <h2 className="font-semibold text-sm flex items-center gap-2 whitespace-nowrap text-muted-foreground">
+               <div className="p-3 border-b bg-background flex items-center justify-between gap-2 shrink-0 sticky top-0">
+                 <h2 className="font-semibold text-sm flex items-center gap-2 whitespace-nowrap text-muted-foreground pl-2">
                    <LayoutTemplate className="size-4" />
                    Evidence Board
                  </h2>
@@ -291,8 +317,8 @@ function InvestigatePageContent() {
               </div>
                
                <div className="flex-1 overflow-y-auto">
-                 <div className="p-4 min-h-full">
-                   <TabsContent value="all" className="mt-0 space-y-6">
+                 <div className="p-6 min-h-full max-w-5xl mx-auto w-full">
+                   <TabsContent value="all" className="mt-0 space-y-6 animate-in fade-in duration-300">
                      {investigationResults.length === 0 ? (
                         <EmptyState />
                      ) : (
@@ -302,7 +328,7 @@ function InvestigatePageContent() {
                      )}
                    </TabsContent>
                    
-                   <TabsContent value="visuals" className="mt-0 space-y-6">
+                   <TabsContent value="visuals" className="mt-0 space-y-6 animate-in fade-in duration-300">
                      {visualResults.length === 0 ? (
                         <EmptyState text="No visualizations generated yet." />
                      ) : (
@@ -312,7 +338,7 @@ function InvestigatePageContent() {
                      )}
                    </TabsContent>
                    
-                   <TabsContent value="data" className="mt-0 space-y-6">
+                   <TabsContent value="data" className="mt-0 space-y-6 animate-in fade-in duration-300">
                      {dataResults.length === 0 ? (
                         <EmptyState text="No structured data found yet." />
                      ) : (
@@ -324,8 +350,96 @@ function InvestigatePageContent() {
                  </div>
                </div>
             </Tabs>
+         </div>
+
+        {/* Right Panel: Chat & Timeline (Sidebar) */}
+        <div className={cn(
+            "w-[400px] lg:w-[450px] border-l bg-background flex flex-col shadow-xl z-10 transition-all duration-300 ease-in-out relative",
+            !isRightPanelOpen && "w-0 opacity-0 overflow-hidden border-l-0"
+        )}>
+          {/* Sidebar Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
+            className="absolute -left-10 top-3 size-8 bg-background border shadow-sm rounded-r-none rounded-l-md z-20 flex items-center justify-center hover:bg-muted"
+          >
+            {isRightPanelOpen ? <PanelRightClose className="size-4" /> : <PanelRightOpen className="size-4" />}
+          </Button>
+
+          <div className="p-3 border-b flex items-center gap-2 font-medium text-sm">
+             <Sparkles className="size-4 text-primary" />
+             <span>Investigation Chat</span>
           </div>
-        )}
+
+          <div className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth bg-muted/5">
+            <div className="space-y-6 pb-4">
+              {timelineEntries.length === 0 ? (
+                <div className="text-center text-muted-foreground py-10 text-sm">
+                   Chat history will appear here.
+                </div>
+              ) : (
+                timelineEntries.map((entry, index) => (
+                   <TimelineItem
+                        key={entry.id}
+                        entry={entry}
+                        index={index}
+                        isLast={index === timelineEntries.length - 1}
+                      expanded={entry.kind === 'tool' && !!expandedToolIds[entry.id]}
+                      onToggle={() => entry.kind === 'tool' && toggleToolEntry(entry.id)}
+                    />
+                ))
+              )}
+              {isInvestigating && (
+                 <div className="flex items-center gap-3 animate-pulse pl-4">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                       <Loader size={14} className="text-primary" />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium">Agent is thinking...</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Input Area */}
+          <div className="p-3 border-t bg-background z-20">
+                <div className="mb-2 flex items-center justify-between">
+                   <Button
+                         variant="ghost" 
+                     size="sm"
+                         className="text-[10px] text-muted-foreground h-auto py-1 px-2 hover:text-foreground"
+                         onClick={() => setPersonalSource(prev => prev ? '' : ' ')}
+                      >
+                         {personalSource ? '- Context' : '+ Context'}
+                   </Button>
+                   {personalSource && <span className="text-[10px] text-blue-500 font-medium flex items-center gap-1"><FileText className="size-3" /> Active</span>}
+                </div>
+                  
+                {personalSource && (
+                   <div className="mb-2 animate-in slide-in-from-bottom-2 fade-in duration-200">
+                    <Textarea
+                         placeholder="Personal source context..."
+                      value={personalSource}
+                      onChange={(e) => setPersonalSource(e.target.value)}
+                         className="min-h-[60px] text-xs resize-none bg-muted/20 focus:bg-background transition-colors"
+                    />
+                  </div>
+                )}
+
+                <PromptInput onSubmit={handleSubmit} className="relative shadow-sm border rounded-xl overflow-hidden bg-background focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                   <PromptInputTextarea 
+                      placeholder="Follow up question..." 
+                      className="min-h-[44px] border-0 focus-visible:ring-0 resize-none py-3 px-3 text-sm"
+                   />
+                   <PromptInputFooter className="px-2 pb-2 pt-0">
+                      <PromptInputTools>
+                           {/* Minimal tools in sidebar */}
+                      </PromptInputTools>
+                      <PromptInputSubmit status={mockMode ? undefined : status} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg h-7 w-7 p-1.5 transition-transform active:scale-95" />
+                    </PromptInputFooter>
+                </PromptInput>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -333,12 +447,14 @@ function InvestigatePageContent() {
 
 function EmptyState({ text = "No evidence collected yet." }: { text?: string }) {
    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground border-2 border-dashed rounded-xl m-2 bg-muted/5">
-         <LayoutTemplate className="size-10 mb-3 opacity-20" />
-         <p className="text-sm">{text}</p>
+      <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground border-2 border-dashed rounded-xl m-2 bg-muted/5">
+         <LayoutTemplate className="size-12 mb-4 opacity-20" />
+         <p className="text-base font-medium mb-1">Evidence Board Empty</p>
+         <p className="text-sm opacity-70">{text}</p>
       </div>
    );
 }
+
 
 function TimelineItem({
    entry,
@@ -438,7 +554,9 @@ function TimelineItem({
             <Bot className="size-4" />
          </div>
          <div className="bg-muted/30 rounded-2xl rounded-tl-sm px-5 py-3.5 border text-sm leading-relaxed max-w-[85%]">
-            {entry.body}
+            <MessageResponse>
+               {entry.body}
+            </MessageResponse>
          </div>
       </div>
    );
@@ -463,7 +581,7 @@ function ResultCard({ result }: { result: InvestigationResult }) {
             </div>
                     )}
                     {result.graphData && (
-            <div className="h-64 border-b relative">
+            <div className="h-[600px] border-b relative">
                       <EvolutionGraph nodes={result.graphData.nodes} edges={result.graphData.edges} />
             </div>
                     )}
@@ -951,8 +1069,16 @@ function createMockInvestigationData(query: string): any[] {
               summary: 'Analysis shows consistent positive sentiment across sources.',
               citations: [
                 {
-                  title: 'CNBC Article',
-                  url: 'https://www.cnbc.com/example',
+                  title: 'CNBC Article: Cursor AI raises $2.3B',
+                  url: 'https://www.cnbc.com/2025/11/13/cursor-ai-startup-funding-round-valuation.html',
+                },
+                {
+                  title: 'TechCrunch: The Future of AI Coding',
+                  url: 'https://techcrunch.com/cursor-ai-development',
+                },
+                {
+                  title: 'Bloomberg: AI Market Analysis',
+                  url: 'https://bloomberg.com/news/articles/2025-11-14/ai-market-trends',
                 },
               ],
             },
@@ -972,10 +1098,45 @@ function createMockInvestigationData(query: string): any[] {
           state: 'output-available',
           input: {
             events: [
-              { id: 'event-1', label: 'Initial Funding Announcement', date: '2024-01-15', source: 'Company Press Release', type: 'primary' },
-              { id: 'event-2', label: 'TechCrunch Coverage', date: '2024-01-15', source: 'TechCrunch', type: 'secondary' },
-              { id: 'event-3', label: 'CNBC Analysis', date: '2024-01-16', source: 'CNBC', type: 'secondary' },
-              { id: 'event-4', label: 'Market Reaction', date: '2024-01-16', source: 'Market Data', type: 'related' },
+              { 
+                id: 'event-1', 
+                label: 'Initial Funding Announcement', 
+                date: '2024-01-15', 
+                source: 'Company Press Release', 
+                summary: 'Official announcement of the $2.3B Series A funding round led by major investors.',
+                url: 'https://example.com/press-release',
+                credibility: 10,
+                type: 'primary' 
+              },
+              { 
+                id: 'event-2', 
+                label: 'TechCrunch Coverage', 
+                date: '2024-01-15', 
+                source: 'TechCrunch', 
+                summary: 'Detailed analysis of the funding round and its implications for the AI coding market.',
+                url: 'https://techcrunch.com/example',
+                credibility: 9,
+                type: 'secondary' 
+              },
+              { 
+                id: 'event-3', 
+                label: 'CNBC Analysis', 
+                date: '2024-01-16', 
+                source: 'CNBC', 
+                summary: 'Financial perspective on the valuation and investor sentiment.',
+                url: 'https://cnbc.com/example',
+                credibility: 8,
+                type: 'secondary' 
+              },
+              { 
+                id: 'event-4', 
+                label: 'Market Reaction', 
+                date: '2024-01-16', 
+                source: 'Market Data', 
+                summary: 'Competitor stock prices adjusted following the announcement.',
+                credibility: 7,
+                type: 'related' 
+              },
             ],
             relationships: [
               { sourceId: 'event-1', targetId: 'event-2', label: 'reported by' },
@@ -990,25 +1151,56 @@ function createMockInvestigationData(query: string): any[] {
               {
                 id: 'event-1',
                 type: 'default',
-                data: { label: 'Initial Funding Announcement', date: '2024-01-15', source: 'Company Press Release', type: 'primary' },
+                data: { 
+                  label: 'Initial Funding Announcement', 
+                  date: '2024-01-15', 
+                  source: 'Company Press Release', 
+                  summary: 'Official announcement of the $2.3B Series A funding round led by major investors.',
+                  url: 'https://example.com/press-release',
+                  credibility: 10,
+                  type: 'primary' 
+                },
                 position: { x: 0, y: 0 },
               },
               {
                 id: 'event-2',
                 type: 'default',
-                data: { label: 'TechCrunch Coverage', date: '2024-01-15', source: 'TechCrunch', type: 'secondary' },
+                data: { 
+                  label: 'TechCrunch Coverage', 
+                  date: '2024-01-15', 
+                  source: 'TechCrunch', 
+                  summary: 'Detailed analysis of the funding round and its implications for the AI coding market.',
+                  url: 'https://techcrunch.com/example',
+                  credibility: 9,
+                  type: 'secondary' 
+                },
                 position: { x: 200, y: 0 },
               },
               {
                 id: 'event-3',
                 type: 'default',
-                data: { label: 'CNBC Analysis', date: '2024-01-16', source: 'CNBC', type: 'secondary' },
+                data: { 
+                  label: 'CNBC Analysis', 
+                  date: '2024-01-16', 
+                  source: 'CNBC', 
+                  summary: 'Financial perspective on the valuation and investor sentiment.',
+                  url: 'https://cnbc.com/example',
+                  credibility: 8,
+                  type: 'secondary' 
+                },
                 position: { x: 200, y: 100 },
               },
               {
                 id: 'event-4',
                 type: 'default',
-                data: { label: 'Market Reaction', date: '2024-01-16', source: 'Market Data', type: 'related' },
+                data: { 
+                  label: 'Market Reaction', 
+                  date: '2024-01-16', 
+                  source: 'Market Data', 
+                  summary: 'Competitor stock prices adjusted following the announcement.',
+                  credibility: 7,
+                  type: 'related' 
+                },
                 position: { x: 400, y: 50 },
               },
             ],

@@ -98,7 +98,7 @@ ${Object.keys(extractedContent.metadata).length > 0
    These analyses can run in parallel, but must wait for steps 1 and 2.
 
 4. **Visualize** (MUST WAIT FOR STEP 3): After analyses complete:
-   a. Use the generate_visualization tool with the sentiment/political analysis results.
+   a. Use the generate_visualization tool. Pass the sentiment/political analysis results AND the citations/summary from Step 1 (Web Search) into the tool's inputs.
    b. Use the generate_evolution_graph tool to create a visual timeline of events found in research and web search.
 
 IMPORTANT WORKFLOW ORDER:

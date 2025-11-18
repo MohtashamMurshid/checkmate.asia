@@ -101,6 +101,9 @@ export const visualizationTools = {
             label: z.string().describe('Short title of the event'),
             date: z.string().optional().describe('Date of the event'),
             source: z.string().optional().describe('Source of the info'),
+            summary: z.string().optional().describe('Short description of the event'),
+            url: z.string().optional().describe('Link to the source'),
+            credibility: z.number().min(0).max(10).optional().describe('Credibility score (0-10)'),
             type: z.enum(['primary', 'secondary', 'related']).optional(),
           })
         )
@@ -123,6 +126,9 @@ export const visualizationTools = {
           label: event.label, 
           date: event.date, 
           source: event.source,
+          summary: event.summary,
+          url: event.url,
+          credibility: event.credibility,
           type: event.type || 'secondary'
         },
         position: { x: 0, y: index * 100 }, // Layout will be handled by frontend library ideally, or simple vertical for now

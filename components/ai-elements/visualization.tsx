@@ -205,6 +205,47 @@ const BiasMeterCard = ({ political }: { political: any }) => {
   );
 };
 
+const ReferencesCard = ({ citations, sentiment }: { citations: any[], sentiment: any }) => {
+  if (!citations || citations.length === 0) return null;
+
+  // Aggregate sentiment to show next to references
+  const sentimentLabel = sentiment?.classification || 'neutral';
+  const sentimentColor = sentimentLabel === 'positive' ? 'text-green-600 bg-green-50 border-green-200' : 
+                         sentimentLabel === 'negative' ? 'text-red-600 bg-red-50 border-red-200' : 
+                         'text-gray-600 bg-gray-50 border-gray-200';
+
+  return (
+    <Card className="md:col-span-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div className="flex items-center gap-2">
+           <CardTitle className="text-sm font-medium">References & News Coverage</CardTitle>
+           <Badge variant="outline" className={cn("text-[10px] capitalize font-normal ml-2", sentimentColor)}>
+              {sentimentLabel} Coverage
+           </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+         <div className="space-y-3">
+            {citations.map((cite: any, i: number) => (
+               <div key={i} className="flex items-start justify-between gap-2 text-xs border-b pb-2 last:border-0 last:pb-0">
+                  <div className="flex-1">
+                     <a href={cite.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline text-primary flex items-center gap-1">
+                        {cite.title || 'Untitled Source'}
+                        <ArrowRight className="size-3 -rotate-45 opacity-50" />
+                     </a>
+                     <p className="text-muted-foreground line-clamp-1 mt-0.5">
+                        {cite.url ? new URL(cite.url).hostname : 'Unknown Source'}
+                     </p>
+                  </div>
+                  {/* Placeholder for per-source sentiment if available later */}
+               </div>
+            ))}
+         </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export const Visualization = ({ className, data, ...props }: VisualizationProps) => {
   if (!data || typeof data !== 'object') {
     return null;
@@ -221,6 +262,7 @@ export const Visualization = ({ className, data, ...props }: VisualizationProps)
     const confidence = exaResults?.overallConfidence || sentiment?.confidence || 0;
     const sourceCount = exaResults?.citations?.length || 0;
     const beliefDrivers = exaResults?.beliefDrivers?.length ? exaResults.beliefDrivers : initialContent?.beliefDrivers || [];
+    const citations = exaResults?.citations || [];
     
     // Calculate match score (consistency)
     const matchScore = comparison?.sentimentDiff?.match ? 
@@ -233,6 +275,7 @@ export const Visualization = ({ className, data, ...props }: VisualizationProps)
         <ConsistencyCard sentiment={sentiment} matchScore={matchScore} />
         <BeliefDriversCard drivers={beliefDrivers} />
         <BiasMeterCard political={political} />
+        <ReferencesCard citations={citations} sentiment={sentiment} />
       </div>
     );
   }

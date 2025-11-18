@@ -9,6 +9,7 @@
  */
 
 import type * as contacts from "../contacts.js";
+import type * as investigations from "../investigations.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   contacts: typeof contacts;
+  investigations: typeof investigations;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
