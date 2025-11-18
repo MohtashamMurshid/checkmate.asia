@@ -1,7 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { generateObject } from 'ai';
-import { getOpenRouterProvider, getModelConfig } from '../config';
+import { getOpenRouterProvider } from '../config';
 
 export const analysisTools = {
   comprehensive_analysis: tool({
@@ -141,7 +141,8 @@ Content: ${text}`,
     execute: async ({ text, context }) => {
       try {
         const provider = getOpenRouterProvider();
-        const modelConfig = getModelConfig();
+        // Use a robust model for structured output to avoid "No object generated" errors
+        const modelId = 'openai/gpt-4o-mini';
 
         const analysisPrompt = `Analyze the following text for sentiment and political leaning.
 
@@ -161,7 +162,7 @@ Provide a detailed analysis with:
 Be objective and base your analysis on the actual content, not assumptions.`;
 
         const analysisResult = await generateObject({
-          model: provider.chat(modelConfig.model),
+          model: provider.chat(modelId),
           prompt: analysisPrompt,
           schema: z.object({
             sentiment: z.object({
