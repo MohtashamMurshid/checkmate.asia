@@ -198,8 +198,8 @@ const nodeTypes = {
 };
 
 export function EvolutionGraph({ nodes: initialNodes, edges: initialEdges }: EvolutionGraphProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { theme, resolvedTheme } = useTheme();
 
   useEffect(() => {
@@ -234,7 +234,7 @@ export function EvolutionGraph({ nodes: initialNodes, edges: initialEdges }: Evo
   }, [initialNodes, initialEdges, setNodes, setEdges, resolvedTheme]);
 
   const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge({ ...params, type: 'smoothstep', animated: true }, eds)),
+    (params: any) => setEdges(eds => addEdge({ ...params, type: 'smoothstep', animated: true }, eds)),
     [setEdges],
   );
 
