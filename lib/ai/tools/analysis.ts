@@ -152,8 +152,11 @@ ${context ? `Context: ${context}` : ''}
 
 Provide a detailed analysis with:
 1. Sentiment classification (positive, negative, or neutral) with confidence score (0-1)
-2. Political leaning classification (left, center, or right) with confidence score (0-1)
-3. Reasoning/evidence for each classification
+2. Detailed sentiment breakdown (percentage 0-1 for positive, negative, neutral, mixed)
+3. Political leaning classification (left, center, or right) with confidence score (0-1)
+4. Identification of belief drivers (psychological factors like Confirmation Bias, Availability Heuristic, etc.) present or exploited in the text
+5. Overall analysis confidence score (0-1)
+6. Reasoning/evidence for each classification
 
 Be objective and base your analysis on the actual content, not assumptions.`;
 
@@ -164,6 +167,12 @@ Be objective and base your analysis on the actual content, not assumptions.`;
             sentiment: z.object({
               classification: z.enum(['positive', 'negative', 'neutral']),
               confidence: z.number().min(0).max(1),
+              breakdown: z.object({
+                positive: z.number().min(0).max(1),
+                negative: z.number().min(0).max(1),
+                neutral: z.number().min(0).max(1),
+                mixed: z.number().min(0).max(1),
+              }),
               reasoning: z.string(),
             }),
             politicalLeaning: z.object({
@@ -171,6 +180,8 @@ Be objective and base your analysis on the actual content, not assumptions.`;
               confidence: z.number().min(0).max(1),
               reasoning: z.string(),
             }),
+            beliefDrivers: z.array(z.string()).describe('List of psychological factors influencing belief identified in the text'),
+            overallConfidence: z.number().min(0).max(1).describe('Overall confidence in the analysis'),
           }),
         });
 

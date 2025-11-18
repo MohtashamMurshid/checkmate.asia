@@ -9,5 +9,12 @@ export default defineSchema({
     message: v.optional(v.string()),
     submittedAt: v.number(),
   }),
+  investigations: defineTable({
+    userQuery: v.string(),
+    userSourceContent: v.optional(v.string()),
+    results: v.any(), // JSON object
+    graphData: v.optional(v.any()), // JSON object for graph
+    timestamp: v.number(),
+  }),
 });
 

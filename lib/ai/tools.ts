@@ -10,6 +10,7 @@ import { financeTools } from './tools/finance';
 import { scienceTools } from './tools/science';
 import { factualTools } from './tools/factual';
 import { historyTools } from './tools/history';
+import { investigationExtrasTools } from './tools/investigate-extras';
 
 export const investigateTools = {
   ...socialMediaTools,
@@ -22,5 +23,6 @@ export const investigateTools = {
   ...scienceTools,
   ...factualTools,
   ...historyTools,
+  ...investigationExtrasTools,
 };
 

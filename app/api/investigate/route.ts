@@ -88,25 +88,25 @@ ${Object.keys(extractedContent.metadata).length > 0
    
    Pass the web search summary and key claims from the content as context. The research agent will automatically select appropriate APIs. WAIT for this to complete.
 
-3. **Analyze** (MUST WAIT FOR STEPS 1 AND 2): After both web search and research complete:
+3. **Analyze & Classify** (MUST WAIT FOR STEPS 1 AND 2): After both web search and research complete:
    a. Use the analyze_sentiment_political tool to analyze the summary from the web search results. Pass the summary text from step 1 and include context mentioning "web search results" or "news coverage".
    b. Use the analyze_sentiment_political tool to analyze the sentiment and political leaning of the initial extracted content above. Include context about the source type (twitter, tiktok, blog, or text).
+   c. If the Content includes "Personal Source Context", use the compare_user_source_to_external tool to compare the personal source text with the web search summary.
+   d. If any social media profiles are identified (in metadata or content), use evaluate_source_credibility for each.
+   e. For key sources found in web search or research, use classify_source_type to label them as Primary or Secondary.
    
-   These two analyses can run in parallel, but both must wait for steps 1 and 2.
+   These analyses can run in parallel, but must wait for steps 1 and 2.
 
-4. **Visualize** (MUST WAIT FOR STEP 3): After both sentiment analyses complete, use the generate_visualization tool with:
-   - initialAnalysis: the JSON result from step 3b (initial content analysis)
-   - exaAnalysis: the JSON result from step 3a (web search results analysis)
-   - citations: the citations array from step 1 (web search)
-   - exaSummary: the summary text from step 1 (web search)
-   - researchResults: Include key findings from step 2 (research) in the visualization
+4. **Visualize** (MUST WAIT FOR STEP 3): After analyses complete:
+   a. Use the generate_visualization tool with the sentiment/political analysis results.
+   b. Use the generate_evolution_graph tool to create a visual timeline of events found in research and web search.
 
 IMPORTANT WORKFLOW ORDER:
 - Step 1 (Web Search) → Step 2 (Research) → Step 3 (Analyze) → Step 4 (Visualize)
 - Step 2 MUST wait for step 1 to complete
 - Step 3 MUST wait for both steps 1 and 2 to complete
 - Step 4 MUST wait for step 3 to complete
-- Within step 3, the two analyses can run in parallel
+- Within step 3, the analyses can run in parallel
 
 All tools are optional - if any step fails, continue with the next step. Present the final visualization and analysis results clearly, incorporating both web search findings and research verification.`;
 

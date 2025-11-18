@@ -51,7 +51,7 @@ export type ToolHeaderProps = {
   className?: string;
 };
 
-const getToolIcon = (toolType: string): ReactNode => {
+export const getToolIcon = (toolType: string): ReactNode => {
   // Extract tool name from type (e.g., "tool-search_news_parallel" -> "search_news_parallel")
   const toolName = toolType.replace("tool-", "");
   
@@ -73,7 +73,7 @@ const getToolIcon = (toolType: string): ReactNode => {
   return iconMap[toolName] || <WrenchIcon className="size-4 text-muted-foreground shrink-0" />;
 };
 
-const getToolDisplayName = (toolType: string, input?: any): string => {
+export const getToolDisplayName = (toolType: string, input?: any): string => {
   // Extract tool name from type (e.g., "tool-search_news_parallel" -> "search_news_parallel")
   const toolName = toolType.replace("tool-", "");
   
@@ -116,7 +116,7 @@ const getToolDisplayName = (toolType: string, input?: any): string => {
   ).join(" ");
 };
 
-const getStatusBadge = (status: ToolUIPart["state"]) => {
+export const getStatusBadge = (status: ToolUIPart["state"]) => {
   const labels: Record<string, string> = {
     "input-streaming": "Pending",
     "input-available": "Running",

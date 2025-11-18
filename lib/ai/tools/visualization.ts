@@ -55,10 +55,14 @@ export const visualizationTools = {
           initialContent: {
             sentiment: initialData.sentiment || null,
             politicalLeaning: initialData.politicalLeaning || null,
+            beliefDrivers: initialData.beliefDrivers || [],
+            overallConfidence: initialData.overallConfidence || 0,
           },
           exaResults: {
             sentiment: exaData.sentiment || null,
             politicalLeaning: exaData.politicalLeaning || null,
+            beliefDrivers: exaData.beliefDrivers || [],
+            overallConfidence: exaData.overallConfidence || 0,
             citations: citationsArray,
             summary: exaSummary || null,
           },
@@ -83,6 +87,60 @@ export const visualizationTools = {
           type: 'investigation_visualization',
         });
       }
+    },
+  }),
+
+  generate_evolution_graph: tool({
+    description:
+      'Generates a graph structure representing the evolution of news/events. Returns nodes and edges compatible with React Flow / @xyflow/react.',
+    inputSchema: z.object({
+      events: z
+        .array(
+          z.object({
+            id: z.string().describe('Unique ID for the event'),
+            label: z.string().describe('Short title of the event'),
+            date: z.string().optional().describe('Date of the event'),
+            source: z.string().optional().describe('Source of the info'),
+            type: z.enum(['primary', 'secondary', 'related']).optional(),
+          })
+        )
+        .describe('List of events or news points'),
+      relationships: z
+        .array(
+          z.object({
+            sourceId: z.string(),
+            targetId: z.string(),
+            label: z.string().optional(),
+          })
+        )
+        .describe('Relationships between events'),
+    }),
+    execute: async ({ events, relationships }) => {
+      const nodes = events.map((event, index) => ({
+        id: event.id,
+        type: 'default', // Can be customized in frontend
+        data: { 
+          label: event.label, 
+          date: event.date, 
+          source: event.source,
+          type: event.type || 'secondary'
+        },
+        position: { x: 0, y: index * 100 }, // Layout will be handled by frontend library ideally, or simple vertical for now
+      }));
+
+      const edges = relationships.map((rel, index) => ({
+        id: `e-${index}`,
+        source: rel.sourceId,
+        target: rel.targetId,
+        label: rel.label,
+        animated: true,
+      }));
+
+      return JSON.stringify({
+        type: 'evolution_graph',
+        nodes,
+        edges,
+      });
     },
   }),
 };
