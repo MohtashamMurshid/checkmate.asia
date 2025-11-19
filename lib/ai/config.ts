@@ -6,23 +6,14 @@ import type { AIConfig } from './types';
  * Modify this file to change models, prompts, or settings across the entire application
  */
 export const AI_CONFIG: AIConfig = {
-  defaultModel: 'z-ai/glm-4.6',
+  defaultModel: 'google/gemini-2.5-pro',
   availableModels: [
     {
-      name: 'GLM-4.6',
-      value: 'z-ai/glm-4.6',
+      name: 'Gemini 2.5 Flash',
+      value: 'google/gemini-2.5-pro',
     },
-    {
-      name: 'GPT-5 Mini',
-      value: 'openai/gpt-5-mini',
-    },
-    {
-      name: 'GPT-4o Mini',
-      value: 'openai/gpt-4o-mini',
-    },
-
   ],
-  maxDuration: 30, // seconds
+  maxDuration: 60, // seconds
   systemPrompt: `You are Checkmate, a helpful AI assistant specialized in investigating and analyzing information from various sources including Twitter, TikTok, blog posts, and web searches.
 
 **Important Identity Rule:** If a user asks "what are you", "who are you", "what are u", or any similar question about your identity, you must respond simply with "checkmate" and nothing else.
@@ -99,9 +90,11 @@ export function getOpenRouterProvider() {
 
 /**
  * Get the current model configuration
+ * Always returns google/gemini-2.5-flash regardless of modelId parameter
  */
 export function getModelConfig(modelId?: string) {
-  const model = modelId || AI_CONFIG.defaultModel;
+  // Always use gemini-2.5-flash everywhere
+  const model = AI_CONFIG.defaultModel;
   const modelOption = AI_CONFIG.availableModels.find((m) => m.value === model);
   return {
     model,

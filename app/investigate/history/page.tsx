@@ -26,25 +26,59 @@ import {
   Trash2, 
   ArrowUpDown 
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const investigations = useQuery(api.investigations.list) || [];
 
-  const filteredHistory = mockHistory.filter(item => 
-    item.query.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredHistory = useMemo(() => {
+    if (!investigations) return [];
+    
+    return investigations
+      .filter(item => 
+        item.userQuery.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .map(item => {
+        // Extract tags from results
+        const tags: string[] = [];
+        if (item.results?.visual) {
+          const sentiment = item.results.visual?.initialContent?.sentiment?.classification || 
+                          item.results.visual?.exaResults?.sentiment?.classification;
+          if (sentiment) tags.push(sentiment.charAt(0).toUpperCase() + sentiment.slice(1) + ' Sentiment');
+        }
+        if (item.results?.comparisonData) {
+          tags.push('Cross-Checked');
+        }
+        if (item.results?.graphData || item.graphData) {
+          tags.push('Timeline');
+        }
+        if (item.results?.citations?.length > 0) {
+          tags.push(`${item.results.citations.length} Sources`);
+        }
+        
+        return {
+          id: item._id,
+          query: item.userQuery,
+          date: new Date(item.timestamp).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+          }),
+          status: 'Completed' as const,
+          tags,
+        };
+      });
+  }, [investigations, searchQuery]);
 
   const handleRowClick = (id: string) => {
-    // Only top 3 are clickable for this demo
-    if (['1', '2', '3'].includes(id)) {
-      router.push(`/investigate/history/${id}`);
-    } else {
-      // Optional: alert user that this is a mock item without details
-      // alert("Details not available for this mock item.");
-    }
+    router.push(`/investigate/history/${id}`);
   };
 
   return (
@@ -93,14 +127,14 @@ export default function HistoryPage() {
               {filteredHistory.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                    No investigations found.
+                    {investigations === undefined ? 'Loading...' : 'No investigations found.'}
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredHistory.map((item) => (
                   <TableRow 
                     key={item.id}
-                    className={['1', '2', '3'].includes(item.id) ? "cursor-pointer hover:bg-muted/50" : ""}
+                    className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleRowClick(item.id)}
                   >
                     <TableCell className="font-medium">
@@ -127,11 +161,15 @@ export default function HistoryPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {item.tags.map((tag, i) => (
-                          <Badge key={i} variant="outline" className="text-[10px] px-1 py-0 h-5">
-                            {tag}
-                          </Badge>
-                        ))}
+                        {item.tags.length > 0 ? (
+                          item.tags.map((tag, i) => (
+                            <Badge key={i} variant="outline" className="text-[10px] px-1 py-0 h-5">
+                              {tag}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No tags</span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -164,61 +202,3 @@ export default function HistoryPage() {
   );
 }
 
-const mockHistory = [
-  {
-    id: '1',
-    query: 'AI Regulation in EU vs US',
-    date: 'Nov 18, 2025 • 2:30 PM',
-    status: 'Completed',
-    tags: ['Neutral Bias', 'High Confidence'],
-  },
-  {
-    id: '2',
-    query: 'Impact of Quantum Computing on Encryption',
-    date: 'Nov 17, 2025 • 10:15 AM',
-    status: 'Completed',
-    tags: ['Scientific', 'Tech'],
-  },
-  {
-    id: '3',
-    query: 'Recent Tech Stock Volatility Reasons',
-    date: 'Nov 16, 2025 • 4:45 PM',
-    status: 'Completed',
-    tags: ['Financial', 'Mixed Sentiment'],
-  },
-  {
-    id: '4',
-    query: 'Global Renewable Energy Targets 2030',
-    date: 'Nov 15, 2025 • 9:00 AM',
-    status: 'Completed',
-    tags: ['Policy', 'Positive Trend'],
-  },
-  {
-    id: '5',
-    query: 'Deepfake Detection Tools Comparison',
-    date: 'Nov 14, 2025 • 1:20 PM',
-    status: 'Draft',
-    tags: ['Incomplete'],
-  },
-  {
-    id: '6',
-    query: 'Mars Colonization Feasibility Study',
-    date: 'Nov 12, 2025 • 11:30 AM',
-    status: 'Completed',
-    tags: ['Scientific', 'Speculative'],
-  },
-  {
-    id: '7',
-    query: 'History of Digital Currencies',
-    date: 'Nov 10, 2025 • 3:15 PM',
-    status: 'Completed',
-    tags: ['Historical', 'Finance'],
-  },
-  {
-    id: '8',
-    query: 'Corporate Tax Rates by Country 2025',
-    date: 'Nov 08, 2025 • 10:00 AM',
-    status: 'Completed',
-    tags: ['Data Heavy', 'Neutral'],
-  },
-];

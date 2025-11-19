@@ -1,6 +1,7 @@
 import { generateText } from 'ai';
 import { getOpenRouterProvider, getModelConfig } from './config';
 import { stepCountIs } from 'ai';
+import { webSearchTools } from './tools/web-search';
 import { businessTools } from './tools/business';
 import { financeTools } from './tools/finance';
 import { scienceTools } from './tools/science';
@@ -11,6 +12,7 @@ import { historyTools } from './tools/history';
  * Research tools - combines all research API tools
  */
 export const researchTools = {
+  ...webSearchTools,
   ...businessTools,
   ...financeTools,
   ...scienceTools,
@@ -24,6 +26,10 @@ export const researchTools = {
 const RESEARCH_AGENT_PROMPT = `You are a comprehensive research assistant specialized in gathering information from authoritative sources across multiple domains.
 
 **Available Research Tools:**
+
+**Web & News Search (PRIORITY):**
+- search_web_exa: Primary tool for general research and verifying recent events. Always try this first for broad topics.
+- search_news_parallel: Use for verifying specific news claims or current events.
 
 **Business & Economics:**
 - search_opencorporates: Search for company registration, ownership, and director information
@@ -56,6 +62,7 @@ const RESEARCH_AGENT_PROMPT = `You are a comprehensive research assistant specia
 **Your Research Workflow:**
 
 1. **Understand the Query**: Analyze what type of information the user is seeking
+   - General/News/Recent Events → Use Web & News Search (search_web_exa)
    - Business/company information → Use business tools
    - Economic/financial data → Use finance tools
    - Academic/scientific research → Use science tools
@@ -65,6 +72,7 @@ const RESEARCH_AGENT_PROMPT = `You are a comprehensive research assistant specia
 2. **Select Appropriate Tools**: Choose the most relevant tools based on the query domain
 
 3. **Execute Research**: Use multiple tools if needed to gather comprehensive information
+   - For general/news research: START with search_web_exa or search_news_parallel. This is the most versatile tool.
    - For company research: Start with OpenCorporates, then Crunchbase if needed
    - For economic data: Use FRED or IMF depending on the specific indicator
    - For academic research: Search Semantic Scholar and arXiv for comprehensive coverage

@@ -31,7 +31,6 @@ import { MessageResponse } from '@/components/ai-elements/message';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  SearchIcon, 
   Sparkles, 
   ChevronRight, 
   ChevronDown, 
@@ -44,17 +43,20 @@ import {
   FileText,
   Layers,
   Check,
-  CircleDashed,
   Loader2,
   Bot,
-  Save,
-  TrendingUp,
-  Shield
+  Link as LinkIcon,
+  Search,
+  RefreshCw,
+  Info,
+  CircleDashed
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LinkPreview } from '@/components/link-preview';
+import { analyzeSourceAction } from '@/app/actions';
 
 type TimelineEntry = {
   id: string;
@@ -75,6 +77,7 @@ type InvestigationResult = {
   graphData?: { nodes: any[]; edges: any[] } | null;
   comparisonData?: any | null;
   credibilityData?: any | null;
+  citations?: any[] | null;
   timestamp: number;
 };
 
@@ -109,31 +112,107 @@ function InvestigatePageContent() {
 
   const hasStarted = activeMessages.length > 0;
 
+  // Aggregate all citations from all results
+  const allCitations = useMemo(() => {
+    const citationMap = new Map();
+    investigationResults.forEach(result => {
+      if (result.citations && Array.isArray(result.citations)) {
+        result.citations.forEach(citation => {
+          if (citation.url && !citationMap.has(citation.url)) {
+             citationMap.set(citation.url, citation);
+          }
+        });
+      }
+      // Also extract from structured data results if they have urls
+      if (result.structuredData && Array.isArray((result.structuredData as any).results)) {
+         (result.structuredData as any).results.forEach((item: any) => {
+            if (item.url && !citationMap.has(item.url)) {
+              citationMap.set(item.url, {
+                 title: item.title,
+                 url: item.url,
+                 text: item.text || item.snippet
+              });
+            }
+         });
+      }
+    });
+    return Array.from(citationMap.values());
+  }, [investigationResults]);
+
   // Auto-save when investigation completes
   useEffect(() => {
     if (status !== 'streaming' && investigationResults.length > 0) {
       const latestTimestamp = Math.max(...investigationResults.map(r => r.timestamp));
       if (latestTimestamp > lastSavedTimestamp) {
+        // Find all relevant results
         const latestResult = investigationResults[0]; // Most recent
+        const crossCheckResult = investigationResults.find(r => r.comparisonData);
+        const visualResult = investigationResults.find(r => r.visual);
+        const graphResult = investigationResults.find(r => r.graphData);
         
         // Find user query
         const userQuery = activeMessages.find(m => m.role === 'user')?.content || 'Investigation';
+        
+        // Extract text report from assistant messages
+        const assistantMessages = activeMessages
+          .filter(m => m.role === 'assistant')
+          .map(m => {
+            let text = '';
+            if (m.parts) {
+              const textPart = m.parts.find((p: any) => p.type === 'text' && p.text);
+              text = textPart?.text || '';
+            } else if (typeof m.content === 'string') {
+              text = m.content;
+            }
+            return { text, length: text.trim().length };
+          })
+          .filter(m => m.length > 100)
+          .sort((a, b) => b.length - a.length);
+        
+        const textReport = assistantMessages.length > 0 ? assistantMessages[0].text.trim() : null;
 
-        // Prepare data to save - save aggregate or specific result?
-        // Let's save the latest state
+        // Build comprehensive results object with all data
+        const comprehensiveResults = {
+          ...latestResult,
+          // Ensure comparisonData is included if it exists in any result
+          comparisonData: crossCheckResult?.comparisonData || latestResult.comparisonData || null,
+          // Ensure visual is included
+          visual: visualResult?.visual || latestResult.visual || null,
+          // Ensure graphData is included
+          graphData: graphResult?.graphData || latestResult.graphData || null,
+          // Include text report
+          summary: textReport || latestResult.summary || 'Investigation completed',
+          // Include citations from all results
+          citations: latestResult.citations || [],
+        };
+
+        console.log('[CROSS-CHECK] Saving investigation to database');
+        console.log('[CROSS-CHECK] Comprehensive results structure:', {
+          hasComparisonData: !!comprehensiveResults.comparisonData,
+          comparisonDataKeys: comprehensiveResults.comparisonData ? Object.keys(comprehensiveResults.comparisonData) : [],
+          hasVisual: !!comprehensiveResults.visual,
+          hasGraphData: !!comprehensiveResults.graphData,
+          hasSummary: !!comprehensiveResults.summary,
+          citationsCount: comprehensiveResults.citations?.length || 0,
+        });
+        
+        if (comprehensiveResults.comparisonData) {
+          console.log('[CROSS-CHECK] Comparison data being saved:', JSON.stringify(comprehensiveResults.comparisonData, null, 2));
+        }
+
         const saveData = async () => {
           try {
             await saveInvestigation({
               userQuery: userQuery.slice(0, 1000), // Limit length
               userSourceContent: personalSource || undefined,
-              results: latestResult, // Save the latest result object
-              graphData: latestResult.graphData || undefined,
+              results: comprehensiveResults, // Save comprehensive results with all data
+              graphData: comprehensiveResults.graphData || undefined,
               timestamp: Date.now(),
             });
             setLastSavedTimestamp(Date.now());
-            console.log('Investigation saved');
+            console.log('[CROSS-CHECK] Investigation saved successfully');
           } catch (err) {
-            console.error('Failed to save investigation:', err);
+            console.error('[CROSS-CHECK] Failed to save investigation:', err);
           }
         };
         
@@ -168,9 +247,104 @@ function InvestigatePageContent() {
 
   const isInvestigating = mockMode ? false : status === 'streaming';
 
-  // Filtering results for tabs
-  const visualResults = investigationResults.filter(r => r.visual || r.graphData);
-  const dataResults = investigationResults.filter(r => r.structuredData || r.comparisonData || r.credibilityData);
+  // Extract extracted content from server (for Source & Preview)
+  // The content is included in the system prompt, so we need to extract it from the first message
+  // For now, we'll extract it from the user's input by detecting if it's a URL or use personalSource
+  const extractedSourceContent = useMemo(() => {
+    // If we have personalSource, use that as the extracted content
+    if (personalSource.trim()) {
+      return {
+        content: personalSource,
+        sourceType: 'text',
+        metadata: {},
+      };
+    }
+    
+    // Otherwise, try to extract from the first user message
+    const firstUserMessage = activeMessages.find(m => m.role === 'user');
+    if (firstUserMessage) {
+      const userText = firstUserMessage.parts?.find((p: any) => p.type === 'text')?.text || 
+                       (typeof firstUserMessage.content === 'string' ? firstUserMessage.content : '');
+      // If it looks like a URL, we'd need to extract it, but for now just use the text
+      // In a real implementation, you'd call an extraction API here
+      if (userText && !userText.includes('Personal Source Context:')) {
+        return {
+          content: userText.split('Investigation Query:')[1]?.trim() || userText,
+          sourceType: 'text',
+          metadata: {},
+        };
+      }
+    }
+    return null;
+  }, [activeMessages, personalSource]);
+
+  // Extract text report from the latest assistant message (must be before early return)
+  // Look for the most comprehensive text response that explains all findings
+  const textReport = useMemo(() => {
+    // Find the last assistant message with significant text content
+    // Prefer longer messages that look like comprehensive reports
+    const assistantMessages = activeMessages
+      .filter(m => m.role === 'assistant')
+      .map(m => {
+        let text = '';
+        if (m.parts) {
+          const textPart = m.parts.find((p: any) => p.type === 'text' && p.text);
+          text = textPart?.text || '';
+        } else if (typeof m.content === 'string') {
+          text = m.content;
+        }
+        return { message: m, text, length: text.trim().length };
+      })
+      .filter(m => m.length > 100) // Only consider substantial messages
+      .sort((a, b) => b.length - a.length); // Sort by length, longest first
+
+    // Return the longest substantial message as the report
+    if (assistantMessages.length > 0) {
+      return assistantMessages[0].text.trim();
+    }
+
+    return null;
+  }, [activeMessages]);
+
+  // Extract key sections for the 1-6 order
+  console.log('[CROSS-CHECK] Step 5: Extracting cross-check result from investigationResults');
+  console.log('[CROSS-CHECK] Total investigation results:', investigationResults.length);
+  console.log('[CROSS-CHECK] Investigation results:', investigationResults.map(r => ({
+    id: r.id,
+    title: r.title,
+    hasComparisonData: !!r.comparisonData,
+    comparisonDataType: r.comparisonData ? typeof r.comparisonData : 'none',
+  })));
+  
+  const crossCheckResult = investigationResults.find(r => r.comparisonData);
+  
+  console.log('[CROSS-CHECK] Step 6: Found crossCheckResult:', crossCheckResult ? {
+    id: crossCheckResult.id,
+    title: crossCheckResult.title,
+    hasComparisonData: !!crossCheckResult.comparisonData,
+    comparisonDataKeys: crossCheckResult.comparisonData ? Object.keys(crossCheckResult.comparisonData) : [],
+  } : 'NOT FOUND');
+  
+  if (crossCheckResult?.comparisonData) {
+    console.log('[CROSS-CHECK] Step 7: Full comparisonData:', JSON.stringify(crossCheckResult.comparisonData, null, 2));
+    console.log('[CROSS-CHECK] Step 8: Extracted fields:', {
+      userContextComparison: crossCheckResult.comparisonData?.userContextComparison || crossCheckResult.comparisonData?.comparisonPoints,
+      searchVsResearchComparison: crossCheckResult.comparisonData?.searchVsResearchComparison,
+      userSourceContent: crossCheckResult.comparisonData?.userSourceContent,
+      webSearchSummary: crossCheckResult.comparisonData?.webSearchSummary || crossCheckResult.comparisonData?.externalSourcesSummary,
+      deepResearchSummary: crossCheckResult.comparisonData?.deepResearchSummary,
+    });
+  }
+  
+  const visualResult = investigationResults.find(r => r.visual);
+  const graphResult = investigationResults.find(r => r.graphData);
+  
+  // User source or first query
+  const userQueryMessage = activeMessages.find(m => m.role === 'user')?.content || '';
+  // Try to extract clean query from prompt wrapper
+  const cleanUserQuery = userQueryMessage.includes('Investigation Query:') 
+    ? userQueryMessage.split('Investigation Query:')[1]?.trim() 
+    : userQueryMessage;
 
   if (!hasStarted) {
     return (
@@ -292,64 +466,197 @@ function InvestigatePageContent() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex min-h-0">
-         {/* Left Panel: Results & Evidence (Main View) */}
-         <div className="flex-1 flex flex-col min-w-0 bg-muted/5 relative z-0">
-            <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
-               <div className="p-3 border-b bg-background flex items-center justify-between gap-2 shrink-0 sticky top-0">
-                 <h2 className="font-semibold text-sm flex items-center gap-2 whitespace-nowrap text-muted-foreground pl-2">
-                   <LayoutTemplate className="size-4" />
-                   Evidence Board
-                 </h2>
-                 <TabsList className="h-8 bg-muted/50 p-0.5">
-                    <TabsTrigger value="all" className="text-xs px-2.5 h-7">
-                       <Layers className="size-3 mr-1.5" /> All
-                       <span className="ml-1.5 text-[10px] bg-primary/10 text-primary px-1 rounded-full">{investigationResults.length}</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="visuals" className="text-xs px-2.5 h-7">
-                       <PieChart className="size-3 mr-1.5" /> Visuals
-                       <span className="ml-1.5 text-[10px] bg-muted text-muted-foreground px-1 rounded-full">{visualResults.length}</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="data" className="text-xs px-2.5 h-7">
-                       <FileText className="size-3 mr-1.5" /> Data
-                       <span className="ml-1.5 text-[10px] bg-muted text-muted-foreground px-1 rounded-full">{dataResults.length}</span>
-                    </TabsTrigger>
-                 </TabsList>
-              </div>
-               
-               <div className="flex-1 overflow-y-auto">
-                 <div className="p-6 min-h-full max-w-5xl mx-auto w-full">
-                   <TabsContent value="all" className="mt-0 space-y-6 animate-in fade-in duration-300">
-                     {investigationResults.length === 0 ? (
-                        <EmptyState />
-                     ) : (
-                        investigationResults.map((result) => (
-                           <ResultCard key={result.id} result={result} />
-                        ))
-                     )}
-                   </TabsContent>
-                   
-                   <TabsContent value="visuals" className="mt-0 space-y-6 animate-in fade-in duration-300">
-                     {visualResults.length === 0 ? (
-                        <EmptyState text="No visualizations generated yet." />
-                     ) : (
-                        visualResults.map((result) => (
-                           <ResultCard key={result.id} result={result} />
-                        ))
-                     )}
-                   </TabsContent>
-                   
-                   <TabsContent value="data" className="mt-0 space-y-6 animate-in fade-in duration-300">
-                     {dataResults.length === 0 ? (
-                        <EmptyState text="No structured data found yet." />
-                     ) : (
-                        dataResults.map((result) => (
-                           <ResultCard key={result.id} result={result} />
-                        ))
-                     )}
-                   </TabsContent>
-                 </div>
+         {/* Left Panel: Evidence Board (Strict 6-Section Layout) */}
+         <div className="flex-1 flex flex-col min-w-0 bg-muted/5 relative z-0 overflow-y-auto">
+            <div className="p-6 max-w-5xl mx-auto w-full space-y-8 pb-20">
+               <div className="flex items-center gap-2 mb-4">
+                 <LayoutTemplate className="size-5 text-muted-foreground" />
+                 <h2 className="font-semibold text-lg">Evidence Board</h2>
                </div>
-            </Tabs>
+
+               {/* 1. Source & Preview */}
+               <section className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                     <span className="bg-primary/10 text-primary w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                     Source & Preview
+                  </h3>
+                  <Card>
+                     <CardContent className="p-4">
+                        {/* Show extracted source content if available */}
+                        {extractedSourceContent ? (
+                           <div className="space-y-4">
+                              <div>
+                                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                                    Extracted Source
+                                    <Badge variant="outline" className="text-xs">
+                                       {extractedSourceContent.sourceType}
+                                    </Badge>
+                                 </h4>
+                                 <div className="bg-muted/30 p-3 rounded-md text-sm whitespace-pre-wrap max-h-[300px] overflow-y-auto">
+                                    {extractedSourceContent.content}
+                                 </div>
+                                 {extractedSourceContent.metadata && Object.keys(extractedSourceContent.metadata).length > 0 && (
+                                    <div className="mt-2 text-xs text-muted-foreground">
+                                       {(extractedSourceContent.metadata as any).url && (
+                                          <a href={(extractedSourceContent.metadata as any).url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
+                                             <LinkIcon className="size-3" />
+                                             {(extractedSourceContent.metadata as any).url}
+                                          </a>
+                                       )}
+                                       {(extractedSourceContent.metadata as any).title && (
+                                          <div className="mt-1 font-medium">{(extractedSourceContent.metadata as any).title}</div>
+                                       )}
+                                    </div>
+                                 )}
+                              </div>
+                              {personalSource && (
+                                 <div>
+                                    <h4 className="text-sm font-medium mb-2">User Context Provided</h4>
+                                    <div className="bg-blue-50/50 p-3 rounded-md text-sm border-l-2 border-blue-500">
+                                       {personalSource}
+                                    </div>
+                                 </div>
+                              )}
+                           </div>
+                        ) : (
+                           <>
+                              <div className="mb-4">
+                                 <h4 className="text-sm font-medium mb-2">Primary Query / Source</h4>
+                                 <div className="bg-muted/30 p-3 rounded-md text-sm">
+                                    {cleanUserQuery}
+                                 </div>
+                              </div>
+                              {personalSource && (
+                                 <div>
+                                    <h4 className="text-sm font-medium mb-2">User Context Provided</h4>
+                                    <div className="bg-blue-50/50 p-3 rounded-md text-sm border-l-2 border-blue-500">
+                                       {personalSource}
+                                    </div>
+                                 </div>
+                              )}
+                           </>
+                        )}
+                     </CardContent>
+                  </Card>
+               </section>
+
+               {/* 2. Cross-Check */}
+               <section className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                     <span className="bg-primary/10 text-primary w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                     Cross-Check
+                  </h3>
+                  {crossCheckResult ? (
+                     (() => {
+                        console.log('[CROSS-CHECK] Step 9: Rendering SourceComparison component');
+                        
+                        // Extract data with fallbacks
+                        const userContextComparison = crossCheckResult.comparisonData?.userContextComparison || crossCheckResult.comparisonData?.comparisonPoints;
+                        const searchVsResearchComparison = crossCheckResult.comparisonData?.searchVsResearchComparison;
+                        const userSourceContent = crossCheckResult.comparisonData?.userSourceContent || personalSource || undefined;
+                        const webSearchSummary = crossCheckResult.comparisonData?.webSearchSummary || crossCheckResult.comparisonData?.externalSourcesSummary;
+                        const deepResearchSummary = crossCheckResult.comparisonData?.deepResearchSummary;
+                        
+                        console.log('[CROSS-CHECK] Props being passed:', {
+                          userContextComparison,
+                          userContextComparisonType: Array.isArray(userContextComparison) ? 'array' : typeof userContextComparison,
+                          userContextComparisonLength: Array.isArray(userContextComparison) ? userContextComparison.length : 'not array',
+                          searchVsResearchComparison,
+                          searchVsResearchComparisonType: Array.isArray(searchVsResearchComparison) ? 'array' : typeof searchVsResearchComparison,
+                          searchVsResearchComparisonLength: Array.isArray(searchVsResearchComparison) ? searchVsResearchComparison.length : 'not array',
+                          userSourceContent,
+                          userSourceContentLength: userSourceContent?.length || 0,
+                          webSearchSummary,
+                          webSearchSummaryLength: webSearchSummary?.length || 0,
+                          deepResearchSummary,
+                          deepResearchSummaryLength: deepResearchSummary?.length || 0,
+                        });
+                        
+                        // Log the full comparisonData structure for debugging
+                        console.log('[CROSS-CHECK] Full comparisonData object:', JSON.stringify(crossCheckResult.comparisonData, null, 2));
+                        
+                        return (
+                           <SourceComparison 
+                              userContextComparison={userContextComparison}
+                              searchVsResearchComparison={searchVsResearchComparison}
+                              userSourceContent={userSourceContent}
+                              webSearchSummary={webSearchSummary}
+                              deepResearchSummary={deepResearchSummary}
+                           />
+                        );
+                     })()
+                  ) : (
+                     <EmptySection text="Waiting for source comparison..." />
+                  )}
+               </section>
+
+               {/* 3. DD Analysis (Visuals) */}
+               <section className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                     <span className="bg-primary/10 text-primary w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                     DD Analysis
+                  </h3>
+                  {visualResult && visualResult.visual ? (
+                     <Card>
+                        <CardContent className="p-4">
+                           <Visualization data={visualResult.visual} />
+                        </CardContent>
+                     </Card>
+                  ) : (
+                     <EmptySection text="Analyzing sentiment and bias..." />
+                  )}
+               </section>
+
+               {/* 4. Evolution Graph */}
+               <section className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                     <span className="bg-primary/10 text-primary w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                     Evolution Graph
+                  </h3>
+                  {graphResult && graphResult.graphData ? (
+                     <Card className="overflow-hidden">
+                        <div className="h-[500px] relative">
+                           <EvolutionGraph nodes={graphResult.graphData.nodes} edges={graphResult.graphData.edges} />
+                        </div>
+                     </Card>
+                  ) : (
+                     <EmptySection text="Building timeline..." />
+                  )}
+               </section>
+
+               {/* 5. Text Report */}
+               <section className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                     <span className="bg-primary/10 text-primary w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">5</span>
+                     Text Report
+                  </h3>
+                  {textReport ? (
+                     <Card>
+                        <CardContent className="p-6">
+                           <MessageResponse>
+                              {textReport}
+                           </MessageResponse>
+                        </CardContent>
+                     </Card>
+                  ) : (
+                     <EmptySection text="Drafting report..." />
+                  )}
+               </section>
+
+               {/* 6. Citations */}
+               <section className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                     <span className="bg-primary/10 text-primary w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">6</span>
+                     Citations
+                  </h3>
+                  {allCitations.length > 0 ? (
+                     <CitationsBoard citations={allCitations} />
+                  ) : (
+                     <EmptySection text="Collecting sources..." />
+                  )}
+               </section>
+
+            </div>
          </div>
 
         {/* Right Panel: Chat & Timeline (Sidebar) */}
@@ -445,12 +752,104 @@ function InvestigatePageContent() {
   );
 }
 
-function EmptyState({ text = "No evidence collected yet." }: { text?: string }) {
+function EmptySection({ text = "Pending..." }: { text?: string }) {
    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground border-2 border-dashed rounded-xl m-2 bg-muted/5">
-         <LayoutTemplate className="size-12 mb-4 opacity-20" />
-         <p className="text-base font-medium mb-1">Evidence Board Empty</p>
+      <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground border-2 border-dashed rounded-xl bg-muted/5">
+         <CircleDashed className="size-8 mb-3 opacity-20 animate-spin-slow" />
          <p className="text-sm opacity-70">{text}</p>
+      </div>
+   );
+}
+
+function CitationsBoard({ citations }: { citations: any[] }) {
+   const [analyzing, setAnalyzing] = useState<string | null>(null);
+   const [analyses, setAnalyses] = useState<Record<string, any>>({});
+
+   const handleAnalyze = async (url: string, text: string, title: string) => {
+      if (!text) return;
+      
+      setAnalyzing(url);
+      try {
+         const result = await analyzeSourceAction(text, title);
+         if (result.success) {
+            setAnalyses(prev => ({ ...prev, [url]: result.data }));
+         }
+      } catch (err) {
+         console.error("Failed to analyze source:", err);
+      } finally {
+         setAnalyzing(null);
+      }
+   };
+
+   return (
+      <div className="grid gap-3">
+         {citations.map((citation, idx) => {
+            const analysis = analyses[citation.url];
+            const isAnalyzing = analyzing === citation.url;
+
+            return (
+            <Card key={idx} className="overflow-hidden">
+               <div className="p-3">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                     <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-medium leading-tight mb-1 truncate">
+                           {citation.title || 'Untitled Source'}
+                        </h4>
+                        <a href={citation.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline flex items-center gap-1 truncate">
+                           <LinkIcon className="size-3" />
+                           {citation.url}
+                        </a>
+                     </div>
+                     <Button 
+                        variant={analysis ? "secondary" : "outline"} 
+                        size="sm" 
+                        className="h-7 text-xs gap-1"
+                        onClick={() => !analysis && handleAnalyze(citation.url, citation.text, citation.title)}
+                        disabled={isAnalyzing || !!analysis}
+                     >
+                        {isAnalyzing ? (
+                           <Loader2 className="size-3 animate-spin" />
+                        ) : analysis ? (
+                           <Check className="size-3" />
+                        ) : (
+                           <Search className="size-3" />
+                        )}
+                        {analysis ? 'Analyzed' : 'Analyze Source'}
+                     </Button>
+                  </div>
+                  
+                  {/* Analysis Result Inline */}
+                  {analysis && (
+                     <div className="mt-3 bg-muted/50 rounded-md p-3 text-xs animate-in fade-in slide-in-from-top-1">
+                        <div className="grid grid-cols-2 gap-4 mb-2">
+                           <div>
+                              <span className="text-muted-foreground block mb-1">Sentiment</span>
+                              <Badge variant={analysis.sentiment === 'Positive' ? 'default' : analysis.sentiment === 'Negative' ? 'destructive' : 'secondary'}>
+                                 {analysis.sentiment}
+                              </Badge>
+                           </div>
+                           <div>
+                              <span className="text-muted-foreground block mb-1">Political Bias</span>
+                              <Badge variant="outline">
+                                 {analysis.politicalBias}
+                              </Badge>
+                           </div>
+                        </div>
+                        <div>
+                           <span className="text-muted-foreground block mb-1">Key Themes</span>
+                           <div className="flex flex-wrap gap-1">
+                              {analysis.themes.map((theme: string, i: number) => (
+                                 <span key={i} className="bg-background border px-1.5 py-0.5 rounded text-[10px]">
+                                    {theme}
+                                 </span>
+                              ))}
+                           </div>
+                        </div>
+                     </div>
+                  )}
+               </div>
+            </Card>
+         );})}
       </div>
    );
 }
@@ -563,54 +962,26 @@ function TimelineItem({
  }
 
 function ResultCard({ result }: { result: InvestigationResult }) {
-   return (
-     <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden transition-all hover:shadow-md animate-in fade-in slide-in-from-bottom-2">
-       <div className="p-4 border-b bg-muted/10 flex items-start justify-between gap-4">
-         <div>
-           <h3 className="font-semibold text-sm">{result.title}</h3>
-                    {result.summary && (
-             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{result.summary}</p>
-                    )}
-         </div>
-       </div>
-       
-       <div className="p-0">
-                    {result.visual && (
-            <div className="p-4">
-                      <Visualization data={result.visual} />
+   // This is now mainly used for structured data (Folder Report)
+   // Since visual, graph, and comparison are pulled out into their own sections
+   if (result.structuredData) {
+      return (
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+          <div className="p-4 border-b bg-muted/10 flex items-start justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-sm">{result.title}</h3>
+               {result.summary && (
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{result.summary}</p>
+               )}
             </div>
-                    )}
-                    {result.graphData && (
-            <div className="h-[600px] border-b relative">
-                      <EvolutionGraph nodes={result.graphData.nodes} edges={result.graphData.edges} />
-            </div>
-                    )}
-                    {result.comparisonData && (
-           <div className="p-4">
-                      <SourceComparison 
-               userSourceContent={result.comparisonData.userSourceContent || 'No user source provided'}
-                        externalSummary={result.comparisonData.externalSourcesSummary}
-                        comparisonPoints={result.comparisonData.comparisonPoints || []}
-                      />
-           </div>
-                    )}
-                    {result.credibilityData && (
-           <div className="p-4 flex justify-center bg-muted/5">
-                      <CredibilityBadge 
-                        score={result.credibilityData.score} 
-                        username={result.credibilityData.username}
-                        platform={result.credibilityData.platform}
-                      />
-           </div>
-                    )}
-                    {result.structuredData && (
-           <div className="p-4">
-                      <StructuredDataDisplay data={result.structuredData} />
-              </div>
-            )}
+          </div>
+          <div className="p-4">
+             <StructuredDataDisplay data={result.structuredData} />
+          </div>
        </div>
-    </div>
-  );
+      );
+   }
+   return null;
 }
 
 function StructuredDataDisplay({ data }: { data: Record<string, unknown> }) {
@@ -715,23 +1086,49 @@ function buildInvestigationResults(messages: Array<any>): InvestigationResult[] 
   const results: InvestigationResult[] = [];
   let insightCounter = 1;
 
+  console.log('[CROSS-CHECK] buildInvestigationResults: Processing messages');
+  console.log('[CROSS-CHECK] Total messages:', messages.length);
+  console.log('[CROSS-CHECK] Assistant messages:', messages.filter(m => m.role === 'assistant').length);
+
   messages
     .filter((message) => message.role === 'assistant')
     .forEach((message, messageIndex) => {
       const parts = extractMessageParts(message);
+      console.log(`[CROSS-CHECK] Processing assistant message ${messageIndex}, parts:`, parts.length);
+      
       parts.forEach((part: { type: string; text?: string } | ToolUIPart, partIndex: number) => {
         if (typeof part.type === 'string' && part.type.startsWith('tool-')) {
+          const toolName = part.type.replace('tool-', '');
+          console.log(`[CROSS-CHECK] Found tool part: ${toolName}`);
+          
+          if (toolName === 'compare_sources_comprehensive') {
+            console.log('[CROSS-CHECK] Found compare_sources_comprehensive tool part!');
+            console.log('[CROSS-CHECK] Tool part state:', (part as ToolUIPart).state);
+            console.log('[CROSS-CHECK] Tool part output:', (part as ToolUIPart).output);
+          }
+          
           const parsed = parseToolOutputForResult(part as ToolUIPart, insightCounter);
           if (parsed) {
+            console.log(`[CROSS-CHECK] Parsed result for ${toolName}:`, {
+              id: parsed.id,
+              title: parsed.title,
+              hasComparisonData: !!parsed.comparisonData,
+            });
+            
             results.push({
                ...parsed,
                timestamp: Date.now()
             });
             insightCounter++;
+          } else {
+            console.log(`[CROSS-CHECK] No parsed result for ${toolName}`);
           }
         }
       });
     });
+
+  console.log('[CROSS-CHECK] Final results count:', results.length);
+  console.log('[CROSS-CHECK] Results with comparisonData:', results.filter(r => r.comparisonData).length);
 
   return results.reverse();
 }
@@ -752,7 +1149,7 @@ function parseToolOutputForResult(
         title?: string;
         summary?: string;
         initialContent?: Record<string, unknown>;
-        exaResults?: Record<string, unknown> & { summary?: string };
+        exaResults?: Record<string, unknown> & { summary?: string; citations?: any[] };
         comparison?: Record<string, unknown>;
       };
       return {
@@ -760,7 +1157,19 @@ function parseToolOutputForResult(
         title: visualization.title ?? `Visualization ${insightIndex}`,
         summary: visualization.exaResults?.summary || visualization.summary || '',
         visual: parsed as Record<string, unknown>,
+        citations: visualization.exaResults?.citations,
       };
+    }
+    
+    // Handle web search results directly
+    if ((parsed as any).citations && Array.isArray((parsed as any).citations)) {
+       return {
+         id,
+         title: 'Web Search Results',
+         summary: (parsed as any).summary || 'Found related articles',
+         citations: (parsed as any).citations,
+         structuredData: parsed as Record<string, unknown>,
+       }
     }
 
     // Check if this is structured research data
@@ -800,6 +1209,35 @@ function parseToolOutputForResult(
       };
     }
 
+    if ((parsed as { tool?: string }).tool === 'compare_sources_comprehensive') {
+      console.log('[CROSS-CHECK] Step 3: Parsing tool output in parseToolOutputForResult');
+      console.log('[CROSS-CHECK] Raw parsed data:', JSON.stringify(parsed, null, 2));
+      console.log('[CROSS-CHECK] Parsed comparison data structure:', {
+        hasUserContextComparison: !!(parsed as any).userContextComparison,
+        userContextComparisonLength: Array.isArray((parsed as any).userContextComparison) 
+          ? (parsed as any).userContextComparison.length 
+          : 0,
+        hasSearchVsResearchComparison: !!(parsed as any).searchVsResearchComparison,
+        searchVsResearchComparisonLength: Array.isArray((parsed as any).searchVsResearchComparison) 
+          ? (parsed as any).searchVsResearchComparison.length 
+          : 0,
+        hasUserSourceContent: !!(parsed as any).userSourceContent,
+        hasWebSearchSummary: !!(parsed as any).webSearchSummary,
+        hasDeepResearchSummary: !!(parsed as any).deepResearchSummary,
+      });
+      
+      const result = {
+        id,
+        title: 'Source Comparison',
+        summary: 'Comprehensive comparison of sources',
+        comparisonData: parsed,
+      };
+      
+      console.log('[CROSS-CHECK] Step 4: Created result object:', JSON.stringify(result, null, 2));
+      
+      return result;
+    }
+    
     if ((parsed as { tool?: string }).tool === 'compare_user_source_to_external') {
       return {
         id,
@@ -1000,40 +1438,58 @@ function createMockInvestigationData(query: string): any[] {
             overallConfidence: 0.82,
           }),
         },
-        ...(hasPersonalSource && personalSourceText ? [{
-          type: 'tool-compare_user_source_to_external',
+        {
+          type: 'tool-compare_sources_comprehensive',
           toolCallId: `mock-tool-compare-${timestamp}`,
           state: 'output-available',
           input: { 
-            userSourceContent: personalSourceText,
-            externalSourcesSummary: 'External sources confirm the main claims but provide additional context about market conditions and investor sentiment.',
+            userSourceContent: personalSourceText || undefined,
+            webSearchSummary: 'External sources confirm the main claims but provide additional context about market conditions and investor sentiment.',
+            deepResearchSummary: 'Deep research verifies the $2.3B funding and valuation figures, with specific details on lead investors (Andreessen Horowitz) and strategic implications for the AI market.',
           },
           output: JSON.stringify({
-            tool: 'compare_user_source_to_external',
-            userSourceContent: personalSourceText,
-            externalSourcesSummary: 'External sources confirm the main claims but provide additional context about market conditions and investor sentiment.',
-            comparisonPoints: [
-              { 
-                category: 'Factual Consistency', 
-                userSource: 'Claims funding round occurred', 
-                externalSource: 'Multiple sources confirm $2.3B funding round', 
-                match: true 
-              },
-              { 
-                category: 'Tone', 
-                userSource: 'Emotional/Subjective perspective', 
-                externalSource: 'Objective/Factual reporting', 
-                match: false 
-              },
-              { 
-                category: 'Context', 
-                userSource: 'Focuses on immediate impact', 
-                externalSource: 'Includes market analysis and historical context', 
-                match: false 
-              },
-            ],
+            tool: 'compare_sources_comprehensive',
+            userSourceContent: personalSourceText || undefined,
+            webSearchSummary: 'External sources confirm the main claims but provide additional context about market conditions and investor sentiment.',
+            deepResearchSummary: 'Deep research verifies the $2.3B funding and valuation figures, with specific details on lead investors (Andreessen Horowitz) and strategic implications for the AI market.',
+            comparisonData: {
+              userContextComparison: hasPersonalSource ? [
+                { 
+                  category: 'Factual Consistency', 
+                  userSource: 'Claims funding round occurred', 
+                  externalSource: 'Multiple sources confirm $2.3B funding round', 
+                  match: true 
+                },
+                { 
+                  category: 'Tone', 
+                  userSource: 'Emotional/Subjective perspective', 
+                  externalSource: 'Objective/Factual reporting', 
+                  match: false 
+                }
+              ] : [],
+              searchVsResearchComparison: [
+                {
+                  category: 'Valuation Details',
+                  searchSource: 'Mentions $29.3B valuation',
+                  researchSource: 'Confirms $29.3B post-money valuation',
+                  match: true
+                },
+                {
+                  category: 'Investor Specifics',
+                  searchSource: 'Mentions "major VC firms"',
+                  researchSource: 'Identifies Andreessen Horowitz, Jeff Dean, and others',
+                  match: true
+                },
+                {
+                  category: 'Market Impact',
+                  searchSource: 'General "revolutionizing" claims',
+                  researchSource: 'Specific analysis of code editor market share shifts',
+                  match: false
+                }
+              ]
+            }
           }),
-        }] : []),
+        },
         {
           type: 'tool-generate_visualization',
           toolCallId: `mock-tool-3-${timestamp}`,
@@ -1214,7 +1670,18 @@ function createMockInvestigationData(query: string): any[] {
         },
         {
           type: 'text',
-          text: 'Investigation complete. All analyses have been performed and results are available in the Evidence Board.',
+          text: `## Investigation Report: Cursor AI Funding
+
+### Executive Summary
+Cursor AI has successfully raised **$2.3 billion** in a Series A funding round, achieving a **$29.3 billion valuation**. This round was led by Andreessen Horowitz and other major investors, signaling strong market confidence in AI-assisted development tools.
+
+### Key Findings
+1. **Funding & Valuation**: The company secured $2.3B, valuing it at $29.3B. This is a significant milestone for an early-stage AI startup.
+2. **Market Impact**: The investment validates the shift towards AI-native coding environments. Competitors and legacy IDEs are expected to accelerate their AI integration.
+3. **Investor Sentiment**: Top-tier VCs are doubling down on developer productivity tools, betting that AI will fundamentally change software engineering.
+
+### Conclusion
+The massive valuation reflects the high growth potential of Cursor AI. However, the company will need to demonstrate sustained user adoption and revenue growth to justify this premium valuation in the long term.`,
         },
       ],
     },
