@@ -145,7 +145,7 @@ const CustomNode = ({ data, isConnectable }: { data: any, isConnectable: boolean
           </div>
           
           {credibility !== null && (
-            <div className={cn("flex items-center gap-1 text-[10px] font-medium", credibilityColor)} title={`Credibility Score: ${credibility}/10`}>
+            <div className={cn("flex items-center gap-1 text-[10px] font-medium", credibilityColor)} title={`Author Credibility Score: ${credibility}/10`}>
               {credibility >= 7 ? <ShieldCheck className={cn("size-3", credibilityIconColor)} /> : <ShieldAlert className={cn("size-3", credibilityIconColor)} />}
               {credibility}/10
             </div>
@@ -281,7 +281,7 @@ export function EvolutionGraph({ nodes: initialNodes, edges: initialEdges }: Evo
            </div>
            <div className="flex items-center gap-2">
               <ShieldCheck className="size-3 text-green-600 dark:text-green-400" />
-              <span className="text-muted-foreground">High Credibility</span>
+              <span className="text-muted-foreground">High Author Credibility</span>
            </div>
         </div>
       </CardContent>

@@ -17,16 +17,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          title="Total Investigations"
-          value="128"
-          trend="+12%"
-          trendUp={true}
-          icon={SearchIcon}
-        />
-        <StatCard
-          title="Avg. Credibility Score"
+          title="Avg. Author Credibility Score"
           value="87%"
           trend="+2.4%"
           trendUp={true}
@@ -77,9 +70,9 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Source Credibility</CardTitle>
+            <CardTitle>Author Credibility</CardTitle>
             <CardDescription>
-              Top analyzed domains by credibility score.
+              Top analyzed domains by author credibility score.
             </CardDescription>
           </CardHeader>
           <CardContent>

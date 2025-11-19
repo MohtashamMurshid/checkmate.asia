@@ -14,9 +14,9 @@ export function CredibilityBadge({ score, username, platform }: { score: number;
   };
 
   const getLabel = (s: number) => {
-    if (s >= 8) return 'High Credibility';
-    if (s >= 5) return 'Medium Credibility';
-    return 'Low Credibility';
+    if (s >= 8) return 'High Author Credibility';
+    if (s >= 5) return 'Medium Author Credibility';
+    return 'Low Author Credibility';
   };
 
   return (
@@ -100,8 +100,8 @@ export function SourceComparison({
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <Info className="size-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No comparison data available yet.</p>
-            <p className="text-xs mt-1">Waiting for cross-check analysis to complete...</p>
+            <p className="text-sm">Cross-checking sources...</p>
+            <p className="text-xs mt-1">Comparing your content with verified information from the web.</p>
           </div>
         </CardContent>
       </Card>
@@ -119,14 +119,14 @@ export function SourceComparison({
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b pb-2">
               <Badge variant="outline">Context Check</Badge>
-              <h3 className="text-sm font-semibold">User Context vs. Web Search</h3>
+              <h3 className="text-sm font-semibold">Your Source vs. Web Search Results</h3>
             </div>
             
             {(userSourceContent || webSearchSummary) && (
               <div className="grid md:grid-cols-2 gap-4">
                 {userSourceContent && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">User Personal Source</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Your Source Content</h4>
                     <div className="p-3 bg-muted/30 rounded-md text-sm border min-h-[100px] max-h-[200px] overflow-y-auto">
                       {userSourceContent}
                     </div>
@@ -134,7 +134,7 @@ export function SourceComparison({
                 )}
                 {webSearchSummary && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Web Search Findings</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">What We Found Online</h4>
                     <div className="p-3 bg-muted/30 rounded-md text-sm border min-h-[100px] max-h-[200px] overflow-y-auto">
                       {webSearchSummary}
                     </div>
@@ -146,7 +146,7 @@ export function SourceComparison({
             {userContextComparison && userContextComparison.length > 0 && (
               <div className="space-y-3">
                 {userContextComparison.map((point, idx) => (
-                  <ComparisonRow key={idx} point={point} leftLabel="User" rightLabel="Search" leftKey="userSource" rightKey="externalSource" />
+                  <ComparisonRow key={idx} point={point} leftLabel="Your Source" rightLabel="Web Search" leftKey="userSource" rightKey="externalSource" />
                 ))}
               </div>
             )}
@@ -154,7 +154,7 @@ export function SourceComparison({
             {(!userContextComparison || userContextComparison.length === 0) && (
               <div className="text-sm text-muted-foreground text-center py-4">
                 <Info className="size-4 mx-auto mb-1 opacity-50" />
-                <p>No comparison points generated yet.</p>
+                <p>Comparing your source with web search results...</p>
               </div>
             )}
           </div>
@@ -165,14 +165,14 @@ export function SourceComparison({
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b pb-2">
               <Badge variant="outline">Fact Check</Badge>
-              <h3 className="text-sm font-semibold">Initial Search vs. Deep Research</h3>
+              <h3 className="text-sm font-semibold">Quick Search vs. Deep Research</h3>
             </div>
 
             {(webSearchSummary || deepResearchSummary) && (
               <div className="grid md:grid-cols-2 gap-4">
                 {webSearchSummary && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Initial News Search</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Quick Search Results</h4>
                     <div className="p-3 bg-muted/30 rounded-md text-sm border min-h-[100px] max-h-[200px] overflow-y-auto">
                       {webSearchSummary}
                     </div>
@@ -180,7 +180,7 @@ export function SourceComparison({
                 )}
                 {deepResearchSummary && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Deep Research & Facts</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Verified Facts & Analysis</h4>
                     <div className="p-3 bg-muted/30 rounded-md text-sm border min-h-[100px] max-h-[200px] overflow-y-auto">
                       {deepResearchSummary}
                     </div>
@@ -188,9 +188,9 @@ export function SourceComparison({
                 )}
                 {!deepResearchSummary && (
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Deep Research & Facts</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Verified Facts & Analysis</h4>
                     <div className="p-3 bg-muted/30 rounded-md text-sm border min-h-[100px] max-h-[200px] overflow-y-auto text-muted-foreground">
-                      No deep research summary available.
+                      Deep research analysis in progress...
                     </div>
                   </div>
                 )}
@@ -200,13 +200,13 @@ export function SourceComparison({
             {searchVsResearchComparison && searchVsResearchComparison.length > 0 ? (
               <div className="space-y-3">
                 {searchVsResearchComparison.map((point, idx) => (
-                  <ComparisonRow key={idx} point={point} leftLabel="Search" rightLabel="Research" leftKey="searchSource" rightKey="researchSource" />
+                  <ComparisonRow key={idx} point={point} leftLabel="Quick Search" rightLabel="Deep Research" leftKey="searchSource" rightKey="researchSource" />
                 ))}
               </div>
             ) : (
               <div className="text-sm text-muted-foreground text-center py-4">
                 <Info className="size-4 mx-auto mb-1 opacity-50" />
-                <p>No comparison points generated yet.</p>
+                <p>Comparing quick search with deep research findings...</p>
               </div>
             )}
           </div>

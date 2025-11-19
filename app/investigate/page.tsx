@@ -487,7 +487,7 @@ function InvestigatePageContent() {
                            <div className="space-y-4">
                               <div>
                                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                                    Extracted Source
+                                    Source Content
                                     <Badge variant="outline" className="text-xs">
                                        {extractedSourceContent.sourceType}
                                     </Badge>
@@ -511,7 +511,7 @@ function InvestigatePageContent() {
                               </div>
                               {personalSource && (
                                  <div>
-                                    <h4 className="text-sm font-medium mb-2">User Context Provided</h4>
+                                    <h4 className="text-sm font-medium mb-2">Your Source Content</h4>
                                     <div className="bg-blue-50/50 p-3 rounded-md text-sm border-l-2 border-blue-500">
                                        {personalSource}
                                     </div>
@@ -521,14 +521,14 @@ function InvestigatePageContent() {
                         ) : (
                            <>
                               <div className="mb-4">
-                                 <h4 className="text-sm font-medium mb-2">Primary Query / Source</h4>
+                                 <h4 className="text-sm font-medium mb-2">Your Investigation Query</h4>
                                  <div className="bg-muted/30 p-3 rounded-md text-sm">
                                     {cleanUserQuery}
                                  </div>
                               </div>
                               {personalSource && (
                                  <div>
-                                    <h4 className="text-sm font-medium mb-2">User Context Provided</h4>
+                                    <h4 className="text-sm font-medium mb-2">Your Source Content</h4>
                                     <div className="bg-blue-50/50 p-3 rounded-md text-sm border-l-2 border-blue-500">
                                        {personalSource}
                                     </div>
@@ -586,7 +586,7 @@ function InvestigatePageContent() {
                         );
                      })()
                   ) : (
-                     <EmptySection text="Waiting for source comparison..." />
+                     <EmptySection text="Comparing your source with web search results..." />
                   )}
                </section>
 
@@ -603,7 +603,7 @@ function InvestigatePageContent() {
                         </CardContent>
                      </Card>
                   ) : (
-                     <EmptySection text="Analyzing sentiment and bias..." />
+                     <EmptySection text="Analyzing content sentiment and political bias..." />
                   )}
                </section>
 
@@ -620,7 +620,7 @@ function InvestigatePageContent() {
                         </div>
                      </Card>
                   ) : (
-                     <EmptySection text="Building timeline..." />
+                     <EmptySection text="Building event timeline and relationships..." />
                   )}
                </section>
 
@@ -639,7 +639,7 @@ function InvestigatePageContent() {
                         </CardContent>
                      </Card>
                   ) : (
-                     <EmptySection text="Drafting report..." />
+                     <EmptySection text="Generating comprehensive investigation report..." />
                   )}
                </section>
 
@@ -652,7 +652,7 @@ function InvestigatePageContent() {
                   {allCitations.length > 0 ? (
                      <CitationsBoard citations={allCitations} />
                   ) : (
-                     <EmptySection text="Collecting sources..." />
+                     <EmptySection text="Gathering source citations and references..." />
                   )}
                </section>
 
@@ -1250,8 +1250,8 @@ function parseToolOutputForResult(
     if ((parsed as { tool?: string }).tool === 'evaluate_source_credibility') {
       return {
         id,
-        title: 'Credibility Assessment',
-        summary: `Credibility score for ${(parsed as any).username}`,
+        title: 'Author Credibility Assessment',
+        summary: `Author credibility score for ${(parsed as any).username}`,
         credibilityData: parsed,
       };
     }

@@ -50,7 +50,7 @@ const MetricsCard = ({
           </div>
         </div>
         <div className="mt-4 text-xs text-muted-foreground">
-          Click to view detailed metrics and source credibility
+          Click to view detailed metrics and author credibility
         </div>
       </CardContent>
     </Card>
@@ -81,7 +81,7 @@ const ConsistencyCard = ({
 
         <div className="space-y-1 mb-4">
           <div className="flex justify-between text-xs font-medium mb-1">
-            <span>Pattern Match</span>
+            <span>Info Consistency</span>
             <span className="text-blue-600">{Math.round(matchScore * 100)}%</span>
           </div>
           <Progress value={matchScore * 100} className="h-1.5 bg-blue-100 text-blue-600" />
