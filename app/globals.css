@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -187,4 +186,28 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+}
+
+/* ReactFlow Theme Support */
+.react-flow-theme {
+  --react-flow-background: hsl(var(--background));
+  --react-flow-foreground: hsl(var(--foreground));
+  --react-flow-border: hsl(var(--border));
+  --react-flow-muted: hsl(var(--muted-foreground));
+}
+
+.react-flow-theme .react-flow__controls button {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.react-flow-theme .react-flow__controls button:hover {
+  background-color: hsl(var(--muted));
+}
+
+.react-flow-theme .react-flow__attribution {
+  background-color: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
 }

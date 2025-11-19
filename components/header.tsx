@@ -2,8 +2,9 @@
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
+import Link from "next/link";
 
 interface NavItem {
   label: string;
@@ -20,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
 export function Header() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
+  const router = useRouter();
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
@@ -59,6 +61,19 @@ export function Header() {
 
             {/* Actions */}
             <div className="flex items-center gap-1.5">
+              {pathname === '/investigate' && (
+                <div className="hidden md:flex items-center gap-1.5 mr-2">
+                  <Link href="/investigate">
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      className="h-9 px-4"
+                    >
+                      Investigate
+                    </Button>
+                  </Link>
+                </div>
+              )}
               <Button variant="ghost" size="icon-sm" className="cursor-pointer" aria-label="Toggle theme" onClick={toggleTheme}>
                 <Sun className="hidden dark:block" />
                 <Moon className="block dark:hidden" />

@@ -1,7 +1,13 @@
-import type { NextConfig } from "next";
+import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Externalize packages that use native Node.js modules
+  // This works for both webpack and Turbopack
+  serverExternalPackages: [
+    'canvas',
+    'jsdom',
+    '@tobyg74/tiktok-api-dl',
+  ],
 };
 
 export default nextConfig;
