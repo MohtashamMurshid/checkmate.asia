@@ -91,6 +91,14 @@ function InvestigatePageContent() {
   const [personalSource, setPersonalSource] = useState('');
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   const [lastSavedTimestamp, setLastSavedTimestamp] = useState<number>(0);
+  const [previewMetadata, setPreviewMetadata] = useState<{
+    type: 'twitter' | 'tiktok' | null;
+    url: string;
+    content: string;
+    metadata: Record<string, any>;
+  } | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const fetchedUrlRef = useRef<string | null>(null);
 
   const saveInvestigation = useMutation(api.investigations.save);
 
@@ -247,10 +255,115 @@ function InvestigatePageContent() {
 
   const isInvestigating = mockMode ? false : status === 'streaming';
 
+  // Extract URL from user input and fetch preview metadata (only once per URL)
+  // Use useMemo to extract URL once, then useEffect to fetch only when URL changes
+  const extractedUrl = useMemo(() => {
+    // Skip if we have personalSource (it's text, not a URL)
+    if (personalSource.trim()) {
+      return null;
+    }
+
+    // Extract URL from first user message only
+    const firstUserMessage = activeMessages.find(m => m.role === 'user');
+    if (!firstUserMessage) {
+      return null;
+    }
+
+    const userText = firstUserMessage.parts?.find((p: any) => p.type === 'text')?.text || 
+                     (typeof firstUserMessage.content === 'string' ? firstUserMessage.content : '');
+    
+    if (!userText || userText.includes('Personal Source Context:')) {
+      return null;
+    }
+
+    // Extract clean query
+    const cleanQuery = userText.split('Investigation Query:')[1]?.trim() || userText;
+    
+    // Check if it's a URL (Twitter or TikTok)
+    const urlPattern = /(https?:\/\/[^\s]+)/;
+    const urlMatch = cleanQuery.match(urlPattern);
+    
+    if (urlMatch) {
+      const url = urlMatch[1];
+      // Check if it's Twitter or TikTok
+      if (url.includes('twitter.com') || url.includes('x.com') || url.includes('tiktok.com')) {
+        return url;
+      }
+    }
+    
+    return null;
+  }, [
+    // Only recompute when first user message changes (by ID) or personalSource changes
+    activeMessages.find(m => m.role === 'user')?.id,
+    personalSource
+  ]);
+
+  // Fetch preview metadata only when extractedUrl changes
+  useEffect(() => {
+    // Skip if we've already fetched metadata for this URL
+    if (extractedUrl === fetchedUrlRef.current) {
+      return;
+    }
+
+    // Clear metadata if no URL
+    if (!extractedUrl) {
+      if (fetchedUrlRef.current !== null) {
+        fetchedUrlRef.current = null;
+        setPreviewMetadata(null);
+      }
+      return;
+    }
+
+    // Fetch metadata for new URL
+    const fetchPreviewMetadata = async () => {
+      fetchedUrlRef.current = extractedUrl;
+      setIsLoadingPreview(true);
+      try {
+        const response = await fetch('/api/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: extractedUrl }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.error) {
+            console.error('Preview API error:', data.error);
+            setPreviewMetadata(null);
+            fetchedUrlRef.current = null;
+          } else {
+            setPreviewMetadata(data);
+          }
+        } else {
+          setPreviewMetadata(null);
+          fetchedUrlRef.current = null;
+        }
+      } catch (error) {
+        console.error('Failed to fetch preview metadata:', error);
+        setPreviewMetadata(null);
+        fetchedUrlRef.current = null;
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    };
+
+    fetchPreviewMetadata();
+  }, [extractedUrl]); // Only depend on extractedUrl
+
   // Extract extracted content from server (for Source & Preview)
   // The content is included in the system prompt, so we need to extract it from the first message
   // For now, we'll extract it from the user's input by detecting if it's a URL or use personalSource
   const extractedSourceContent = useMemo(() => {
+    // If we have preview metadata, use that
+    if (previewMetadata) {
+      return {
+        content: previewMetadata.content,
+        sourceType: previewMetadata.type || 'text',
+        metadata: previewMetadata.metadata,
+        url: previewMetadata.url,
+      };
+    }
+
     // If we have personalSource, use that as the extracted content
     if (personalSource.trim()) {
       return {
@@ -276,7 +389,7 @@ function InvestigatePageContent() {
       }
     }
     return null;
-  }, [activeMessages, personalSource]);
+  }, [activeMessages, personalSource, previewMetadata]);
 
   // Extract text report from the latest assistant message (must be before early return)
   // Look for the most comprehensive text response that explains all findings
@@ -482,8 +595,12 @@ function InvestigatePageContent() {
                   </h3>
                   <Card>
                      <CardContent className="p-4">
-                        {/* Show extracted source content if available */}
-                        {extractedSourceContent ? (
+                        {isLoadingPreview ? (
+                           <div className="flex items-center gap-3 py-4">
+                              <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">Loading source metadata...</span>
+                           </div>
+                        ) : extractedSourceContent ? (
                            <div className="space-y-4">
                               <div>
                                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -495,17 +612,132 @@ function InvestigatePageContent() {
                                  <div className="bg-muted/30 p-3 rounded-md text-sm whitespace-pre-wrap max-h-[300px] overflow-y-auto">
                                     {extractedSourceContent.content}
                                  </div>
+                                 
+                                 {/* Full Metadata Display */}
                                  {extractedSourceContent.metadata && Object.keys(extractedSourceContent.metadata).length > 0 && (
-                                    <div className="mt-2 text-xs text-muted-foreground">
-                                       {(extractedSourceContent.metadata as any).url && (
-                                          <a href={(extractedSourceContent.metadata as any).url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
-                                             <LinkIcon className="size-3" />
-                                             {(extractedSourceContent.metadata as any).url}
-                                          </a>
-                                       )}
-                                       {(extractedSourceContent.metadata as any).title && (
-                                          <div className="mt-1 font-medium">{(extractedSourceContent.metadata as any).title}</div>
-                                       )}
+                                    <div className="mt-4 space-y-3">
+                                       <h5 className="text-xs font-semibold text-muted-foreground uppercase">Full Metadata</h5>
+                                       <div className="bg-muted/20 p-4 rounded-md border space-y-2">
+                                          {/* URL */}
+                                          {(extractedSourceContent as any).url && (
+                                             <div className="flex items-start gap-2">
+                                                <span className="text-xs font-medium text-muted-foreground min-w-[80px]">URL:</span>
+                                                <a 
+                                                   href={(extractedSourceContent as any).url} 
+                                                   target="_blank" 
+                                                   rel="noopener noreferrer" 
+                                                   className="text-xs text-blue-500 hover:underline flex items-center gap-1 break-all"
+                                                >
+                                                   <LinkIcon className="size-3 shrink-0" />
+                                                   {(extractedSourceContent as any).url}
+                                                </a>
+                                             </div>
+                                          )}
+                                          
+                                          {/* Twitter Metadata */}
+                                          {extractedSourceContent.sourceType === 'twitter' && (() => {
+                                             const meta = extractedSourceContent.metadata as Record<string, any>;
+                                             return (
+                                                <>
+                                                   {meta.username && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Username:</span>
+                                                         <span className="text-xs">@{meta.username}</span>
+                                                      </div>
+                                                   )}
+                                                   {meta.author && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Author:</span>
+                                                         <span className="text-xs">{meta.author}</span>
+                                                      </div>
+                                                   )}
+                                                   {typeof meta.likes === 'number' && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Likes:</span>
+                                                         <span className="text-xs">{meta.likes.toLocaleString()}</span>
+                                                      </div>
+                                                   )}
+                                                   {typeof meta.retweets === 'number' && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Retweets:</span>
+                                                         <span className="text-xs">{meta.retweets.toLocaleString()}</span>
+                                                      </div>
+                                                   )}
+                                                   {typeof meta.replies === 'number' && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Replies:</span>
+                                                         <span className="text-xs">{meta.replies.toLocaleString()}</span>
+                                                      </div>
+                                                   )}
+                                                   {meta.createdAt && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Created:</span>
+                                                         <span className="text-xs">{new Date(meta.createdAt).toLocaleString()}</span>
+                                                      </div>
+                                                   )}
+                                                </>
+                                             );
+                                          })()}
+                                          
+                                          {/* TikTok Metadata */}
+                                          {extractedSourceContent.sourceType === 'tiktok' && (() => {
+                                             const meta = extractedSourceContent.metadata as Record<string, any>;
+                                             return (
+                                                <>
+                                                   {meta.author && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Author:</span>
+                                                         <span className="text-xs">{meta.author}</span>
+                                                      </div>
+                                                   )}
+                                                   {meta.description && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Description:</span>
+                                                         <span className="text-xs">{meta.description}</span>
+                                                      </div>
+                                                   )}
+                                                   {typeof meta.likes === 'number' && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Likes:</span>
+                                                         <span className="text-xs">{meta.likes.toLocaleString()}</span>
+                                                      </div>
+                                                   )}
+                                                   {meta.duration && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Duration:</span>
+                                                         <span className="text-xs">{Math.round(meta.duration)}s</span>
+                                                      </div>
+                                                   )}
+                                                   {meta.videoUrl && (
+                                                      <div className="flex items-start gap-2">
+                                                         <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Video URL:</span>
+                                                         <a 
+                                                            href={meta.videoUrl} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer" 
+                                                            className="text-xs text-blue-500 hover:underline flex items-center gap-1 break-all"
+                                                         >
+                                                            <LinkIcon className="size-3 shrink-0" />
+                                                            {meta.videoUrl}
+                                                         </a>
+                                                      </div>
+                                                   )}
+                                                </>
+                                             );
+                                          })()}
+                                          
+                                          {/* Raw JSON for any other metadata */}
+                                          {extractedSourceContent.sourceType !== 'twitter' && extractedSourceContent.sourceType !== 'tiktok' && (
+                                             <details className="mt-2">
+                                                <summary className="text-xs font-medium text-muted-foreground cursor-pointer hover:text-foreground">
+                                                   View Raw Metadata
+                                                </summary>
+                                                <pre className="mt-2 text-[10px] bg-background p-2 rounded border overflow-auto max-h-[200px]">
+                                                   {JSON.stringify(extractedSourceContent.metadata, null, 2)}
+                                                </pre>
+                                             </details>
+                                          )}
+                                       </div>
                                     </div>
                                  )}
                               </div>
