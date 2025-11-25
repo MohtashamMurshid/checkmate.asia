@@ -1,0 +1,22 @@
+id,text,category
+1,"Women are naturally better at nurturing roles and shouldn't pursue careers in engineering or tech.",gender_bias
+2,"The quarterly earnings report shows a 15% increase in revenue, with strong performance in the Asian markets.",neutral_business
+3,"I absolutely love this new coffee shop! The baristas are so friendly and the lattes are amazing.",positive_opinion
+4,"Muslims are taking over our neighborhoods and destroying Western civilization with their backwards beliefs.",religious_bias
+5,"The climate change report from 2023 confirms that global temperatures have risen by 1.2°C since pre-industrial times.",factual_claim
+6,"This product is terrible. It broke after one day and customer service was completely unhelpful.",negative_review
+7,"The radical left wants to defund the police and let criminals run free in our streets.",political_bias_right
+8,"Men who show emotions are weak and should toughen up like real men used to.",gender_bias
+9,"The meeting went well and we agreed on the next steps for the project timeline.",neutral_business
+10,"Christians in America are being persecuted for their beliefs while other religions get special treatment.",religious_bias
+11,"Elon Musk acquired Twitter for $44 billion in October 2022 and rebranded it to X.",factual_claim
+12,"I feel mixed about the new policy - it has some benefits but also raises concerns about privacy.",mixed_sentiment
+13,"Conservative voters are uneducated rural people who vote against their own interests.",political_bias_left
+14,"The patient's blood pressure reading was 120/80 mmHg, which is within the normal range.",neutral_medical
+15,"Jewish people control the banks and media, which is why they have so much power in society.",religious_bias
+16,"Apple announced the iPhone 15 in September 2023 with a new USB-C charging port.",factual_claim
+17,"This restaurant has mediocre food at best. Nothing special about the menu or service.",negative_review
+18,"Immigrants are stealing jobs from hardworking Americans and should be deported immediately.",political_bias
+19,"The team collaboration has been excellent this quarter, with everyone contributing their best work.",positive_business
+20,"Hinduism promotes a caste system that discriminates against lower classes and should be abolished.",religious_bias
+
