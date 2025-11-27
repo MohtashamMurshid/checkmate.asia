@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { 
   BarChart3, 
   Upload, 
@@ -10,8 +10,14 @@ import {
   Scale,
   Heart,
   Search,
-  Zap
+  Zap,
+  History,
+  CheckCircle2,
+  Save
 } from 'lucide-react';
+import Link from 'next/link';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -70,6 +76,8 @@ export default function AnalyzePage() {
   const [results, setResults] = useState<RowResult[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Analysis options
   const [options, setOptions] = useState({
@@ -77,6 +85,38 @@ export default function AnalyzePage() {
     checkSentiment: true,
     checkFacts: true,
   });
+
+  // Convex mutation for saving results
+  const saveAnalysis = useMutation(api.datasetAnalyses.save);
+
+  // Auto-save when analysis completes
+  useEffect(() => {
+    const saveResults = async () => {
+      if (appState === 'results' && stats && parsedData && !isSaved && !isSaving) {
+        setIsSaving(true);
+        try {
+          await saveAnalysis({
+            fileName: parsedData.fileName,
+            fileType: parsedData.fileType,
+            rowCount: results.length,
+            textColumn: selectedColumn,
+            options,
+            results,
+            stats,
+            timestamp: Date.now(),
+          });
+          setIsSaved(true);
+          console.log('Analysis saved successfully');
+        } catch (error) {
+          console.error('Failed to save analysis:', error);
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    };
+    
+    saveResults();
+  }, [appState, stats, parsedData, results, selectedColumn, options, isSaved, isSaving, saveAnalysis]);
 
   const handleDataParsed = useCallback((data: ParsedData) => {
     setParsedData(data);
@@ -159,26 +199,28 @@ export default function AnalyzePage() {
     setResults([]);
     setStats(null);
     setProgress({ completed: 0, total: 0 });
+    setIsSaved(false);
   }, []);
 
   const handleNewAnalysis = useCallback(() => {
     setResults([]);
     setStats(null);
+    setIsSaved(false);
     setAppState('preview');
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
+      <div className="flex items-center justify-between pb-4 border-b">
+        <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg">
+            <div className="p-2.5 rounded-xl bg-primary text-primary-foreground shadow-sm">
               <BarChart3 className="size-6" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight">Dataset Analysis</h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Analyze your dataset for bias, sentiment, and factual accuracy using AI agents
           </p>
         </div>
@@ -192,7 +234,7 @@ export default function AnalyzePage() {
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center gap-2 px-4">
+      <div className="flex items-center gap-2 px-2">
         {['Upload', 'Preview', 'Analyze', 'Results'].map((step, i) => {
           const stepState = ['upload', 'preview', 'analyzing', 'results'][i];
           const isActive = appState === stepState;
@@ -202,20 +244,20 @@ export default function AnalyzePage() {
             <div key={step} className="flex items-center gap-2">
               {i > 0 && (
                 <div className={cn(
-                  'h-0.5 w-8 md:w-16 rounded',
-                  isPast ? 'bg-primary' : 'bg-muted'
+                  'h-0.5 w-8 md:w-16 rounded-full',
+                  isPast ? 'bg-primary' : 'bg-border'
                 )} />
               )}
               <div className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
-                isActive && 'bg-primary text-primary-foreground',
-                isPast && !isActive && 'bg-primary/20 text-primary',
+                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                isActive && 'bg-primary text-primary-foreground shadow-sm',
+                isPast && !isActive && 'bg-primary/10 text-primary border border-primary/20',
                 !isActive && !isPast && 'bg-muted text-muted-foreground'
               )}>
                 <span className={cn(
-                  'size-5 rounded-full flex items-center justify-center text-xs',
+                  'size-5 rounded-md flex items-center justify-center text-xs font-semibold',
                   isActive && 'bg-primary-foreground/20',
-                  isPast && !isActive && 'bg-primary/30',
+                  isPast && !isActive && 'bg-primary/20',
                   !isActive && !isPast && 'bg-muted-foreground/20'
                 )}>
                   {i + 1}
@@ -259,10 +301,10 @@ export default function AnalyzePage() {
       {appState === 'preview' && parsedData && (
         <div className="space-y-6">
           {/* Analysis Options */}
-          <Card>
-            <CardContent className="p-4">
+          <Card className="border">
+            <CardContent className="p-5">
               <div className="flex flex-wrap items-center gap-6">
-                <span className="text-sm font-medium">Analysis Options:</span>
+                <span className="text-sm font-semibold text-foreground">Analysis Options:</span>
                 <OptionToggle
                   icon={Scale}
                   label="Bias Detection"
@@ -308,16 +350,42 @@ export default function AnalyzePage() {
 
       {appState === 'results' && stats && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="size-5 text-primary" />
-              <span className="font-medium">Analysis Complete</span>
-              <Badge variant="secondary">{results.length} rows processed</Badge>
+          <div className="flex items-center justify-between pb-4 border-b">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <Sparkles className="size-5 text-green-600 dark:text-green-500" />
+              </div>
+              <div>
+                <span className="font-semibold text-base">Analysis Complete</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary" className="text-xs">{results.length} rows processed</Badge>
+                  {isSaving && (
+                    <Badge variant="outline" className="gap-1 animate-pulse text-xs">
+                      <Save className="size-3" />
+                      Saving...
+                    </Badge>
+                  )}
+                  {isSaved && (
+                    <Badge variant="default" className="gap-1 bg-green-600 text-xs">
+                      <CheckCircle2 className="size-3" />
+                      Saved
+                    </Badge>
+                  )}
+                </div>
+              </div>
             </div>
-            <Button variant="outline" onClick={handleNewAnalysis} className="gap-2">
-              <ArrowLeft className="size-4" />
-              Analyze Again
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link href="/analyze/history">
+                <Button variant="outline" className="gap-2" size="sm">
+                  <History className="size-4" />
+                  View History
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={handleNewAnalysis} className="gap-2" size="sm">
+                <ArrowLeft className="size-4" />
+                Analyze Again
+              </Button>
+            </div>
           </div>
           
           <ResultsDashboard results={results} stats={stats} />
@@ -339,19 +407,19 @@ function FeatureCard({
   color: 'amber' | 'pink' | 'blue';
 }) {
   const colorClasses = {
-    amber: 'bg-amber-500/10 text-amber-600',
-    pink: 'bg-pink-500/10 text-pink-600',
-    blue: 'bg-blue-500/10 text-blue-600',
+    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-500',
+    pink: 'bg-pink-500/10 text-pink-600 dark:text-pink-500',
+    blue: 'bg-blue-500/10 text-blue-600 dark:text-blue-500',
   };
 
   return (
-    <Card className="relative overflow-hidden">
-      <CardContent className="p-5">
-        <div className={cn('p-2 rounded-lg w-fit mb-3', colorClasses[color])}>
+    <Card className="border transition-all hover:shadow-md">
+      <CardContent className="p-6">
+        <div className={cn('p-2.5 rounded-lg w-fit mb-4', colorClasses[color])}>
           <Icon className="size-5" />
         </div>
-        <h3 className="font-semibold mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="font-semibold mb-2 text-base">{title}</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
       </CardContent>
     </Card>
   );
@@ -371,13 +439,13 @@ function OptionToggle({
   color: 'amber' | 'pink' | 'blue';
 }) {
   const colorClasses = {
-    amber: 'text-amber-600',
-    pink: 'text-pink-600',
-    blue: 'text-blue-600',
+    amber: 'text-amber-600 dark:text-amber-500',
+    pink: 'text-pink-600 dark:text-pink-500',
+    blue: 'text-blue-600 dark:text-blue-500',
   };
 
   return (
-    <label className="flex items-center gap-2 cursor-pointer select-none">
+    <label className="flex items-center gap-2.5 cursor-pointer select-none group">
       <input
         type="checkbox"
         checked={checked}
@@ -385,16 +453,16 @@ function OptionToggle({
         className="sr-only peer"
       />
       <div className={cn(
-        'w-9 h-5 rounded-full transition-colors relative',
+        'w-10 h-5 rounded-full transition-all relative shadow-inner',
         checked ? 'bg-primary' : 'bg-muted'
       )}>
         <div className={cn(
-          'absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform',
-          checked && 'translate-x-4'
+          'absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-all shadow-sm',
+          checked && 'translate-x-5'
         )} />
       </div>
-      <Icon className={cn('size-4', checked ? colorClasses[color] : 'text-muted-foreground')} />
-      <span className={cn('text-sm', checked ? 'text-foreground' : 'text-muted-foreground')}>
+      <Icon className={cn('size-4 transition-colors', checked ? colorClasses[color] : 'text-muted-foreground')} />
+      <span className={cn('text-sm font-medium transition-colors', checked ? 'text-foreground' : 'text-muted-foreground')}>
         {label}
       </span>
     </label>

@@ -6,11 +6,11 @@ import type { AIConfig } from './types';
  * Modify this file to change models, prompts, or settings across the entire application
  */
 export const AI_CONFIG: AIConfig = {
-  defaultModel: 'google/gemini-2.5-pro',
+  defaultModel: 'google/gemini-2.5-flash',
   availableModels: [
     {
       name: 'Gemini 2.5 Flash',
-      value: 'google/gemini-2.5-pro',
+      value: 'google/gemini-2.5-flash',
     },
   ],
   maxDuration: 60, // seconds

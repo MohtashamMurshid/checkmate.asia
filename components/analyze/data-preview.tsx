@@ -54,11 +54,11 @@ export function DataPreview({
   }).length;
 
   return (
-    <Card className={className}>
+    <Card className={cn('border', className)}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
               <FileText className="size-5 text-primary" />
             </div>
             <div>
@@ -99,7 +99,7 @@ export function DataPreview({
       <CardContent className="space-y-4">
         {/* Column warning */}
         {emptyRowCount > 0 && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-sm">
             <AlertTriangle className="size-4 shrink-0" />
             <span>
               {emptyRowCount} row{emptyRowCount > 1 ? 's have' : ' has'} empty values in "{selectedColumn}" column.

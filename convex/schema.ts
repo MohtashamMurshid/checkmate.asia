@@ -16,5 +16,19 @@ export default defineSchema({
     graphData: v.optional(v.any()), // JSON object for graph
     timestamp: v.number(),
   }),
+  datasetAnalyses: defineTable({
+    fileName: v.string(),
+    fileType: v.string(), // 'csv' | 'jsonl'
+    rowCount: v.number(),
+    textColumn: v.string(),
+    options: v.object({
+      checkBias: v.boolean(),
+      checkSentiment: v.boolean(),
+      checkFacts: v.boolean(),
+    }),
+    results: v.any(), // Array of row results
+    stats: v.any(), // Aggregated statistics
+    timestamp: v.number(),
+  }),
 });
 

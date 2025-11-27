@@ -18,8 +18,8 @@ import { useState } from 'react';
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/analyze', icon: BarChart3, label: 'Dataset Analysis' },
+  { href: '/analyze/history', icon: History, label: 'Analysis History' },
   { href: '/investigate', icon: FileSearch, label: 'Investigate' },
-  { href: '/investigate/history', icon: History, label: 'History' },
 ];
 
 export default function AnalyzeLayout({
@@ -31,14 +31,14 @@ export default function AnalyzeLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-              <div className="p-1.5 rounded-lg bg-primary text-primary-foreground">
+            <Link href="/" className="flex items-center gap-2.5 font-bold text-xl hover:opacity-80 transition-opacity">
+              <div className="p-1.5 rounded-lg bg-primary text-primary-foreground shadow-sm">
                 <ShieldCheck className="size-5" />
               </div>
               <span>Checkmate</span>
@@ -55,10 +55,10 @@ export default function AnalyzeLayout({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
                       isActive 
-                        ? 'bg-primary/10 text-primary' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        ? 'bg-primary/10 text-primary border border-primary/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                     )}
                   >
                     <item.icon className="size-4" />
@@ -94,10 +94,10 @@ export default function AnalyzeLayout({
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
+                      'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all',
                       isActive 
-                        ? 'bg-primary/10 text-primary' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        ? 'bg-primary/10 text-primary border border-primary/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                     )}
                   >
                     <item.icon className="size-5" />
