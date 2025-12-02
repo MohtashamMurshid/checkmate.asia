@@ -9,6 +9,7 @@ export interface ModelOption {
 
 export interface AIConfig {
   defaultModel: string;
+  routerModel?: string; // Fast, cheap model for routing decisions
   availableModels: ModelOption[];
   maxDuration: number;
   systemPrompt: string;

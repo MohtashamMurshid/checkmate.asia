@@ -32,9 +32,21 @@ type AppState = 'upload' | 'preview' | 'analyzing' | 'results';
 interface RowResult {
   index: number;
   text: string;
+  hash?: string;
   bias?: any;
   sentiment?: any;
   factCheck?: any;
+  riskScore?: number;
+  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+  confidence?: number;
+  routingDecision?: {
+    intent: string;
+    confidence: number;
+    agentsNeeded: string[];
+    reasoning: string;
+  };
+  agentsRun?: string[];
+  fromCache?: boolean;
   error?: string;
 }
 
@@ -67,6 +79,36 @@ interface Stats {
     };
     avgConfidence: number;
   };
+  risk?: {
+    avgScore: number;
+    highRiskCount: number;
+    distribution: {
+      low: number;
+      medium: number;
+      high: number;
+      critical: number;
+    };
+  };
+}
+
+interface PipelineMetrics {
+  routerDecisions: {
+    factCheck: number;
+    biasCheck: number;
+    sentiment: number;
+    safe: number;
+  };
+  cacheHits: number;
+  cacheMisses: number;
+  avgRiskScore: number;
+  highRiskCount: number;
+  processingTimeMs: number;
+  costSavings: {
+    totalPossibleAgentCalls: number;
+    actualAgentCalls: number;
+    savedCalls: number;
+    savingsPercent: number;
+  };
 }
 
 export default function AnalyzePage() {
@@ -75,6 +117,7 @@ export default function AnalyzePage() {
   const [selectedColumn, setSelectedColumn] = useState<string>('');
   const [results, setResults] = useState<RowResult[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [metrics, setMetrics] = useState<PipelineMetrics | null>(null);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -104,6 +147,14 @@ export default function AnalyzePage() {
             results,
             stats,
             timestamp: Date.now(),
+            metrics: metrics ? {
+              routerDecisions: metrics.routerDecisions,
+              cacheHits: metrics.cacheHits,
+              cacheMisses: metrics.cacheMisses,
+              avgRiskScore: metrics.avgRiskScore,
+              highRiskCount: metrics.highRiskCount,
+              processingTimeMs: metrics.processingTimeMs,
+            } : undefined,
           });
           setIsSaved(true);
           console.log('Analysis saved successfully');
@@ -116,7 +167,7 @@ export default function AnalyzePage() {
     };
     
     saveResults();
-  }, [appState, stats, parsedData, results, selectedColumn, options, isSaved, isSaving, saveAnalysis]);
+  }, [appState, stats, parsedData, results, selectedColumn, options, isSaved, isSaving, saveAnalysis, metrics]);
 
   const handleDataParsed = useCallback((data: ParsedData) => {
     setParsedData(data);
@@ -177,6 +228,9 @@ export default function AnalyzePage() {
                 setProgress({ completed: data.completed, total: data.total });
               } else if (data.type === 'complete') {
                 setStats(data.stats);
+                if (data.metrics) {
+                  setMetrics(data.metrics);
+                }
                 setAppState('results');
               }
             } catch (e) {
@@ -198,6 +252,7 @@ export default function AnalyzePage() {
     setSelectedColumn('');
     setResults([]);
     setStats(null);
+    setMetrics(null);
     setProgress({ completed: 0, total: 0 });
     setIsSaved(false);
   }, []);
@@ -388,7 +443,7 @@ export default function AnalyzePage() {
             </div>
           </div>
           
-          <ResultsDashboard results={results} stats={stats} />
+          <ResultsDashboard results={results} stats={stats} metrics={metrics ?? undefined} />
         </div>
       )}
     </div>

@@ -7,10 +7,15 @@ import type { AIConfig } from './types';
  */
 export const AI_CONFIG: AIConfig = {
   defaultModel: 'google/gemini-2.5-flash',
+  routerModel: 'x-ai/grok-4.1-fast:free', // Fast, free model for routing decisions
   availableModels: [
     {
       name: 'Gemini 2.5 Flash',
       value: 'google/gemini-2.5-flash',
+    },
+    {
+      name: 'Grok 4.1 Fast (Free)',
+      value: 'x-ai/grok-4.1-fast:free',
     },
   ],
   maxDuration: 60, // seconds
@@ -100,6 +105,19 @@ export function getModelConfig(modelId?: string) {
     model,
     modelName: modelOption?.name || model,
     ...AI_CONFIG,
+  };
+}
+
+/**
+ * Get the router model configuration
+ * Uses a fast, cheap model for routing/triage decisions
+ */
+export function getRouterModelConfig() {
+  const model = AI_CONFIG.routerModel || 'x-ai/grok-4.1-fast:free';
+  const modelOption = AI_CONFIG.availableModels.find((m) => m.value === model);
+  return {
+    model,
+    modelName: modelOption?.name || 'Grok 4.1 Fast (Free)',
   };
 }
 
