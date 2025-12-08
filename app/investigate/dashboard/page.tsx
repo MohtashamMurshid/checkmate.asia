@@ -1,10 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, ShieldAlert, Scale, Clock, ExternalLink, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { TrendingUp, ShieldAlert, Scale, Clock, ExternalLink, ArrowUpRight, ArrowDownRight, Search as SearchIcon, ShieldCheck as ShieldCheckIcon, Scale as ScaleIcon, Globe as GlobeIcon } from "lucide-react";
+import { TextReviewPanel } from "@/components/ai-elements/text-review-panel";
+import { HighlightedTextView } from "@/components/ai-elements/highlighted-text-view";
+import { FactBiasSentimentSpan } from '@/lib/ai/tools/fact-bias-sentiment';
 
 export default function DashboardPage() {
+  const [analyzedText, setAnalyzedText] = useState('');
+  const [analyzedSpans, setAnalyzedSpans] = useState<FactBiasSentimentSpan[]>([]);
+
+  const handleAnalysisComplete = (text: string, spans: FactBiasSentimentSpan[]) => {
+    setAnalyzedText(text);
+    setAnalyzedSpans(spans);
+  };
+
   return (
     <div className="flex-1 space-y-6 p-6 md:p-8">
       <div className="flex items-center justify-between">
@@ -15,6 +27,27 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-2">
           <Badge variant="outline">Last 30 Days</Badge>
         </div>
+      </div>
+
+      <div className="grid gap-4 grid-cols-1">
+        <TextReviewPanel onAnalyzeComplete={handleAnalysisComplete} />
+        
+        {analyzedText && (
+          <Card className="w-full animate-in fade-in zoom-in-95 duration-300">
+            <CardHeader>
+              <CardTitle>Analysis Results</CardTitle>
+              <CardDescription>
+                Review facts, biases, and sentiment. Click on any highlighted text to verify it.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <HighlightedTextView 
+                text={analyzedText} 
+                spans={analyzedSpans} 
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -96,7 +129,7 @@ export default function DashboardPage() {
 }
 
 // Icons
-import { Search as SearchIcon, ShieldCheck as ShieldCheckIcon, Scale as ScaleIcon, Globe as GlobeIcon } from "lucide-react";
+// import { Search as SearchIcon, ShieldCheck as ShieldCheckIcon, Scale as ScaleIcon, Globe as GlobeIcon } from "lucide-react";
 
 function StatCard({ title, value, trend, trendUp, icon: Icon, description }: any) {
   return (
