@@ -111,11 +111,13 @@ function calculateFactCheckRisk(factCheck?: FactCheckResult): number {
       // Medium risk for unverified
       return 50;
     case 'mixed':
-      // Calculate based on findings
-      const falseClaims = factCheck.findings.filter(f => f.verdict === 'false').length;
-      const totalClaims = factCheck.findings.length;
-      if (totalClaims === 0) return 30;
-      return 30 + (falseClaims / totalClaims) * 70; // 30-100 based on false ratio
+      {
+        // Calculate based on findings
+        const falseClaims = factCheck.findings.filter(f => f.verdict === 'false').length;
+        const totalClaims = factCheck.findings.length;
+        if (totalClaims === 0) return 30;
+        return 30 + (falseClaims / totalClaims) * 70; // 30-100 based on false ratio
+      }
     default:
       return 30;
   }
