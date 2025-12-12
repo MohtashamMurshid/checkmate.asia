@@ -1,10 +1,10 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import {  ArrowRight, Sparkles } from "lucide-react";
+import { DottedSurface } from "@/components/dotted";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import localFont from "next/font/local";
-import { DottedSurface } from "@/components/dotted";
 
 const departureMono = localFont({ src: "../fonts/DepartureMono-Regular.woff2" });
 
@@ -15,7 +15,7 @@ export function LandingHero() {
   };
 
   return (
-    <section id="home" className="relative min-h-[calc(100vh-88px)] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Dotted Surface Background */}
       <DottedSurface className="absolute inset-0" />
       
@@ -26,45 +26,81 @@ export function LandingHero() {
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1.5 backdrop-blur-sm">
             <Sparkles className="h-4 w-4" />
             <span className="text-xs sm:text-sm text-muted-foreground">
-              New: Book a Demo
+              AI-powered information investigation
             </span>
           </div>
 
           {/* Headline */}
-          <h1 className={`max-w-3xl mx-auto text-5xl md:text-6xl font-semibold tracking-tight mb-2 `}>
-            Investigate Information in <span className="text-primary">
-                Seconds
-            </span>
+          <h1 className={`max-w-3xl mx-auto text-4xl md:text-5xl font-semibold tracking-tight mb-2 ${departureMono.className}`}>
+            Investigate Information in Seconds
 
           </h1>
           {/* Subheadline */}
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive AI-powered tools to investigate your information’s <span className="text-primary">
-                accuracy</span> and <span className="text-primary">
-                    bias</span> from credible sources.
+            Leverage ultra AI analysis and scalable APIs for real-time
+            misinformation detection. 
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            
-          
-            <Button variant="default" >
-            <Link href="/contact" className="flex items-center">
-              Book a Demo <ArrowRight className="ml-2 h-4 w-4" />
-               </Link>
+            <Button asChild size="sm" className="h-10 px-5 bg-foreground text-background hover:bg-foreground/90">
+              <Link href="/contact">
+               Book a Demo
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
+            <Button variant="outline" size="sm" onClick={scrollToFeatures} className="h-10 px-5 border-border/60 bg-transparent hover:bg-muted/50">
+              Features 
+            </Button>
+            
           </div>
 
+          {/* Floating demo card */}
+          <div className="relative mx-auto mt-12 w-full max-w-4xl">
+            <div className="rounded-xl border border-border/70 bg-background/60 p-5 text-left shadow-xl backdrop-blur-md">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Welcome to Checkmate — your truth companion.</p>
+                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground">
+                  Mohtasham
+                  <span className="relative inline-flex h-2 w-2 items-center justify-center">
+                    <span className="absolute inline-flex h-2 w-2 rounded-full bg-primary opacity-80" />
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                
+                <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-transparent hover:bg-muted/50" asChild>
+                  <Link href="/api">
+                    Enterprise API
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-transparent hover:bg-muted/50" asChild>
+                  <Link href="/analyze">
+                    Data Analysis
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-transparent hover:bg-muted/50" asChild>
+                  <Link href="/investigate">
+                   Investigation 
+                  </Link>
+                </Button>
+                <button aria-label="Play" className="ml-auto grid h-9 w-9 place-items-center rounded-full border border-border/60 bg-background hover:bg-muted/50">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-muted-foreground">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Sponsors strip */}
           <div className="mx-auto mt-14 w-full max-w-5xl border-t border-border/60 pt-8">
             <div className="flex justify-center gap-6 text-sm text-muted-foreground">
-              <div className="opacity-80">Due diligence
-
-</div>
-              <div className="opacity-80">Trace your data</div>
-              <div className="opacity-80">Political bias</div>
-              <div className="opacity-80">Data Compliance</div>
+              <div className="opacity-80">x.com</div>
+              <div className="opacity-80">tiktok</div>
+              <div className="opacity-80">web</div>
+              <div className="opacity-80">api</div>
+              <div className="opacity-80">mobile</div>
             </div>
           </div>
         </div>

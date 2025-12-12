@@ -113,7 +113,7 @@ IMPORTANT:
   });
 
   // Basic safety filter to avoid obviously invalid indices
-  const spans = (result.object.spans || []).filter((span) => {
+  const validSpans = (result.object.spans || []).filter((span) => {
     if (span.start < 0 || span.end <= span.start) return false;
     if (span.end > trimmed.length) return false;
 
@@ -122,7 +122,26 @@ IMPORTANT:
     return !!slice.trim();
   });
 
-  return spans.map((span) => ({
+  // Deduplicate and remove overlapping spans
+  // Strategy: Sort by start index, then keep spans that don't overlap with the previous one.
+  // If overlaps exist, keep the one that starts earlier, or if equal start, the longer one.
+  const sortedSpans = validSpans.sort((a, b) => {
+    if (a.start !== b.start) return a.start - b.start;
+    return b.end - a.end; // Longer spans first if start is same
+  });
+
+  const uniqueSpans: FactBiasSentimentSpan[] = [];
+  let lastEnd = -1;
+
+  for (const span of sortedSpans) {
+    if (span.start >= lastEnd) {
+      uniqueSpans.push(span);
+      lastEnd = span.end;
+    }
+    // If overlapping, we skip the later one (simple greedy approach)
+  }
+
+  return uniqueSpans.map((span) => ({
     ...span,
     text: trimmed.slice(span.start, span.end),
   }));
