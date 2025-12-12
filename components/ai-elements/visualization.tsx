@@ -82,9 +82,9 @@ const ConsistencyCard = ({
         <div className="space-y-1 mb-4">
           <div className="flex justify-between text-xs font-medium mb-1">
             <span>Info Consistency</span>
-            <span className="text-blue-600">{Math.round(matchScore * 100)}%</span>
+            <span className="text-primary">{Math.round(matchScore * 100)}%</span>
           </div>
-          <Progress value={matchScore * 100} className="h-1.5 bg-blue-100 text-blue-600" />
+          <Progress value={matchScore * 100} className="h-1.5 bg-primary/10 text-primary" />
         </div>
 
         <div className="space-y-2">
@@ -96,7 +96,7 @@ const ConsistencyCard = ({
           <div className="space-y-1.5">
             {['positive', 'negative', 'neutral', 'mixed'].map((type) => {
               const val = breakdown[type] || 0;
-              const color = type === 'positive' ? 'bg-green-500' : type === 'negative' ? 'bg-red-500' : type === 'mixed' ? 'bg-yellow-500' : 'bg-gray-500';
+              const color = type === 'positive' ? 'bg-chart-2' : type === 'negative' ? 'bg-destructive' : type === 'mixed' ? 'bg-chart-3' : 'bg-muted';
               return (
                 <div key={type} className="grid grid-cols-[80px_1fr_40px] items-center gap-2 text-xs">
                   <span className="capitalize text-muted-foreground">{type}</span>
@@ -157,9 +157,9 @@ const BiasMeterCard = ({ political }: { political: any }) => {
   };
 
   const getColor = (l: string) => {
-    if (l === 'left') return 'text-blue-600';
-    if (l === 'right') return 'text-red-600';
-    return 'text-gray-600';
+    if (l === 'left') return 'text-primary';
+    if (l === 'right') return 'text-destructive';
+    return 'text-muted-foreground';
   };
 
   return (
@@ -187,7 +187,7 @@ const BiasMeterCard = ({ political }: { political: any }) => {
             <span>Center</span>
             <span>Right</span>
           </div>
-          <div className="h-2 bg-gradient-to-r from-blue-500 via-gray-300 to-red-500 rounded-full relative">
+          <div className="h-2 bg-gradient-to-r from-primary via-muted to-destructive rounded-full relative">
             <div 
               className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-primary rounded-full shadow-sm transition-all duration-500"
               style={{ 
@@ -210,9 +210,9 @@ const ReferencesCard = ({ citations, sentiment }: { citations: any[], sentiment:
 
   // Aggregate sentiment to show next to references
   const sentimentLabel = sentiment?.classification || 'neutral';
-  const sentimentColor = sentimentLabel === 'positive' ? 'text-green-600 bg-green-50 border-green-200' : 
-                         sentimentLabel === 'negative' ? 'text-red-600 bg-red-50 border-red-200' : 
-                         'text-gray-600 bg-gray-50 border-gray-200';
+  const sentimentColor = sentimentLabel === 'positive' ? 'text-chart-2 bg-chart-2/10 border-chart-2/20' : 
+                         sentimentLabel === 'negative' ? 'text-destructive bg-destructive/10 border-destructive/20' : 
+                         'text-muted-foreground bg-muted border-border';
 
   return (
     <Card className="md:col-span-2">

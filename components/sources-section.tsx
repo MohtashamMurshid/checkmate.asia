@@ -1,3 +1,9 @@
+import localFont from "next/font/local";
+import { Instrument_Sans } from "next/font/google";
+
+const departureMono = localFont({ src: "../fonts/DepartureMono-Regular.woff2" });
+const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
+
 export function SourcesSection() {
   const sourceCategories: Array<{
     title: string
@@ -37,14 +43,14 @@ export function SourcesSection() {
   ]
 
   return (
-    <section id="sources" className="py-12 md:py-20 lg:py-32">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="sources" className="py-16 md:py-24 lg:py-32">
+      <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="relative mx-auto max-w-3xl space-y-4 text-center">
-          <h2 className="text-balance text-3xl font-semibold md:text-5xl">
+          <h2 className={`text-balance text-3xl font-semibold md:text-5xl tracking-tight ${departureMono.className}`}>
             Checkmate cites <span className="text-primary">ONLY</span> from{" "}
             <span className="text-primary">REAL SOURCES</span>
           </h2>
-          <p className="text-muted-foreground">
+          <p className={`text-muted-foreground ${instrumentSans.className}`}>
             Credible, traceable, and verifiable sources across platforms and publications.
           </p>
         </div>
@@ -53,17 +59,17 @@ export function SourcesSection() {
           {sourceCategories.map((category) => (
             <div
               key={category.title}
-              className="bg-card/50 hover:bg-card transition-colors rounded-2xl border p-5 md:p-6"
+              className="bg-background/60 backdrop-blur-sm hover:bg-background/80 transition-colors rounded-xl border border-border/60 p-5 md:p-6 shadow-xl"
             >
-              <h3 className="text-lg font-semibold mb-4">{category.title}</h3>
+              <h3 className={`text-lg font-semibold mb-4 tracking-tight ${departureMono.className}`}>{category.title}</h3>
               <div className="space-y-3">
                 {category.items.map((item) => (
                   <div key={item.label}>
-                    <span className="inline-flex items-center justify-center rounded-md border px-2.5 py-1 text-sm font-medium">
+                    <span className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background/40 px-3 py-1 text-sm font-medium backdrop-blur-sm">
                       {item.label}
                     </span>
                     {item.caption && (
-                      <p className="text-muted-foreground mt-2 text-xs">
+                      <p className={`text-muted-foreground mt-2 text-xs ${instrumentSans.className}`}>
                         {item.caption}
                       </p>
                     )}

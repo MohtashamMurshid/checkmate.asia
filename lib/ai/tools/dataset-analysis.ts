@@ -307,8 +307,9 @@ Then provide an overall assessment.`;
 
 /**
  * Direct analysis functions (bypassing tool wrappers for batch processing)
+ * Exported for use in the routed pipeline
  */
-async function runBiasDetection(text: string): Promise<any> {
+export async function runBiasDetection(text: string): Promise<any> {
   const provider = getOpenRouterProvider();
   const modelConfig = getModelConfig();
 
@@ -333,7 +334,7 @@ Be objective and thorough. Flag content that exceeds 0.5 overall bias score.`;
   return result.object;
 }
 
-async function runSentimentAnalysis(text: string): Promise<any> {
+export async function runSentimentAnalysis(text: string): Promise<any> {
   const provider = getOpenRouterProvider();
   const modelConfig = getModelConfig();
 
@@ -356,7 +357,7 @@ Provide:
   return result.object;
 }
 
-async function runFactCheck(text: string): Promise<any> {
+export async function runFactCheck(text: string): Promise<any> {
   const provider = getOpenRouterProvider();
   const modelConfig = getModelConfig();
 
@@ -484,6 +485,7 @@ Then provide an overall assessment.`;
 /**
  * Batch analysis function for the API route
  * Runs all three agents in parallel for a single row
+ * @deprecated Use analyzeRowRouted for the new routed pipeline
  */
 export async function analyzeRow(
   text: string,
@@ -528,6 +530,139 @@ export async function analyzeRow(
     return {
       text,
       error: error instanceof Error ? error.message : 'Analysis failed',
+    };
+  }
+}
+
+import { routeText, type RouterDecision, type AgentType } from './router';
+import { 
+  aggregateResults, 
+  calculateRiskScore, 
+  getRiskLevel,
+  type AggregatedResult,
+  type BiasResult,
+  type SentimentResult,
+  type FactCheckResult,
+} from '../utils/aggregator';
+
+/**
+ * New routed analysis function
+ * Uses the router to determine which agents to run, then aggregates with risk score
+ */
+export async function analyzeRowRouted(
+  text: string,
+  options: { checkBias?: boolean; checkSentiment?: boolean; checkFacts?: boolean } = {},
+  skipRouting: boolean = false
+): Promise<AggregatedResult> {
+  const { checkBias = true, checkSentiment = true, checkFacts = true } = options;
+
+  try {
+    // Step 1: Route the text to determine which agents are needed
+    let routingDecision: RouterDecision;
+    
+    if (skipRouting) {
+      // Skip routing and run all enabled agents
+      const agentsNeeded: AgentType[] = [];
+      if (checkBias) agentsNeeded.push('bias');
+      if (checkSentiment) agentsNeeded.push('sentiment');
+      if (checkFacts) agentsNeeded.push('factCheck');
+      
+      routingDecision = {
+        intent: 'mixed',
+        confidence: 1,
+        agentsNeeded,
+        reasoning: 'Routing skipped - running all enabled agents',
+        contentFlags: {
+          hasFactualClaims: checkFacts,
+          hasSensitiveTopics: checkBias,
+          hasEmotionalContent: checkSentiment,
+          isChitChat: false,
+        },
+      };
+    } else {
+      routingDecision = await routeText(text);
+    }
+
+    // Step 2: Filter agents based on user options
+    const agentsToRun = routingDecision.agentsNeeded.filter(agent => {
+      if (agent === 'bias' && !checkBias) return false;
+      if (agent === 'sentiment' && !checkSentiment) return false;
+      if (agent === 'factCheck' && !checkFacts) return false;
+      return true;
+    });
+
+    // Step 3: Run only the required agents in parallel
+    const promises: Promise<any>[] = [];
+    const agentKeys: AgentType[] = [];
+
+    if (agentsToRun.includes('bias')) {
+      promises.push(runBiasDetection(text).catch(e => ({ error: e.message })));
+      agentKeys.push('bias');
+    }
+
+    if (agentsToRun.includes('sentiment')) {
+      promises.push(runSentimentAnalysis(text).catch(e => ({ error: e.message })));
+      agentKeys.push('sentiment');
+    }
+
+    if (agentsToRun.includes('factCheck')) {
+      promises.push(runFactCheck(text).catch(e => ({ error: e.message })));
+      agentKeys.push('factCheck');
+    }
+
+    const results = await Promise.all(promises);
+
+    // Map results to their agent types
+    let bias: BiasResult | undefined;
+    let sentiment: SentimentResult | undefined;
+    let factCheck: FactCheckResult | undefined;
+
+    results.forEach((result, i) => {
+      const agent = agentKeys[i];
+      if (result.error) {
+        // Handle error case - still set the result but with error
+        console.error(`Agent ${agent} error:`, result.error);
+      }
+      
+      if (agent === 'bias') bias = result.error ? undefined : result;
+      if (agent === 'sentiment') sentiment = result.error ? undefined : result;
+      if (agent === 'factCheck') factCheck = result.error ? undefined : result;
+    });
+
+    // Step 4: Aggregate results with risk score
+    return aggregateResults(
+      text,
+      bias,
+      sentiment,
+      factCheck,
+      routingDecision,
+      agentsToRun,
+      false // fromCache
+    );
+  } catch (error) {
+    // Return error result with default routing
+    const errorMessage = error instanceof Error ? error.message : 'Analysis failed';
+    
+    return {
+      text,
+      riskScore: 0,
+      riskLevel: 'low',
+      confidence: 0,
+      routingDecision: {
+        intent: 'mixed',
+        confidence: 0,
+        agentsNeeded: [],
+        reasoning: `Error: ${errorMessage}`,
+        contentFlags: {
+          hasFactualClaims: false,
+          hasSensitiveTopics: false,
+          hasEmotionalContent: false,
+          isChitChat: false,
+        },
+      },
+      agentsRun: [],
+      fromCache: false,
+      error: errorMessage,
     };
   }
 }

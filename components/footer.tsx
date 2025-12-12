@@ -1,5 +1,8 @@
 import { Logo } from '@/components/logo'
 import Link from 'next/link'
+import { Instrument_Sans } from "next/font/google";
+
+const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 const links = [
     { title: 'Home', href: '/#home' },
@@ -10,8 +13,8 @@ const links = [
 
 export default function FooterSection() {
     return (
-        <footer className="py-16 md:py-32">
-            <div className="mx-auto max-w-5xl px-6">
+        <footer className="py-16 md:py-24 lg:py-32 border-t border-border/60">
+            <div className="mx-auto max-w-5xl px-4 md:px-6">
                 <Link
                     href="/"
                     aria-label="go home"
@@ -19,7 +22,7 @@ export default function FooterSection() {
                     <Logo />
                 </Link>
 
-                <div className="my-8 flex flex-wrap justify-center gap-6 text-sm">
+                <div className={`my-8 flex flex-wrap justify-center gap-6 text-sm ${instrumentSans.className}`}>
                     {links.map((link, index) => (
                         <Link
                             key={index}
@@ -138,7 +141,7 @@ export default function FooterSection() {
                         </svg>
                     </Link>
                 </div> */}
-                <span className="text-muted-foreground block text-center text-sm"> © {new Date().getFullYear()} Checkmate, All rights reserved</span>
+                <span className={`text-muted-foreground block text-center text-sm ${instrumentSans.className}`}> © {new Date().getFullYear()} Checkmate, All rights reserved</span>
             </div>
         </footer>
     )

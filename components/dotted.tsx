@@ -20,7 +20,6 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 		renderer: THREE.WebGLRenderer;
 		particles: THREE.Points[];
 		animationId: number;
-		count: number;
 	} | null>(null);
 
 	useEffect(() => {
@@ -98,13 +97,23 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 		const points = new THREE.Points(geometry, material);
 		scene.add(points);
 
-		let count = 0;
+		// Time-based animation for consistent speed
+		const startTimeRef = { current: performance.now() };
+		const SPEED_MULTIPLIER = 3; // Consistent speed (time-based instead of frame-based)
+
+		// Initialize lastFrameTimeRef
+		lastFrameTimeRef.current = performance.now();
 
 		// Animation function
 		const animate = () => {
 			isAnimatingRef.current = true;
 			animationIdRef.current = requestAnimationFrame(animate);
-			lastFrameTimeRef.current = performance.now();
+			const currentTime = performance.now();
+			lastFrameTimeRef.current = currentTime;
+
+			// Calculate elapsed time in seconds for consistent animation speed
+			const elapsedTime = (currentTime - startTimeRef.current) / 1000;
+			const count = elapsedTime * SPEED_MULTIPLIER;
 
 			const positionAttribute = geometry.attributes.position;
 			const positions = positionAttribute.array as Float32Array;
@@ -135,7 +144,6 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 			}
 
 			renderer.render(scene, camera);
-			count += 0.1;
 		};
 
 		// Handle window resize
@@ -150,6 +158,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 		// Handle tab visibility: resume if stopped when tab becomes visible
 		const handleVisibility = () => {
 			if (document.visibilityState === 'visible' && !isAnimatingRef.current) {
+				lastFrameTimeRef.current = performance.now();
 				animate();
 			}
 		};
@@ -167,6 +176,8 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 			isAnimatingRef.current = false;
 		};
 		const handleContextRestored = () => {
+			startTimeRef.current = performance.now();
+			lastFrameTimeRef.current = performance.now();
 			if (!isAnimatingRef.current) {
 				animate();
 			}
@@ -192,6 +203,8 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 				const contextLost = typeof (gl as any).isContextLost === 'function' && (gl as any).isContextLost();
 				if (document.visibilityState === 'visible' && !contextLost) {
 					if (!isAnimatingRef.current || animationIdRef.current === null || timeSinceLastFrame > 1200) {
+						startTimeRef.current = performance.now();
+						lastFrameTimeRef.current = performance.now();
 						animate();
 					}
 				}
@@ -206,7 +219,6 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 			renderer,
 			particles: [points],
 			animationId: animationIdRef.current ?? 0,
-			count,
 		};
 
 		// Cleanup function

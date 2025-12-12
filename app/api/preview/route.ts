@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-const twitterScraper = new Scraper();
+const twitterScraper = new Scraper(); 
 const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;

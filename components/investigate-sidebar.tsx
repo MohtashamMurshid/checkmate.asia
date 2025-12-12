@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Search, ShieldCheck, History, X } from "lucide-react";
+import { LayoutDashboard, Search, ShieldCheck, History, X, BarChart3, ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface InvestigateSidebarProps {
   isOpen?: boolean;
@@ -13,6 +17,10 @@ interface InvestigateSidebarProps {
 
 export function InvestigateSidebar({ isOpen = true, onClose }: InvestigateSidebarProps) {
   const pathname = usePathname();
+  const analyses = useQuery(api.datasetAnalyses.list);
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(
+    pathname.startsWith('/investigate/dashboard/analyze')
+  );
 
   return (
     <aside className={cn(
@@ -37,7 +45,7 @@ export function InvestigateSidebar({ isOpen = true, onClose }: InvestigateSideba
           </Button>
         )}
       </div>
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 px-4 py-2 space-y-1">
         <SidebarLink 
           href="/investigate" 
           icon={Search} 
@@ -62,6 +70,85 @@ export function InvestigateSidebar({ isOpen = true, onClose }: InvestigateSideba
         >
           History
         </SidebarLink>
+        <Collapsible open={isAnalysisOpen} onOpenChange={setIsAnalysisOpen}>
+          <div className="space-y-1">
+            <CollapsibleTrigger asChild>
+              <button
+                className={cn(
+                  "flex items-center justify-between w-full px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  pathname.startsWith('/investigate/dashboard/analyze')
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="size-4" />
+                  <span>Dataset Analysis</span>
+                </div>
+                {isAnalysisOpen ? (
+                  <ChevronDown className="size-4" />
+                ) : (
+                  <ChevronRight className="size-4" />
+                )}
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pl-4 space-y-1">
+              <Link
+                href="/investigate/dashboard/analyze"
+                onClick={onClose}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors",
+                  pathname === '/investigate/dashboard/analyze'
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <span className="size-1.5 rounded-full bg-current" />
+                New Analysis
+              </Link>
+              {analyses && analyses.length > 0 && (
+                <>
+                  <Link
+                    href="/investigate/dashboard/analyze/history"
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors",
+                      pathname === '/investigate/dashboard/analyze/history'
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <span className="size-1.5 rounded-full bg-current" />
+                    All History
+                  </Link>
+                  <div className="pl-2 space-y-0.5 max-h-[300px] overflow-y-auto">
+                    {analyses.slice(0, 10).map((analysis) => (
+                      <Link
+                        key={analysis._id}
+                        href={`/investigate/dashboard/analyze/history/${analysis._id}`}
+                        onClick={onClose}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors group",
+                          pathname === `/investigate/dashboard/analyze/history/${analysis._id}`
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        )}
+                      >
+                        <FileText className="size-3 opacity-50 group-hover:opacity-100" />
+                        <span className="truncate flex-1">{analysis.fileName}</span>
+                      </Link>
+                    ))}
+                    {analyses.length > 10 && (
+                      <div className="px-3 py-1.5 text-xs text-muted-foreground">
+                        +{analyses.length - 10} more
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
       </nav>
       <div className="p-4 border-t border-border/80 text-xs text-muted-foreground">
         <p>© 2024 Checkmate Inc.</p>
@@ -88,7 +175,7 @@ function SidebarLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+        "flex items-center gap-3 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
         active
           ? "bg-primary/10 text-primary"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"

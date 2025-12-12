@@ -167,16 +167,16 @@ export default function ContactSection() {
                     </div>
 
                     {submitStatus === 'success' && (
-                        <div className="mt-8 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                            <p className="text-green-800 dark:text-green-200 text-sm">
+                        <div className="mt-8 p-4 bg-chart-2/10 dark:bg-chart-2/20 border border-chart-2/30 dark:border-chart-2/40 rounded-lg">
+                            <p className="text-chart-2 dark:text-chart-2/90 text-sm">
                                 Thank you! Your message has been sent successfully. We'll get back to you soon.
                             </p>
                         </div>
                     )}
 
                     {submitStatus === 'error' && (
-                        <div className="mt-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                            <p className="text-red-800 dark:text-red-200 text-sm">
+                        <div className="mt-8 p-4 bg-destructive/10 dark:bg-destructive/20 border border-destructive/30 dark:border-destructive/40 rounded-lg">
+                            <p className="text-destructive dark:text-destructive/90 text-sm">
                                 {errorMessage || 'Failed to submit form. Please try again.'}
                             </p>
                         </div>

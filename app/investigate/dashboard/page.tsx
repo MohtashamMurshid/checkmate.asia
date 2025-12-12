@@ -1,10 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, ShieldAlert, Scale, Clock, ExternalLink, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { TrendingUp, ShieldAlert, Scale, Clock, ExternalLink, ArrowUpRight, ArrowDownRight, Search as SearchIcon, ShieldCheck as ShieldCheckIcon, Scale as ScaleIcon, Globe as GlobeIcon } from "lucide-react";
+import { TextReviewPanel } from "@/components/ai-elements/text-review-panel";
+import { HighlightedTextView } from "@/components/ai-elements/highlighted-text-view";
+import { FactBiasSentimentSpan } from '@/lib/ai/tools/fact-bias-sentiment';
 
 export default function DashboardPage() {
+  const [analyzedText, setAnalyzedText] = useState('');
+  const [analyzedSpans, setAnalyzedSpans] = useState<FactBiasSentimentSpan[]>([]);
+
+  const handleAnalysisComplete = (text: string, spans: FactBiasSentimentSpan[]) => {
+    setAnalyzedText(text);
+    setAnalyzedSpans(spans);
+  };
+
   return (
     <div className="flex-1 space-y-6 p-6 md:p-8">
       <div className="flex items-center justify-between">
@@ -15,6 +27,27 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-2">
           <Badge variant="outline">Last 30 Days</Badge>
         </div>
+      </div>
+
+      <div className="grid gap-4 grid-cols-1">
+        <TextReviewPanel onAnalyzeComplete={handleAnalysisComplete} />
+        
+        {analyzedText && (
+          <Card className="w-full animate-in fade-in zoom-in-95 duration-300">
+            <CardHeader>
+              <CardTitle>Analysis Results</CardTitle>
+              <CardDescription>
+                Review facts, biases, and sentiment. Click on any highlighted text to verify it.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <HighlightedTextView 
+                text={analyzedText} 
+                spans={analyzedSpans} 
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -96,7 +129,7 @@ export default function DashboardPage() {
 }
 
 // Icons
-import { Search as SearchIcon, ShieldCheck as ShieldCheckIcon, Scale as ScaleIcon, Globe as GlobeIcon } from "lucide-react";
+// import { Search as SearchIcon, ShieldCheck as ShieldCheckIcon, Scale as ScaleIcon, Globe as GlobeIcon } from "lucide-react";
 
 function StatCard({ title, value, trend, trendUp, icon: Icon, description }: any) {
   return (
@@ -110,7 +143,7 @@ function StatCard({ title, value, trend, trendUp, icon: Icon, description }: any
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         <p className="text-xs text-muted-foreground flex items-center mt-1">
-          <span className={trendUp ? "text-green-500 flex items-center" : "text-red-500 flex items-center"}>
+          <span className={trendUp ? "text-chart-2 flex items-center" : "text-destructive flex items-center"}>
             {trendUp ? <ArrowUpRight className="mr-1 h-3 w-3" /> : <ArrowDownRight className="mr-1 h-3 w-3" />}
             {trend}
           </span>
@@ -140,15 +173,15 @@ function MockSentimentChart() {
           <div className="w-full max-w-[40px] flex flex-col gap-1 h-full justify-end">
              {/* Stacked bars */}
              <div 
-               className="w-full bg-green-500/80 rounded-t-sm transition-all group-hover:bg-green-500"
+               className="w-full bg-chart-2/80 rounded-t-sm transition-all group-hover:bg-chart-2"
                style={{ height: `${item.pos}%` }}
              />
              <div 
-               className="w-full bg-gray-400/50 transition-all group-hover:bg-gray-400"
+               className="w-full bg-muted/50 transition-all group-hover:bg-muted"
                style={{ height: `${item.neu}%` }}
              />
              <div 
-               className="w-full bg-red-500/80 rounded-b-sm transition-all group-hover:bg-red-500"
+               className="w-full bg-destructive/80 rounded-b-sm transition-all group-hover:bg-destructive"
                style={{ height: `${item.neg}%` }}
              />
           </div>
@@ -161,11 +194,11 @@ function MockSentimentChart() {
 
 function MockBiasDistribution() {
   const biases = [
-    { label: "Left", value: 15, color: "bg-blue-500" },
-    { label: "Center-Left", value: 20, color: "bg-blue-300" },
-    { label: "Center", value: 30, color: "bg-purple-500" },
-    { label: "Center-Right", value: 20, color: "bg-red-300" },
-    { label: "Right", value: 15, color: "bg-red-500" },
+    { label: "Left", value: 15, color: "bg-primary" },
+    { label: "Center-Left", value: 20, color: "bg-primary/70" },
+    { label: "Center", value: 30, color: "bg-chart-4" },
+    { label: "Center-Right", value: 20, color: "bg-destructive/70" },
+    { label: "Right", value: 15, color: "bg-destructive" },
   ];
 
   return (
@@ -174,11 +207,11 @@ function MockBiasDistribution() {
       <div className="relative size-48 rounded-full" 
            style={{ 
              background: `conic-gradient(
-               #3b82f6 0% 15%, 
-               #93c5fd 15% 35%, 
-               #a855f7 35% 65%, 
-               #fca5a5 65% 85%, 
-               #ef4444 85% 100%
+               hsl(var(--primary)) 0% 15%, 
+               hsl(var(--primary) / 0.7) 15% 35%, 
+               hsl(var(--chart-4)) 35% 65%, 
+               hsl(var(--destructive) / 0.7) 65% 85%, 
+               hsl(var(--destructive)) 85% 100%
              )` 
            }}>
            <div className="absolute inset-8 bg-background rounded-full flex items-center justify-center flex-col">
