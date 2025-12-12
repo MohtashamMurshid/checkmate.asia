@@ -9,6 +9,14 @@ import {
   Code2, 
   Globe 
 } from "lucide-react";
+import {
+  MultiPlatformBg,
+  AiDetectionBg,
+  FactCheckBg,
+  CreatorCredBg,
+  DevApiBg,
+  MultilingualBg
+} from "@/components/feature-visualizations";
 
 const features = [
   {
@@ -19,7 +27,9 @@ const features = [
     cta: "Try It Now",
     className: "col-span-3 lg:col-span-2",
     background: (
-      <div className="absolute inset-0 bg-primary/10" />
+      <div className="absolute inset-0 bg-primary/10">
+        <MultiPlatformBg />
+      </div>
     ),
   },
   {
@@ -30,7 +40,9 @@ const features = [
     cta: "Learn More",
     className: "col-span-3 lg:col-span-1",
     background: (
-      <div className="absolute inset-0 bg-accent/10" />
+      <div className="absolute inset-0 bg-accent/10">
+        <AiDetectionBg />
+      </div>
     ),
   },
   {
@@ -41,7 +53,9 @@ const features = [
     cta: "Explore",
     className: "col-span-3 lg:col-span-1",
     background: (
-      <div className="absolute inset-0 bg-chart-3/10" />
+      <div className="absolute inset-0 bg-chart-3/10">
+        <FactCheckBg />
+      </div>
     ),
   },
   {
@@ -52,7 +66,9 @@ const features = [
     cta: "View Profile",
     className: "col-span-3 lg:col-span-1",
     background: (
-      <div className="absolute inset-0 bg-chart-2/10" />
+      <div className="absolute inset-0 bg-chart-2/10">
+        <CreatorCredBg />
+      </div>
     ),
   },
   {
@@ -65,6 +81,7 @@ const features = [
     background: (
       <div className="absolute inset-0 bg-primary/20">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <DevApiBg />
       </div>
     ),
   },
@@ -76,7 +93,9 @@ const features = [
     cta: "Languages",
     className: "col-span-3 lg:col-span-1",
     background: (
-      <div className="absolute inset-0 bg-chart-4/10" />
+      <div className="absolute inset-0 bg-chart-4/10">
+        <MultilingualBg />
+      </div>
     ),
   },
 ];

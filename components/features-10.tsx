@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { LucideIcon, Code, Server, Globe } from 'lucide-react'
-import Image from 'next/image'
 import { ReactNode } from 'react'
 import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
+import { EnterpriseApiVisual, AgentDeploymentVisual } from '@/components/feature-visualizations'
 
 const departureMono = localFont({ src: "../fonts/DepartureMono-Regular.woff2" });
 const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
@@ -73,13 +73,7 @@ export default function Features10() {
                                     className="absolute inset-0 [background:radial-gradient(125%_125%_at_50%_0%,transparent_40%,hsl(var(--primary)/0.1),transparent_100%)]"
                                 />
                                 <div className="aspect-[76/59] p-1 px-6">
-                                    <DualModeImage
-                                        darkSrc="/enterprise-api.png"
-                                        lightSrc="/enterprise-api.png"
-                                        alt="enterprise api illustration"
-                                        width={1207}
-                                        height={929}
-                                    />
+                                    <EnterpriseApiVisual />
                                 </div>
                             </div>
                         </CardContent>
@@ -97,13 +91,7 @@ export default function Features10() {
                         <CardContent className="pt-6">
                             <div className="relative overflow-hidden rounded-xl border border-border/60">
                                 <div className="aspect-[76/59] overflow-hidden">
-                                    <DualModeImage
-                                        darkSrc="/agent-deploy.png"
-                                        lightSrc="/agent-deploy.png"
-                                        alt="agent deploy illustration"
-                                        width={1207}
-                                        height={929}
-                                    />
+                                    <AgentDeploymentVisual />
                                 </div>
                             </div>
                         </CardContent>
@@ -150,34 +138,6 @@ const CardHeading = ({ icon: Icon, title, description }: CardHeadingProps) => (
         </span>
         <p className={`mt-4 text-xl md:text-2xl font-semibold tracking-tight leading-tight ${instrumentSans.className}`}>{description}</p>
     </div>
-)
-
-interface DualModeImageProps {
-    darkSrc: string
-    lightSrc: string
-    alt: string
-    width: number
-    height: number
-    className?: string
-}
-
-const DualModeImage = ({ darkSrc, lightSrc, alt, width, height, className }: DualModeImageProps) => (
-    <>
-        <Image
-            src={darkSrc}
-            className={cn('hidden dark:block object-contain', className)}
-            alt={`${alt} dark`}
-            width={width}
-            height={height}
-        />
-        <Image
-            src={lightSrc}
-            className={cn('shadow dark:hidden object-contain', className)}
-            alt={`${alt} light`}
-            width={width}
-            height={height}
-        />
-    </>
 )
 
 interface CircleConfig {

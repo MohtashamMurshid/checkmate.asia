@@ -1,11 +1,11 @@
 'use client'
 import { FileText, Network, CheckCircle2 } from 'lucide-react'
-import Image from 'next/image'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { BorderBeam } from '@/components/ui/border-beam'
 import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
+import { DueDiligenceVisual, SourceTracingVisual, DataComplianceVisual } from '@/components/feature-visualizations'
 
 const departureMono = localFont({ src: "../fonts/DepartureMono-Regular.woff2" });
 const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
@@ -14,19 +14,10 @@ export default function Features() {
     type ImageKey = 'item-1' | 'item-2' | 'item-4'
     const [activeItem, setActiveItem] = useState<ImageKey>('item-1')
 
-    const images = {
-        'item-1': {
-            image: '/due-dilegence.png',
-            alt: 'Due diligence - PDF validation',
-        },
-        'item-2': {
-            image: '/trace-source.png',
-            alt: 'Trace information source - node visualization',
-        },
-        'item-4': {
-            image: '/data-compliance.png',
-            alt: 'Data compliance - text correction',
-        },
+    const visuals = {
+        'item-1': DueDiligenceVisual,
+        'item-2': SourceTracingVisual,
+        'item-4': DataComplianceVisual,
     }
 
     const features: Array<{
@@ -120,13 +111,12 @@ export default function Features() {
                                     exit={{ opacity: 0, y: 6, scale: 0.98 }}
                                     transition={{ duration: 0.2 }}
                                     className="size-full overflow-hidden rounded-xl border border-border/60 bg-card shadow-xl">
-                                    <Image
-                                        src={images[activeItem].image}
-                                        className="size-full object-contain  dark:mix-blend-lighten"
-                                        alt={images[activeItem].alt}
-                                        width={1207}
-                                        height={929}
-                                    />
+                                    <div className="size-full p-8 flex items-center justify-center">
+                                        {(() => {
+                                            const VisualComponent = visuals[activeItem]
+                                            return <VisualComponent />
+                                        })()}
+                                    </div>
                                 </motion.div>
                             </AnimatePresence>
                         </div>
