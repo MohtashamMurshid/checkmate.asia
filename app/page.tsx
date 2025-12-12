@@ -26,8 +26,7 @@ export default function LandingContent() {
 
   return (
     <div className="relative">
-                <Header />
-
+        <Header />
       <LandingHero />
       <HeroSubtitle />
       <Features />

@@ -77,7 +77,7 @@ export function LandingHero() {
                   </Link>
                 </Button>
                 <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-transparent hover:bg-muted/50" asChild>
-                  <Link href="/analyze">
+                  <Link href="/investigate/dashboard/analyze">
                     Data Analysis
                   </Link>
                 </Button>

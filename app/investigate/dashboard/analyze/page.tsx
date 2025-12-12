@@ -265,187 +265,189 @@ export default function AnalyzePage() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between pb-4 border-b">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <BarChart3 className="size-6" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight">Dataset Analysis</h1>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            Analyze your dataset for bias, sentiment, and factual accuracy using AI agents
-          </p>
-        </div>
-        
-        {appState !== 'upload' && (
-          <Button variant="outline" onClick={handleReset} className="gap-2">
-            <RefreshCw className="size-4" />
-            Start Over
-          </Button>
-        )}
-      </div>
-
-      {/* Progress Steps */}
-      <div className="flex items-center gap-2 px-2">
-        {['Upload', 'Preview', 'Analyze', 'Results'].map((step, i) => {
-          const stepState = ['upload', 'preview', 'analyzing', 'results'][i];
-          const isActive = appState === stepState;
-          const isPast = ['upload', 'preview', 'analyzing', 'results'].indexOf(appState) > i;
-          
-          return (
-            <div key={step} className="flex items-center gap-2">
-              {i > 0 && (
-                <div className={cn(
-                  'h-0.5 w-8 md:w-16 rounded-full',
-                  isPast ? 'bg-primary' : 'bg-border'
-                )} />
-              )}
-              <div className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                isActive && 'bg-primary text-primary-foreground shadow-sm',
-                isPast && !isActive && 'bg-primary/10 text-primary border border-primary/20',
-                !isActive && !isPast && 'bg-muted text-muted-foreground'
-              )}>
-                <span className={cn(
-                  'size-5 rounded-md flex items-center justify-center text-xs font-semibold',
-                  isActive && 'bg-primary-foreground/20',
-                  isPast && !isActive && 'bg-primary/20',
-                  !isActive && !isPast && 'bg-muted-foreground/20'
-                )}>
-                  {i + 1}
-                </span>
-                <span className="hidden sm:inline">{step}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Main Content */}
-      {appState === 'upload' && (
-        <div className="space-y-6">
-          <FileUploader onDataParsed={handleDataParsed} />
-          
-          {/* Feature cards */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <FeatureCard
-              icon={Scale}
-              title="Bias Detection"
-              description="Identifies gender, religious, and political bias with severity scores"
-              color="amber"
-            />
-            <FeatureCard
-              icon={Heart}
-              title="Sentiment Analysis"
-              description="Classifies emotional tone and provides confidence breakdown"
-              color="pink"
-            />
-            <FeatureCard
-              icon={Search}
-              title="Smart Fact Check"
-              description="Verifies factual claims with web search, skips opinions"
-              color="blue"
-            />
-          </div>
-        </div>
-      )}
-
-      {appState === 'preview' && parsedData && (
-        <div className="space-y-6">
-          {/* Analysis Options */}
-          <Card className="border">
-            <CardContent className="p-5">
-              <div className="flex flex-wrap items-center gap-6">
-                <span className="text-sm font-semibold text-foreground">Analysis Options:</span>
-                <OptionToggle
-                  icon={Scale}
-                  label="Bias Detection"
-                  checked={options.checkBias}
-                  onChange={(checked) => setOptions(prev => ({ ...prev, checkBias: checked }))}
-                  color="amber"
-                />
-                <OptionToggle
-                  icon={Heart}
-                  label="Sentiment"
-                  checked={options.checkSentiment}
-                  onChange={(checked) => setOptions(prev => ({ ...prev, checkSentiment: checked }))}
-                  color="pink"
-                />
-                <OptionToggle
-                  icon={Search}
-                  label="Fact Check"
-                  checked={options.checkFacts}
-                  onChange={(checked) => setOptions(prev => ({ ...prev, checkFacts: checked }))}
-                  color="blue"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <DataPreview
-            data={parsedData}
-            selectedColumn={selectedColumn}
-            onColumnChange={setSelectedColumn}
-            onStartAnalysis={handleStartAnalysis}
-          />
-        </div>
-      )}
-
-      {appState === 'analyzing' && (
-        <AnalysisProgress
-          total={progress.total}
-          completed={progress.completed}
-          results={results}
-          isComplete={false}
-        />
-      )}
-
-      {appState === 'results' && stats && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b">
+    <div className="flex-1 space-y-6 p-6 md:p-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between pb-4 border-b">
+          <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <Sparkles className="size-5 text-green-600 dark:text-green-500" />
+              <div className="p-2.5 rounded-xl bg-primary text-primary-foreground shadow-sm">
+                <BarChart3 className="size-6" />
               </div>
-              <div>
-                <span className="font-semibold text-base">Analysis Complete</span>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="secondary" className="text-xs">{results.length} rows processed</Badge>
-                  {isSaving && (
-                    <Badge variant="outline" className="gap-1 animate-pulse text-xs">
-                      <Save className="size-3" />
-                      Saving...
-                    </Badge>
-                  )}
-                  {isSaved && (
-                    <Badge variant="default" className="gap-1 bg-green-600 text-xs">
-                      <CheckCircle2 className="size-3" />
-                      Saved
-                    </Badge>
-                  )}
+              <h1 className="text-3xl font-bold tracking-tight">Dataset Analysis</h1>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              Analyze your dataset for bias, sentiment, and factual accuracy using AI agents
+            </p>
+          </div>
+          
+          {appState !== 'upload' && (
+            <Button variant="outline" onClick={handleReset} className="gap-2">
+              <RefreshCw className="size-4" />
+              Start Over
+            </Button>
+          )}
+        </div>
+
+        {/* Progress Steps */}
+        <div className="flex items-center gap-2 px-2">
+          {['Upload', 'Preview', 'Analyze', 'Results'].map((step, i) => {
+            const stepState = ['upload', 'preview', 'analyzing', 'results'][i];
+            const isActive = appState === stepState;
+            const isPast = ['upload', 'preview', 'analyzing', 'results'].indexOf(appState) > i;
+            
+            return (
+              <div key={step} className="flex items-center gap-2">
+                {i > 0 && (
+                  <div className={cn(
+                    'h-0.5 w-8 md:w-16 rounded-full',
+                    isPast ? 'bg-primary' : 'bg-border'
+                  )} />
+                )}
+                <div className={cn(
+                  'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                  isActive && 'bg-primary text-primary-foreground shadow-sm',
+                  isPast && !isActive && 'bg-primary/10 text-primary border border-primary/20',
+                  !isActive && !isPast && 'bg-muted text-muted-foreground'
+                )}>
+                  <span className={cn(
+                    'size-5 rounded-md flex items-center justify-center text-xs font-semibold',
+                    isActive && 'bg-primary-foreground/20',
+                    isPast && !isActive && 'bg-primary/20',
+                    !isActive && !isPast && 'bg-muted-foreground/20'
+                  )}>
+                    {i + 1}
+                  </span>
+                  <span className="hidden sm:inline">{step}</span>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/analyze/history">
-                <Button variant="outline" className="gap-2" size="sm">
-                  <History className="size-4" />
-                  View History
-                </Button>
-              </Link>
-              <Button variant="outline" onClick={handleNewAnalysis} className="gap-2" size="sm">
-                <ArrowLeft className="size-4" />
-                Analyze Again
-              </Button>
+            );
+          })}
+        </div>
+
+        {/* Main Content */}
+        {appState === 'upload' && (
+          <div className="space-y-6">
+            <FileUploader onDataParsed={handleDataParsed} />
+            
+            {/* Feature cards */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <FeatureCard
+                icon={Scale}
+                title="Bias Detection"
+                description="Identifies gender, religious, and political bias with severity scores"
+                color="amber"
+              />
+              <FeatureCard
+                icon={Heart}
+                title="Sentiment Analysis"
+                description="Classifies emotional tone and provides confidence breakdown"
+                color="pink"
+              />
+              <FeatureCard
+                icon={Search}
+                title="Smart Fact Check"
+                description="Verifies factual claims with web search, skips opinions"
+                color="blue"
+              />
             </div>
           </div>
-          
-          <ResultsDashboard results={results} stats={stats} metrics={metrics ?? undefined} />
-        </div>
-      )}
+        )}
+
+        {appState === 'preview' && parsedData && (
+          <div className="space-y-6">
+            {/* Analysis Options */}
+            <Card className="border">
+              <CardContent className="p-5">
+                <div className="flex flex-wrap items-center gap-6">
+                  <span className="text-sm font-semibold text-foreground">Analysis Options:</span>
+                  <OptionToggle
+                    icon={Scale}
+                    label="Bias Detection"
+                    checked={options.checkBias}
+                    onChange={(checked) => setOptions(prev => ({ ...prev, checkBias: checked }))}
+                    color="amber"
+                  />
+                  <OptionToggle
+                    icon={Heart}
+                    label="Sentiment"
+                    checked={options.checkSentiment}
+                    onChange={(checked) => setOptions(prev => ({ ...prev, checkSentiment: checked }))}
+                    color="pink"
+                  />
+                  <OptionToggle
+                    icon={Search}
+                    label="Fact Check"
+                    checked={options.checkFacts}
+                    onChange={(checked) => setOptions(prev => ({ ...prev, checkFacts: checked }))}
+                    color="blue"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <DataPreview
+              data={parsedData}
+              selectedColumn={selectedColumn}
+              onColumnChange={setSelectedColumn}
+              onStartAnalysis={handleStartAnalysis}
+            />
+          </div>
+        )}
+
+        {appState === 'analyzing' && (
+          <AnalysisProgress
+            total={progress.total}
+            completed={progress.completed}
+            results={results}
+            isComplete={false}
+          />
+        )}
+
+        {appState === 'results' && stats && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <Sparkles className="size-5 text-green-600 dark:text-green-500" />
+                </div>
+                <div>
+                  <span className="font-semibold text-base">Analysis Complete</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="secondary" className="text-xs">{results.length} rows processed</Badge>
+                    {isSaving && (
+                      <Badge variant="outline" className="gap-1 animate-pulse text-xs">
+                        <Save className="size-3" />
+                        Saving...
+                      </Badge>
+                    )}
+                    {isSaved && (
+                      <Badge variant="default" className="gap-1 bg-green-600 text-xs">
+                        <CheckCircle2 className="size-3" />
+                        Saved
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/investigate/dashboard/analyze/history">
+                  <Button variant="outline" className="gap-2" size="sm">
+                    <History className="size-4" />
+                    View History
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={handleNewAnalysis} className="gap-2" size="sm">
+                  <ArrowLeft className="size-4" />
+                  Analyze Again
+                </Button>
+              </div>
+            </div>
+            
+            <ResultsDashboard results={results} stats={stats} metrics={metrics ?? undefined} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
