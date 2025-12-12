@@ -151,7 +151,7 @@ export default function HistoryDetailsPage({ params }: { params: Promise<{ id: s
             {politicalBias && (
               <Badge variant="outline">{politicalBias} Bias</Badge>
             )}
-            <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/25 dark:text-green-400 border-0">
+            <Badge className="bg-chart-2/15 text-chart-2 hover:bg-chart-2/25 dark:text-chart-2 border-0">
               Completed
             </Badge>
           </div>
@@ -336,7 +336,7 @@ export default function HistoryDetailsPage({ params }: { params: Promise<{ id: s
                           {citation.title || 'Untitled Source'}
                         </h4>
                         {citation.url && (
-                          <a href={citation.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline flex items-center gap-1 truncate">
+                          <a href={citation.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 truncate">
                             <LinkIcon className="size-3" />
                             {citation.url}
                           </a>

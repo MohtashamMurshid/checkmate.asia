@@ -70,8 +70,8 @@ export function AnalysisProgress({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isComplete ? (
-              <div className="p-2 rounded-full bg-green-500/10">
-                <CheckCircle2 className="size-5 text-green-500" />
+              <div className="p-2 rounded-full bg-chart-2/10">
+                <CheckCircle2 className="size-5 text-chart-2" />
               </div>
             ) : (
               <div className="p-2 rounded-full bg-primary/10">
@@ -90,7 +90,7 @@ export function AnalysisProgress({
 
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="gap-1">
-              <CheckCircle2 className="size-3 text-green-500" />
+              <CheckCircle2 className="size-3 text-chart-2" />
               {successCount}
             </Badge>
             {errorCount > 0 && (
@@ -207,9 +207,9 @@ function AgentStatus({
 
 function ResultRow({ result }: { result: RowResult }) {
   const getStatusColor = () => {
-    if (result.error) return 'text-red-500';
-    if (result.bias?.flagged) return 'text-amber-500';
-    return 'text-green-500';
+    if (result.error) return 'text-destructive';
+    if (result.bias?.flagged) return 'text-chart-3';
+    return 'text-chart-2';
   };
 
   const getStatusIcon = () => {

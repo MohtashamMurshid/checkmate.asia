@@ -120,11 +120,7 @@ export default function Features() {
                                 </motion.div>
                             </AnimatePresence>
                         </div>
-                        <BorderBeam
-                            duration={6}
-                            size={200}
-                            className="from-transparent via-yellow-700 to-transparent dark:via-white/50"
-                        />
+                    
                     </div>
                 </div>
             </div>

@@ -515,13 +515,13 @@ export const DataComplianceVisual = ({ className }: VisualizationProps) => (
     
     {/* Data Rows with Status */}
     <rect x="130" y="100" width="140" height="8" rx="2" className="fill-primary/20" />
-    <circle cx="290" cy="104" r="4" className="fill-green-500" />
+    <circle cx="290" cy="104" r="4" className="fill-chart-2" />
     
     <rect x="130" y="150" width="140" height="8" rx="2" className="fill-primary/20" />
-    <circle cx="290" cy="154" r="4" className="fill-green-500" />
+    <circle cx="290" cy="154" r="4" className="fill-chart-2" />
     
     <rect x="130" y="200" width="140" height="8" rx="2" className="fill-primary/20" />
-    <circle cx="290" cy="204" r="4" className="fill-green-500" />
+    <circle cx="290" cy="204" r="4" className="fill-chart-2" />
     
     {/* Filter/Shield Icon Overlay */}
     <circle cx="200" cy="150" r="40" className="fill-background/90 stroke-primary" strokeWidth="2" />

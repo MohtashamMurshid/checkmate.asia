@@ -8,9 +8,9 @@ import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 export function CredibilityBadge({ score, username, platform }: { score: number; username: string; platform: string }) {
   const getColor = (s: number) => {
-    if (s >= 8) return 'bg-green-500';
-    if (s >= 5) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (s >= 8) return 'bg-chart-2';
+    if (s >= 5) return 'bg-chart-3';
+    return 'bg-destructive';
   };
 
   const getLabel = (s: number) => {
@@ -221,9 +221,9 @@ function ComparisonRow({ point, leftLabel, rightLabel, leftKey, rightKey }: { po
     <div className="flex items-start gap-3 p-3 border rounded-md text-sm bg-background/50">
       <div className="mt-0.5">
         {point.match ? (
-          <CheckCircle2 className="size-4 text-green-500" />
+          <CheckCircle2 className="size-4 text-chart-2" />
         ) : (
-          <AlertCircle className="size-4 text-yellow-500" />
+          <AlertCircle className="size-4 text-chart-3" />
         )}
       </div>
       <div className="flex-1 grid md:grid-cols-3 gap-2">

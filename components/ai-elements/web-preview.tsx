@@ -243,7 +243,7 @@ export const WebPreviewConsole = ({
                 className={cn(
                   "text-xs",
                   log.level === "error" && "text-destructive",
-                  log.level === "warn" && "text-yellow-600",
+                  log.level === "warn" && "text-chart-3",
                   log.level === "log" && "text-foreground"
                 )}
                 key={`${log.timestamp.getTime()}-${index}`}

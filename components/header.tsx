@@ -81,7 +81,7 @@ export function Header() {
                 <Sun className="hidden dark:block" />
                 <Moon className="block dark:hidden" />
               </Button>
-              <Button size="sm" className="h-10 px-5 bg-foreground text-background hover:bg-foreground/90" onClick={(
+              <Button size="sm" className="h-10 px-5" onClick={(
                 e: React.MouseEvent<HTMLButtonElement>
               ) => {
                 e.preventDefault();

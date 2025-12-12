@@ -383,7 +383,7 @@ function BiasStatsCard({ stats }: { stats: Stats['bias'] }) {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Scale className="size-4 text-amber-500" />
+          <Scale className="size-4 text-chart-3" />
           Bias Detection
         </CardTitle>
       </CardHeader>
@@ -410,7 +410,7 @@ function BiasStatsCard({ stats }: { stats: Stats['bias'] }) {
 
 function BiasBar({ label, value, flagged }: { label: string; value: number; flagged: number }) {
   const percent = Math.round(value * 100);
-  const color = value > 0.5 ? 'bg-red-500' : value > 0.3 ? 'bg-amber-500' : 'bg-green-500';
+  const color = value > 0.5 ? 'bg-destructive' : value > 0.3 ? 'bg-chart-3' : 'bg-chart-2';
   
   return (
     <div className="space-y-1">
@@ -433,7 +433,7 @@ function SentimentStatsCard({ stats }: { stats: Stats['sentiment'] }) {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Heart className="size-4 text-pink-500" />
+          <Heart className="size-4 text-chart-4" />
           Sentiment Analysis
         </CardTitle>
       </CardHeader>
@@ -446,10 +446,10 @@ function SentimentStatsCard({ stats }: { stats: Stats['sentiment'] }) {
         </div>
         
         <div className="grid grid-cols-4 gap-2 text-center">
-          <SentimentBox label="Positive" count={distribution.positive} total={total} color="bg-green-500" />
-          <SentimentBox label="Negative" count={distribution.negative} total={total} color="bg-red-500" />
-          <SentimentBox label="Neutral" count={distribution.neutral} total={total} color="bg-gray-500" />
-          <SentimentBox label="Mixed" count={distribution.mixed} total={total} color="bg-amber-500" />
+          <SentimentBox label="Positive" count={distribution.positive} total={total} color="bg-chart-2" />
+          <SentimentBox label="Negative" count={distribution.negative} total={total} color="bg-destructive" />
+          <SentimentBox label="Neutral" count={distribution.neutral} total={total} color="bg-muted" />
+          <SentimentBox label="Mixed" count={distribution.mixed} total={total} color="bg-chart-3" />
         </div>
       </CardContent>
     </Card>
@@ -476,7 +476,7 @@ function FactCheckStatsCard({ stats }: { stats: Stats['factCheck'] }) {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Search className="size-4 text-blue-500" />
+          <Search className="size-4 text-primary" />
           Fact Checking
         </CardTitle>
       </CardHeader>
@@ -490,7 +490,7 @@ function FactCheckStatsCard({ stats }: { stats: Stats['factCheck'] }) {
         
         <div className="space-y-2">
           <div className="flex gap-1">
-            <Badge variant="default" className="bg-green-500">{distribution.verified} verified</Badge>
+            <Badge variant="default" className="bg-chart-2">{distribution.verified} verified</Badge>
             <Badge variant="destructive">{distribution.disputed} disputed</Badge>
             <Badge variant="secondary">{distribution.noClaims} skipped</Badge>
           </div>
@@ -509,11 +509,11 @@ function BiasHeatmap({ results }: { results: RowResult[] }) {
   const displayResults = results.slice(0, maxRows);
   
   const getColor = (score: number) => {
-    if (score > 0.7) return 'bg-red-500';
-    if (score > 0.5) return 'bg-orange-500';
-    if (score > 0.3) return 'bg-amber-400';
-    if (score > 0.1) return 'bg-yellow-300';
-    return 'bg-green-400';
+    if (score > 0.7) return 'bg-destructive';
+    if (score > 0.5) return 'bg-chart-3';
+    if (score > 0.3) return 'bg-chart-3';
+    if (score > 0.1) return 'bg-chart-3';
+    return 'bg-chart-2';
   };
 
   return (
@@ -523,11 +523,11 @@ function BiasHeatmap({ results }: { results: RowResult[] }) {
         <div className="flex items-center gap-2">
           <span>Low bias</span>
           <div className="flex gap-0.5">
-            <div className="size-3 rounded bg-green-400" />
-            <div className="size-3 rounded bg-yellow-300" />
-            <div className="size-3 rounded bg-amber-400" />
-            <div className="size-3 rounded bg-orange-500" />
-            <div className="size-3 rounded bg-red-500" />
+            <div className="size-3 rounded bg-chart-2" />
+            <div className="size-3 rounded bg-chart-3" />
+            <div className="size-3 rounded bg-chart-3" />
+            <div className="size-3 rounded bg-chart-3" />
+            <div className="size-3 rounded bg-destructive" />
           </div>
           <span>High bias</span>
         </div>
@@ -539,7 +539,7 @@ function BiasHeatmap({ results }: { results: RowResult[] }) {
             key={result.index}
             className={cn(
               'aspect-square rounded-sm cursor-pointer hover:ring-2 hover:ring-primary transition-all',
-              result.error ? 'bg-gray-300' : getColor(result.bias?.overallBiasScore || 0)
+              result.error ? 'bg-muted' : getColor(result.bias?.overallBiasScore || 0)
             )}
             title={`Row ${result.index + 1}: ${result.bias?.overallBiasScore ? Math.round(result.bias.overallBiasScore * 100) + '% bias' : 'No data'}`}
           />
@@ -565,36 +565,36 @@ function ResultTableRow({
   onToggle: () => void;
 }) {
   const getBiasColor = (score: number) => {
-    if (score > 0.5) return 'text-red-600 bg-red-50';
-    if (score > 0.3) return 'text-amber-600 bg-amber-50';
-    return 'text-green-600 bg-green-50';
+    if (score > 0.5) return 'text-destructive bg-destructive/10';
+    if (score > 0.3) return 'text-chart-3 bg-chart-3/10';
+    return 'text-chart-2 bg-chart-2/10';
   };
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
-      case 'positive': return 'text-green-600 bg-green-50';
-      case 'negative': return 'text-red-600 bg-red-50';
-      case 'mixed': return 'text-amber-600 bg-amber-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'positive': return 'text-chart-2 bg-chart-2/10';
+      case 'negative': return 'text-destructive bg-destructive/10';
+      case 'mixed': return 'text-chart-3 bg-chart-3/10';
+      default: return 'text-muted-foreground bg-muted';
     }
   };
 
   const getRiskColor = (level?: string) => {
     switch (level) {
-      case 'critical': return 'text-red-700 bg-red-100 border-red-300';
-      case 'high': return 'text-red-600 bg-red-50';
-      case 'medium': return 'text-amber-600 bg-amber-50';
-      case 'low': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'critical': return 'text-destructive bg-destructive/20 border-destructive/30';
+      case 'high': return 'text-destructive bg-destructive/10';
+      case 'medium': return 'text-chart-3 bg-chart-3/10';
+      case 'low': return 'text-chart-2 bg-chart-2/10';
+      default: return 'text-muted-foreground bg-muted';
     }
   };
 
   const getFactCheckIcon = (status: string) => {
     switch (status) {
-      case 'verified': return <CheckCircle2 className="size-4 text-green-500" />;
-      case 'disputed': return <XCircle className="size-4 text-red-500" />;
-      case 'no_claims': return <HelpCircle className="size-4 text-gray-400" />;
-      default: return <AlertTriangle className="size-4 text-amber-500" />;
+      case 'verified': return <CheckCircle2 className="size-4 text-chart-2" />;
+      case 'disputed': return <XCircle className="size-4 text-destructive" />;
+      case 'no_claims': return <HelpCircle className="size-4 text-muted-foreground" />;
+      default: return <AlertTriangle className="size-4 text-chart-3" />;
     }
   };
 
@@ -603,9 +603,9 @@ function ResultTableRow({
       <TableRow 
         className={cn(
           'cursor-pointer hover:bg-muted/50',
-          result.riskLevel === 'critical' && 'bg-red-100/50',
-          result.riskLevel === 'high' && 'bg-red-50/50',
-          !result.riskLevel && result.bias?.flagged && 'bg-red-50/50'
+          result.riskLevel === 'critical' && 'bg-destructive/10',
+          result.riskLevel === 'high' && 'bg-destructive/5',
+          !result.riskLevel && result.bias?.flagged && 'bg-destructive/5'
         )}
         onClick={onToggle}
       >
@@ -692,10 +692,10 @@ function ExpandedResultDetails({ result }: { result: RowResult }) {
             <div className="flex items-center gap-2">
               <Shield className={cn(
                 'size-4',
-                result.riskLevel === 'critical' && 'text-red-700',
-                result.riskLevel === 'high' && 'text-red-500',
-                result.riskLevel === 'medium' && 'text-amber-500',
-                result.riskLevel === 'low' && 'text-green-500'
+                result.riskLevel === 'critical' && 'text-destructive',
+                result.riskLevel === 'high' && 'text-destructive',
+                result.riskLevel === 'medium' && 'text-chart-3',
+                result.riskLevel === 'low' && 'text-chart-2'
               )} />
               <span className="text-sm font-medium">Risk Score: {result.riskScore}/100</span>
               <Badge variant={
@@ -709,7 +709,7 @@ function ExpandedResultDetails({ result }: { result: RowResult }) {
           )}
           {result.routingDecision && (
             <div className="flex items-center gap-2">
-              <Route className="size-4 text-blue-500" />
+              <Route className="size-4 text-primary" />
               <span className="text-sm">
                 Intent: <span className="font-medium capitalize">{result.routingDecision.intent}</span>
               </span>
@@ -720,7 +720,7 @@ function ExpandedResultDetails({ result }: { result: RowResult }) {
           )}
           {result.agentsRun && result.agentsRun.length > 0 && (
             <div className="flex items-center gap-2">
-              <Zap className="size-4 text-amber-500" />
+              <Zap className="size-4 text-chart-3" />
               <span className="text-sm">Agents:</span>
               <div className="flex gap-1">
                 {result.agentsRun.map(agent => (
@@ -750,7 +750,7 @@ function ExpandedResultDetails({ result }: { result: RowResult }) {
 
       {/* Routing Reasoning - New! */}
       {result.routingDecision?.reasoning && (
-        <div className="p-3 bg-blue-50 rounded border border-blue-200 text-blue-800 text-sm">
+        <div className="p-3 bg-primary/10 rounded border border-primary/20 text-primary text-sm">
           <span className="font-medium">Router Decision:</span> {result.routingDecision.reasoning}
         </div>
       )}
@@ -820,9 +820,9 @@ function ExpandedResultDetails({ result }: { result: RowResult }) {
                   <div key={i} className="text-xs p-2 bg-background rounded border">
                     <span className={cn(
                       'font-medium',
-                      finding.verdict === 'true' && 'text-green-600',
-                      finding.verdict === 'false' && 'text-red-600',
-                      finding.verdict === 'partially_true' && 'text-amber-600'
+                      finding.verdict === 'true' && 'text-chart-2',
+                      finding.verdict === 'false' && 'text-destructive',
+                      finding.verdict === 'partially_true' && 'text-chart-3'
                     )}>
                       {finding.verdict.replace('_', ' ')}:
                     </span>{' '}
@@ -836,7 +836,7 @@ function ExpandedResultDetails({ result }: { result: RowResult }) {
       </div>
 
       {result.error && (
-        <div className="p-3 bg-red-50 rounded border border-red-200 text-red-700 text-sm">
+        <div className="p-3 bg-destructive/10 rounded border border-destructive/20 text-destructive text-sm">
           Error: {result.error}
         </div>
       )}
@@ -850,10 +850,10 @@ function ExpandedResultDetails({ result }: { result: RowResult }) {
 
 function RiskScoreCard({ stats, metrics }: { stats: NonNullable<Stats['risk']>; metrics?: PipelineMetrics }) {
   const getRiskColor = (score: number) => {
-    if (score >= 70) return 'text-red-600';
-    if (score >= 50) return 'text-amber-600';
-    if (score >= 30) return 'text-yellow-600';
-    return 'text-green-600';
+    if (score >= 70) return 'text-destructive';
+    if (score >= 50) return 'text-chart-3';
+    if (score >= 30) return 'text-chart-3';
+    return 'text-chart-2';
   };
 
   const total = stats.distribution.low + stats.distribution.medium + stats.distribution.high + stats.distribution.critical;
@@ -891,10 +891,10 @@ function RiskScoreCard({ stats, metrics }: { stats: NonNullable<Stats['risk']>; 
           <div className="space-y-2">
             <span className="text-sm font-medium">Risk Distribution</span>
             <div className="space-y-1.5">
-              <RiskDistributionBar label="Low" count={stats.distribution.low} total={total} color="bg-green-500" />
-              <RiskDistributionBar label="Medium" count={stats.distribution.medium} total={total} color="bg-yellow-500" />
-              <RiskDistributionBar label="High" count={stats.distribution.high} total={total} color="bg-orange-500" />
-              <RiskDistributionBar label="Critical" count={stats.distribution.critical} total={total} color="bg-red-600" />
+              <RiskDistributionBar label="Low" count={stats.distribution.low} total={total} color="bg-chart-2" />
+              <RiskDistributionBar label="Medium" count={stats.distribution.medium} total={total} color="bg-chart-3" />
+              <RiskDistributionBar label="High" count={stats.distribution.high} total={total} color="bg-chart-3" />
+              <RiskDistributionBar label="Critical" count={stats.distribution.critical} total={total} color="bg-destructive" />
             </div>
           </div>
         </div>
@@ -925,56 +925,56 @@ function PipelineMetricsCard({ metrics }: { metrics: PipelineMetrics }) {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
-          <TrendingUp className="size-5 text-blue-500" />
+          <TrendingUp className="size-5 text-primary" />
           Pipeline Performance
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Cost Savings */}
-          <div className="space-y-1 p-3 bg-green-50 rounded-lg border border-green-200">
-            <div className="flex items-center gap-1 text-green-700">
+          <div className="space-y-1 p-3 bg-chart-2/10 rounded-lg border border-chart-2/20">
+            <div className="flex items-center gap-1 text-chart-2">
               <Zap className="size-4" />
               <span className="text-xs font-medium">Cost Savings</span>
             </div>
-            <span className="text-2xl font-bold text-green-700">{metrics.costSavings.savingsPercent}%</span>
-            <p className="text-[10px] text-green-600">
+            <span className="text-2xl font-bold text-chart-2">{metrics.costSavings.savingsPercent}%</span>
+            <p className="text-[10px] text-chart-2/80">
               {metrics.costSavings.savedCalls} API calls saved
             </p>
           </div>
 
           {/* Processing Time */}
-          <div className="space-y-1 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-1 text-blue-700">
+          <div className="space-y-1 p-3 bg-primary/10 rounded-lg border border-primary/20">
+            <div className="flex items-center gap-1 text-primary">
               <Zap className="size-4" />
               <span className="text-xs font-medium">Processing Time</span>
             </div>
-            <span className="text-2xl font-bold text-blue-700">
+            <span className="text-2xl font-bold text-primary">
               {(metrics.processingTimeMs / 1000).toFixed(1)}s
             </span>
-            <p className="text-[10px] text-blue-600">Total analysis time</p>
+            <p className="text-[10px] text-primary/80">Total analysis time</p>
           </div>
 
           {/* Cache Performance */}
-          <div className="space-y-1 p-3 bg-purple-50 rounded-lg border border-purple-200">
-            <div className="flex items-center gap-1 text-purple-700">
+          <div className="space-y-1 p-3 bg-chart-4/10 rounded-lg border border-chart-4/20">
+            <div className="flex items-center gap-1 text-chart-4">
               <Zap className="size-4" />
               <span className="text-xs font-medium">Cache Hits</span>
             </div>
-            <span className="text-2xl font-bold text-purple-700">{metrics.cacheHits}</span>
-            <p className="text-[10px] text-purple-600">
+            <span className="text-2xl font-bold text-chart-4">{metrics.cacheHits}</span>
+            <p className="text-[10px] text-chart-4/80">
               {metrics.cacheMisses} cache misses
             </p>
           </div>
 
           {/* Router Decisions */}
-          <div className="space-y-1 p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <div className="flex items-center gap-1 text-amber-700">
+          <div className="space-y-1 p-3 bg-chart-3/10 rounded-lg border border-chart-3/20">
+            <div className="flex items-center gap-1 text-chart-3">
               <Route className="size-4" />
               <span className="text-xs font-medium">Router Skips</span>
             </div>
-            <span className="text-2xl font-bold text-amber-700">{metrics.routerDecisions.safe}</span>
-            <p className="text-[10px] text-amber-600">
+            <span className="text-2xl font-bold text-chart-3">{metrics.routerDecisions.safe}</span>
+            <p className="text-[10px] text-chart-3/80">
               Safe content skipped
             </p>
           </div>
@@ -1012,16 +1012,16 @@ function RiskHeatmap({ results }: { results: RowResult[] }) {
   const displayResults = results.slice(0, maxRows);
   
   const getColor = (riskScore?: number, riskLevel?: string) => {
-    if (riskScore === undefined) return 'bg-gray-300';
-    if (riskLevel === 'critical') return 'bg-red-600';
-    if (riskLevel === 'high') return 'bg-orange-500';
-    if (riskLevel === 'medium') return 'bg-amber-400';
-    if (riskLevel === 'low') return 'bg-green-400';
+    if (riskScore === undefined) return 'bg-muted';
+    if (riskLevel === 'critical') return 'bg-destructive';
+    if (riskLevel === 'high') return 'bg-chart-3';
+    if (riskLevel === 'medium') return 'bg-chart-3';
+    if (riskLevel === 'low') return 'bg-chart-2';
     // Fallback based on score
-    if (riskScore >= 70) return 'bg-red-600';
-    if (riskScore >= 50) return 'bg-orange-500';
-    if (riskScore >= 30) return 'bg-amber-400';
-    return 'bg-green-400';
+    if (riskScore >= 70) return 'bg-destructive';
+    if (riskScore >= 50) return 'bg-chart-3';
+    if (riskScore >= 30) return 'bg-chart-3';
+    return 'bg-chart-2';
   };
 
   return (
@@ -1031,10 +1031,10 @@ function RiskHeatmap({ results }: { results: RowResult[] }) {
         <div className="flex items-center gap-2">
           <span>Low risk</span>
           <div className="flex gap-0.5">
-            <div className="size-3 rounded bg-green-400" />
-            <div className="size-3 rounded bg-amber-400" />
-            <div className="size-3 rounded bg-orange-500" />
-            <div className="size-3 rounded bg-red-600" />
+            <div className="size-3 rounded bg-chart-2" />
+            <div className="size-3 rounded bg-chart-3" />
+            <div className="size-3 rounded bg-chart-3" />
+            <div className="size-3 rounded bg-destructive" />
           </div>
           <span>Critical risk</span>
         </div>
@@ -1046,7 +1046,7 @@ function RiskHeatmap({ results }: { results: RowResult[] }) {
             key={result.index}
             className={cn(
               'aspect-square rounded-sm cursor-pointer hover:ring-2 hover:ring-primary transition-all',
-              result.error ? 'bg-gray-300' : getColor(result.riskScore, result.riskLevel)
+              result.error ? 'bg-muted' : getColor(result.riskScore, result.riskLevel)
             )}
             title={`Row ${result.index + 1}: Risk ${result.riskScore ?? 'N/A'} (${result.riskLevel ?? 'unknown'})`}
           />

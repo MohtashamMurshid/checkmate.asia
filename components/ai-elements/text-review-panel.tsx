@@ -70,7 +70,7 @@ export function TextReviewPanel({ onAnalyzeComplete }: TextReviewPanelProps) {
         />
         
         {error && (
-          <div className="text-sm text-red-500 bg-red-50 p-2 rounded border border-red-200">
+          <div className="text-sm text-destructive bg-destructive/10 p-2 rounded border border-destructive/20">
             {error}
           </div>
         )}

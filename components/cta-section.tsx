@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
 
@@ -17,12 +18,11 @@ export function CTASection() {
             Join thousands of users investigating information with AI-powered fact-checking
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-4">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-foreground text-background hover:bg-foreground/90 h-10 px-5"
-            >
-              Book a Demo
-            </Link>
+            <Button asChild size="sm" className="h-10 px-5">
+              <Link href="/contact">
+                Book a Demo
+              </Link>
+            </Button>
           
           </div>
         </div>

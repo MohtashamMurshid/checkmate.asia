@@ -477,7 +477,7 @@ function InvestigatePageContent() {
                {personalSource && (
                    <div className="px-4 pt-4 pb-0 animate-in slide-in-from-bottom-2 fade-in duration-200">
                     <div className="flex justify-between items-center mb-2">
-                       <span className="text-xs text-blue-500 font-medium flex items-center gap-1"><FileText className="size-3" /> Context Active</span>
+                       <span className="text-xs text-primary font-medium flex items-center gap-1"><FileText className="size-3" /> Context Active</span>
                        <Button
                           variant="ghost" 
                           size="sm"
@@ -626,7 +626,7 @@ function InvestigatePageContent() {
                                                    href={(extractedSourceContent as any).url} 
                                                    target="_blank" 
                                                    rel="noopener noreferrer" 
-                                                   className="text-xs text-blue-500 hover:underline flex items-center gap-1 break-all"
+                                                   className="text-xs text-primary hover:underline flex items-center gap-1 break-all"
                                                 >
                                                    <LinkIcon className="size-3 shrink-0" />
                                                    {(extractedSourceContent as any).url}
@@ -715,7 +715,7 @@ function InvestigatePageContent() {
                                                             href={meta.videoUrl} 
                                                             target="_blank" 
                                                             rel="noopener noreferrer" 
-                                                            className="text-xs text-blue-500 hover:underline flex items-center gap-1 break-all"
+                                                            className="text-xs text-primary hover:underline flex items-center gap-1 break-all"
                                                          >
                                                             <LinkIcon className="size-3 shrink-0" />
                                                             {meta.videoUrl}
@@ -744,7 +744,7 @@ function InvestigatePageContent() {
                               {personalSource && (
                                  <div>
                                     <h4 className="text-sm font-medium mb-2">Your Source Content</h4>
-                                    <div className="bg-blue-50/50 p-3 rounded-md text-sm border-l-2 border-blue-500">
+                                    <div className="bg-primary/10 p-3 rounded-md text-sm border-l-2 border-primary">
                                        {personalSource}
                                     </div>
                                  </div>
@@ -761,7 +761,7 @@ function InvestigatePageContent() {
                               {personalSource && (
                                  <div>
                                     <h4 className="text-sm font-medium mb-2">Your Source Content</h4>
-                                    <div className="bg-blue-50/50 p-3 rounded-md text-sm border-l-2 border-blue-500">
+                                    <div className="bg-primary/10 p-3 rounded-md text-sm border-l-2 border-primary">
                                        {personalSource}
                                     </div>
                                  </div>
@@ -951,7 +951,7 @@ function InvestigatePageContent() {
                       >
                          {personalSource ? '- Context' : '+ Context'}
                    </Button>
-                   {personalSource && <span className="text-[10px] text-blue-500 font-medium flex items-center gap-1"><FileText className="size-3" /> Active</span>}
+                   {personalSource && <span className="text-[10px] text-primary font-medium flex items-center gap-1"><FileText className="size-3" /> Active</span>}
                 </div>
                   
                 {personalSource && (
@@ -1027,7 +1027,7 @@ function CitationsBoard({ citations }: { citations: any[] }) {
                         <h4 className="text-sm font-medium leading-tight mb-1 truncate">
                            {citation.title || 'Untitled Source'}
                         </h4>
-                        <a href={citation.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline flex items-center gap-1 truncate">
+                        <a href={citation.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 truncate">
                            <LinkIcon className="size-3" />
                            {citation.url}
                         </a>
@@ -1132,9 +1132,9 @@ function TimelineItem({
          {/* Icon/Status Indicator */}
          <div className={cn(
            "size-8 rounded-full flex items-center justify-center shrink-0 text-xs font-medium shadow-sm transition-colors border z-10",
-           isCompleted ? "bg-green-50 border-green-200 text-green-600" : 
-           isRunning ? "bg-blue-50 border-blue-200 text-blue-600" :
-           isError ? "bg-red-50 border-red-200 text-red-600" :
+           isCompleted ? "bg-chart-2/10 border-chart-2/20 text-chart-2" : 
+           isRunning ? "bg-primary/10 border-primary/20 text-primary" :
+           isError ? "bg-destructive/10 border-destructive/20 text-destructive" :
            "bg-muted border-muted-foreground/20 text-muted-foreground"
          )}>
            {isRunning ? <Loader2 className="size-4 animate-spin" /> : 
@@ -1144,7 +1144,7 @@ function TimelineItem({
          
          <div className="flex-1 pt-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-               <h4 className={cn("font-medium text-sm", isRunning && "text-blue-600")}>
+               <h4 className={cn("font-medium text-sm", isRunning && "text-primary")}>
                   {getToolDisplayName(entry.toolName || '', entry.toolPart.input)}
                </h4>
                <Badge variant={isRunning ? "default" : "secondary"} className="text-[10px] h-5 px-2 font-normal">
@@ -1238,7 +1238,7 @@ function StructuredDataDisplay({ data }: { data: Record<string, unknown> }) {
                   href={result.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:underline flex items-center gap-1 mb-2 w-fit"
+                className="text-xs text-primary hover:underline flex items-center gap-1 mb-2 w-fit"
                 >
                   <ExternalLink className="size-3" />
                   {result.url.replace(/^https?:\/\//, '').split('/')[0]}

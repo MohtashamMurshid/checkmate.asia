@@ -91,14 +91,14 @@ const CustomNode = ({ data, isConnectable }: { data: any, isConnectable: boolean
   let credibilityIconColor = 'text-muted-foreground';
   if (credibility !== null) {
     if (credibility >= 7) {
-      credibilityColor = 'text-green-600 dark:text-green-400';
-      credibilityIconColor = 'text-green-600 dark:text-green-400';
+      credibilityColor = 'text-chart-2';
+      credibilityIconColor = 'text-chart-2';
     } else if (credibility >= 4) {
-      credibilityColor = 'text-yellow-600 dark:text-yellow-400';
-      credibilityIconColor = 'text-yellow-600 dark:text-yellow-400';
+      credibilityColor = 'text-chart-3';
+      credibilityIconColor = 'text-chart-3';
     } else {
-      credibilityColor = 'text-red-600 dark:text-red-400';
-      credibilityIconColor = 'text-red-600 dark:text-red-400';
+      credibilityColor = 'text-destructive';
+      credibilityIconColor = 'text-destructive';
     }
   }
 
@@ -280,7 +280,7 @@ export function EvolutionGraph({ nodes: initialNodes, edges: initialEdges }: Evo
               <span className="text-muted-foreground">Secondary/Related</span>
            </div>
            <div className="flex items-center gap-2">
-              <ShieldCheck className="size-3 text-green-600 dark:text-green-400" />
+              <ShieldCheck className="size-3 text-chart-2" />
               <span className="text-muted-foreground">High Author Credibility</span>
            </div>
         </div>

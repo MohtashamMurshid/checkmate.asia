@@ -99,7 +99,7 @@ export function DataPreview({
       <CardContent className="space-y-4">
         {/* Column warning */}
         {emptyRowCount > 0 && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-sm">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-chart-3/10 border border-chart-3/20 text-chart-3 dark:text-chart-3 text-sm">
             <AlertTriangle className="size-4 shrink-0" />
             <span>
               {emptyRowCount} row{emptyRowCount > 1 ? 's have' : ' has'} empty values in "{selectedColumn}" column.

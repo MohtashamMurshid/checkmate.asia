@@ -45,7 +45,7 @@ export function LandingHero() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <Button asChild size="sm" className="h-10 px-5 bg-foreground text-background hover:bg-foreground/90">
+            <Button asChild size="sm" className="h-10 px-5">
               <Link href="/contact">
                Book a Demo
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -86,11 +86,11 @@ export function LandingHero() {
                    Investigation 
                   </Link>
                 </Button>
-                <button aria-label="Play" className="ml-auto grid h-9 w-9 place-items-center rounded-full border border-border/60 bg-background hover:bg-muted/50">
+                <Button aria-label="Play" variant="outline" size="icon" className="ml-auto h-9 w-9 rounded-full">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-muted-foreground">
                     <path d="M8 5v14l11-7z" />
                   </svg>
-                </button>
+                </Button>
               </div>
             </div>
           </div>

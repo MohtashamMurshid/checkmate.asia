@@ -408,8 +408,8 @@ export default function AnalyzePage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <Sparkles className="size-5 text-green-600 dark:text-green-500" />
+                <div className="p-2 rounded-lg bg-chart-2/10">
+                  <Sparkles className="size-5 text-chart-2" />
                 </div>
                 <div>
                   <span className="font-semibold text-base">Analysis Complete</span>
@@ -422,7 +422,7 @@ export default function AnalyzePage() {
                       </Badge>
                     )}
                     {isSaved && (
-                      <Badge variant="default" className="gap-1 bg-green-600 text-xs">
+                      <Badge variant="default" className="gap-1 bg-chart-2 text-xs">
                         <CheckCircle2 className="size-3" />
                         Saved
                       </Badge>
@@ -464,9 +464,9 @@ function FeatureCard({
   color: 'amber' | 'pink' | 'blue';
 }) {
   const colorClasses = {
-    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-500',
-    pink: 'bg-pink-500/10 text-pink-600 dark:text-pink-500',
-    blue: 'bg-blue-500/10 text-blue-600 dark:text-blue-500',
+    amber: 'bg-chart-3/10 text-chart-3',
+    pink: 'bg-chart-4/10 text-chart-4',
+    blue: 'bg-primary/10 text-primary',
   };
 
   return (
@@ -496,9 +496,9 @@ function OptionToggle({
   color: 'amber' | 'pink' | 'blue';
 }) {
   const colorClasses = {
-    amber: 'text-amber-600 dark:text-amber-500',
-    pink: 'text-pink-600 dark:text-pink-500',
-    blue: 'text-blue-600 dark:text-blue-500',
+    amber: 'text-chart-3',
+    pink: 'text-chart-4',
+    blue: 'text-primary',
   };
 
   return (
@@ -514,7 +514,7 @@ function OptionToggle({
         checked ? 'bg-primary' : 'bg-muted'
       )}>
         <div className={cn(
-          'absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-all shadow-sm',
+          'absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-background transition-all shadow-sm',
           checked && 'translate-x-5'
         )} />
       </div>

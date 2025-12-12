@@ -49,13 +49,13 @@ export function HighlightedTextView({ text, spans, context }: HighlightedTextVie
       // Determine style based on type
       let className = "cursor-pointer transition-colors px-1 py-0.5 rounded ";
       if (span.type === 'fact') {
-        className += "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:hover:bg-blue-900/60 border-b-2 border-blue-300 dark:border-blue-700";
+        className += "bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:text-primary dark:hover:bg-primary/30 border-b-2 border-primary/30 dark:border-primary/40";
       } else if (span.type === 'bias') {
-        className += "bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/40 dark:text-red-200 dark:hover:bg-red-900/60 border-b-2 border-red-300 dark:border-red-700";
+        className += "bg-destructive/10 text-destructive hover:bg-destructive/20 dark:bg-destructive/20 dark:text-destructive dark:hover:bg-destructive/30 border-b-2 border-destructive/30 dark:border-destructive/40";
       } else if (span.type === 'sentiment') {
-        className += "bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:hover:bg-amber-900/60 border-b-2 border-amber-300 dark:border-amber-700";
+        className += "bg-chart-3/10 text-chart-3 hover:bg-chart-3/20 dark:bg-chart-3/20 dark:text-chart-3 dark:hover:bg-chart-3/30 border-b-2 border-chart-3/30 dark:border-chart-3/40";
       } else {
-        className += "bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 border-b-2 border-gray-300";
+        className += "bg-muted text-muted-foreground hover:bg-muted/80 dark:bg-muted dark:text-muted-foreground border-b-2 border-border";
       }
 
       // Add the highlighted span
@@ -132,10 +132,10 @@ export function HighlightedTextView({ text, spans, context }: HighlightedTextVie
   // Helper for verdict icon
   const getVerdictIcon = (verdict: string) => {
     switch (verdict) {
-      case 'supported': return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case 'contradicted': return <XCircle className="h-5 w-5 text-red-500" />;
-      case 'mixed': return <AlertTriangle className="h-5 w-5 text-amber-500" />;
-      default: return <HelpCircle className="h-5 w-5 text-gray-500" />;
+      case 'supported': return <CheckCircle2 className="h-5 w-5 text-chart-2" />;
+      case 'contradicted': return <XCircle className="h-5 w-5 text-destructive" />;
+      case 'mixed': return <AlertTriangle className="h-5 w-5 text-chart-3" />;
+      default: return <HelpCircle className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
@@ -212,7 +212,7 @@ export function HighlightedTextView({ text, spans, context }: HighlightedTextVie
                           href={source.url} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="flex items-center gap-1 text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded transition-colors text-blue-600 dark:text-blue-400 hover:underline"
+                          className="flex items-center gap-1 text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded transition-colors text-primary dark:text-primary hover:underline"
                         >
                           <ExternalLink className="h-3 w-3" />
                           {source.title || new URL(source.url).hostname}

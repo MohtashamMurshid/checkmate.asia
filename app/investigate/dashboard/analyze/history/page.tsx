@@ -272,7 +272,7 @@ function AnalysisCard({
             <div className="grid grid-cols-3 gap-4">
               {options.checkBias && (
                 <div className="flex items-center gap-2">
-                  <Scale className="size-4 text-amber-500" />
+                  <Scale className="size-4 text-chart-3" />
                   <div className="text-sm">
                     <span className="font-medium">{Math.round(biasScore * 100)}%</span>
                     <span className="text-muted-foreground"> avg bias</span>
@@ -286,7 +286,7 @@ function AnalysisCard({
               )}
               {options.checkSentiment && (
                 <div className="flex items-center gap-2">
-                  <Heart className="size-4 text-pink-500" />
+                  <Heart className="size-4 text-chart-4" />
                   <div className="text-sm">
                     <span className="font-medium capitalize">{dominantSentiment}</span>
                     <span className="text-muted-foreground"> dominant</span>
@@ -295,7 +295,7 @@ function AnalysisCard({
               )}
               {options.checkFacts && (
                 <div className="flex items-center gap-2">
-                  <Search className="size-4 text-blue-500" />
+                  <Search className="size-4 text-primary" />
                   <div className="text-sm">
                     <span className="font-medium">
                       {stats?.factCheck?.distribution?.verified ?? 0}

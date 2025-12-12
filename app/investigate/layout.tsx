@@ -66,7 +66,7 @@ export default function InvestigateLayout({
       {/* Overlay for mobile when sidebar is open */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[15] md:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-foreground/50 z-[15] md:hidden transition-opacity duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}

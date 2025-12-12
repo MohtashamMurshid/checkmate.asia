@@ -80,7 +80,7 @@ const features = [
     className: "col-span-3 lg:col-span-1 border-2 border-primary/50",
     background: (
       <div className="absolute inset-0 bg-primary/20">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.07)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.07)_1px,transparent_1px)] bg-[size:24px_24px]" />
         <DevApiBg />
       </div>
     ),

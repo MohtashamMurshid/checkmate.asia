@@ -154,7 +154,7 @@ export default function HistoryPage() {
                     <TableCell>
                       <Badge 
                         variant={item.status === 'Completed' ? 'default' : 'secondary'}
-                        className={item.status === 'Completed' ? 'bg-green-500/15 text-green-700 hover:bg-green-500/25 dark:text-green-400' : ''}
+                        className={item.status === 'Completed' ? 'bg-chart-2/15 text-chart-2 hover:bg-chart-2/25 dark:text-chart-2' : ''}
                       >
                         {item.status}
                       </Badge>
