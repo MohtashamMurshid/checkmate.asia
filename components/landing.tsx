@@ -5,8 +5,10 @@ import { DottedSurface } from "@/components/dotted";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import localFont from "next/font/local";
+import { Instrument_Sans } from "next/font/google";
 
 const departureMono = localFont({ src: "../fonts/DepartureMono-Regular.woff2" });
+const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 export function LandingHero() {
 
@@ -25,7 +27,7 @@ export function LandingHero() {
           {/* Top badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1.5 backdrop-blur-sm">
             <Sparkles className="h-4 w-4" />
-            <span className="text-xs sm:text-sm text-muted-foreground">
+            <span className={`text-xs sm:text-sm text-muted-foreground ${instrumentSans.className}`}>
               AI-powered information investigation
             </span>
           </div>
@@ -36,7 +38,7 @@ export function LandingHero() {
 
           </h1>
           {/* Subheadline */}
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className={`text-base md:text-lg text-muted-foreground max-w-2xl mx-auto ${instrumentSans.className}`}>
             Leverage ultra AI analysis and scalable APIs for real-time
             misinformation detection. 
           </p>
@@ -59,8 +61,8 @@ export function LandingHero() {
           <div className="relative mx-auto mt-12 w-full max-w-4xl">
             <div className="rounded-xl border border-border/70 bg-background/60 p-5 text-left shadow-xl backdrop-blur-md">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Welcome to Checkmate — your truth companion.</p>
-                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground">
+                <p className={`text-sm text-muted-foreground ${instrumentSans.className}`}>Welcome to Checkmate — your truth companion.</p>
+                <div className={`inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground ${instrumentSans.className}`}>
                   Mohtasham
                   <span className="relative inline-flex h-2 w-2 items-center justify-center">
                     <span className="absolute inline-flex h-2 w-2 rounded-full bg-primary opacity-80" />
@@ -95,7 +97,7 @@ export function LandingHero() {
 
           {/* Sponsors strip */}
           <div className="mx-auto mt-14 w-full max-w-5xl border-t border-border/60 pt-8">
-            <div className="flex justify-center gap-6 text-sm text-muted-foreground">
+            <div className={`flex justify-center gap-6 text-sm text-muted-foreground ${instrumentSans.className}`}>
               <div className="opacity-80">x.com</div>
               <div className="opacity-80">tiktok</div>
               <div className="opacity-80">web</div>

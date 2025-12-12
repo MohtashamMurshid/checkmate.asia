@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import { Instrument_Sans } from "next/font/google";
+
+const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 interface NavItem {
   label: string;
@@ -39,13 +42,13 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-md">
       <div className="container mx-auto px-4">
-        <div className="mt-4 mb-4 rounded-xl border border-border/60 bg-background/60 shadow-sm">
+        <div className="mt-4 mb-4 rounded-xl border border-border/60 bg-background/60 backdrop-blur-sm shadow-xl">
           <nav className="flex h-14 items-center justify-between px-3 sm:px-4">
             {/* Brand */}
             <Logo />
 
             {/* Center Nav */}
-            <div className="hidden md:flex items-center gap-1.5">
+            <div className={`hidden md:flex items-center gap-1.5 ${instrumentSans.className}`}>
               {NAV_ITEMS.map((item) => (
                 <Button
                   key={item.sectionId}
@@ -78,7 +81,7 @@ export function Header() {
                 <Sun className="hidden dark:block" />
                 <Moon className="block dark:hidden" />
               </Button>
-              <Button size="sm" className="h-9 px-4" onClick={(
+              <Button size="sm" className="h-10 px-5 bg-foreground text-background hover:bg-foreground/90" onClick={(
                 e: React.MouseEvent<HTMLButtonElement>
               ) => {
                 e.preventDefault();
