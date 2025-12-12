@@ -88,6 +88,9 @@ export async function verifyClaimWithWebSearch(params: {
 
   // 1) Run a focused web search for the claim
   let searchResults: ExaResultItem[] = [];
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
   try {
     const response = await fetch('https://api.exa.ai/search', {
       method: 'POST',
@@ -104,7 +107,9 @@ export async function verifyClaimWithWebSearch(params: {
           },
         },
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Exa API error: ${response.statusText}`);
