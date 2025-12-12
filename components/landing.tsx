@@ -58,7 +58,7 @@ export function LandingHero() {
           </div>
 
           {/* Floating demo card */}
-          <div className="relative mx-auto mt-12 w-full max-w-4xl">
+          <div className="relative mx-auto mt-12 w-full max-w-3xl">
             <div className="rounded-xl border border-border/70 bg-background/60 p-5 text-left shadow-xl backdrop-blur-md">
               <div className="flex items-center justify-between">
                 <p className={`text-sm text-muted-foreground ${instrumentSans.className}`}>Welcome to Checkmate — your truth companion.</p>
