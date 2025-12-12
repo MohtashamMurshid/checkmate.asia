@@ -43,8 +43,8 @@ export function SourcesSection() {
   ]
 
   return (
-    <section id="sources" className="py-12 md:py-20 lg:py-32">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="sources" className="py-16 md:py-24 lg:py-32">
+      <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="relative mx-auto max-w-3xl space-y-4 text-center">
           <h2 className={`text-balance text-3xl font-semibold md:text-5xl tracking-tight ${departureMono.className}`}>
             Checkmate cites <span className="text-primary">ONLY</span> from{" "}
@@ -65,7 +65,7 @@ export function SourcesSection() {
               <div className="space-y-3">
                 {category.items.map((item) => (
                   <div key={item.label}>
-                    <span className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background/40 px-3 py-1.5 text-sm font-medium backdrop-blur-sm">
+                    <span className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background/40 px-3 py-1 text-sm font-medium backdrop-blur-sm">
                       {item.label}
                     </span>
                     {item.caption && (

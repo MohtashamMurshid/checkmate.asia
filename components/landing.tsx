@@ -22,11 +22,11 @@ export function LandingHero() {
       <DottedSurface className="absolute inset-0" />
       
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-24 md:py-32">
+      <div className="relative z-10 container mx-auto px-4 md:px-6 py-24 md:py-32">
         <div className="max-w-5xl mx-auto text-center space-y-8">
           {/* Top badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1.5 backdrop-blur-sm">
-            <Sparkles className="h-4 w-4" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1 backdrop-blur-sm">
+            <Sparkles className="size-4" />
             <span className={`text-xs sm:text-sm text-muted-foreground ${instrumentSans.className}`}>
               AI-powered information investigation
             </span>
@@ -45,13 +45,13 @@ export function LandingHero() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <Button asChild size="sm" className="h-10 px-5">
+            <Button asChild size="lg">
               <Link href="/contact">
                Book a Demo
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="sm" onClick={scrollToFeatures} className="h-10 px-5 border-border/60 bg-transparent hover:bg-muted/50">
+            <Button variant="outline" size="lg" onClick={scrollToFeatures} className="border-border/60 bg-transparent hover:bg-muted/50">
               Features 
             </Button>
             
@@ -86,7 +86,7 @@ export function LandingHero() {
                    Investigation 
                   </Link>
                 </Button>
-                <Button aria-label="Play" variant="outline" size="icon" className="ml-auto h-9 w-9 rounded-full">
+                <Button aria-label="Play" variant="outline" size="icon" className="ml-auto size-9 rounded-full">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-muted-foreground">
                     <path d="M8 5v14l11-7z" />
                   </svg>

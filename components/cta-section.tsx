@@ -8,8 +8,8 @@ const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 export function CTASection() {
   return (
-    <section id="cta" className="py-20 md:py-32 bg-background">
-      <div className="container mx-auto px-4">
+    <section id="cta" className="py-16 md:py-24 lg:py-32 bg-background">
+      <div className="container mx-auto px-4 md:px-6">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h2 className={`text-3xl md:text-5xl font-semibold tracking-tight ${departureMono.className}`}>
             Ready to Investigate?
@@ -18,7 +18,7 @@ export function CTASection() {
             Join thousands of users investigating information with AI-powered fact-checking
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-4">
-            <Button asChild size="sm" className="h-10 px-5">
+            <Button asChild size="lg">
               <Link href="/contact">
                 Book a Demo
               </Link>

@@ -11,8 +11,8 @@ const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 export default function Features10() {
     return (
-        <section id="solutions" className="bg-muted/30 py-16 md:py-32 dark:bg-transparent">
-            <div className="mx-auto max-w-2xl px-6 lg:max-w-6xl">
+        <section id="solutions" className="bg-muted/30 py-16 md:py-24 lg:py-32 dark:bg-transparent">
+            <div className="mx-auto max-w-2xl px-4 md:px-6 lg:max-w-6xl">
                 <div className="mb-12 space-y-4 text-center md:mb-16">
                     <h1 className={`text-3xl md:text-5xl font-semibold tracking-tight ${departureMono.className}`}>
                         Solutions

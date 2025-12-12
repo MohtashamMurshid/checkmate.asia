@@ -6,7 +6,7 @@ const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 export function HeroSubtitle() {
   return (
-    <section id="about" className="my-20 flex flex-col items-center justify-center">
+    <section id="about" className="py-12 md:py-20 flex flex-col items-center justify-center container mx-auto px-4 md:px-6">
       <h2 className={`text-2xl md:text-4xl font-semibold text-center mb-3 tracking-tight ${departureMono.className}`}>
         Noisy world, noisy data
       </h2>
