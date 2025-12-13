@@ -26,7 +26,6 @@ export function LandingHero() {
         <div className="max-w-5xl mx-auto text-center space-y-8">
           {/* Top badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1 backdrop-blur-sm">
-            <Sparkles className="size-4" />
             <span className={`text-xs sm:text-sm text-muted-foreground ${instrumentSans.className}`}>
               AI-powered information investigation
             </span>
@@ -34,8 +33,7 @@ export function LandingHero() {
 
           {/* Headline */}
           <h1 className={`max-w-3xl mx-auto text-4xl md:text-5xl font-semibold tracking-tight mb-2 ${departureMono.className}`}>
-            Investigate Information in Seconds
-
+            Investigate Information <br /> in <br /> Seconds
           </h1>
           {/* Subheadline */}
           <p className={`text-base md:text-lg text-muted-foreground max-w-2xl mx-auto ${instrumentSans.className}`}>
