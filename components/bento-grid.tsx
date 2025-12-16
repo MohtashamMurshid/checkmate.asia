@@ -14,7 +14,7 @@ const BentoGrid = ({
   return (
     <div
       className={cn(
-        "grid w-full auto-rows-[26rem] grid-cols-3 gap-4",
+        "grid w-full auto-rows-[32rem] grid-cols-3 gap-4",
         className,
       )}
     >
@@ -50,7 +50,7 @@ const BentoCard = ({
     )}
   >
     {/* Visualization / Image Section */}
-    <div className="relative flex-1 w-full overflow-hidden bg-muted/20 p-4 flex items-center justify-center">
+    <div className="relative flex-1 w-full overflow-hidden bg-muted/20 p-5 flex items-center justify-center">
        {/* Ambient Glow matching landing.tsx */}
        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-orange-400/20 blur-[80px] rounded-full pointer-events-none opacity-60 dark:opacity-40" />
 

@@ -86,8 +86,7 @@ export function BentoFeatures() {
           {/* Section Header */}
           <div className="text-center space-y-4">
             <h2 className="text-5xl md:text-6xl font-medium tracking-tight text-foreground leading-[1.1]">
-              Powerful Features for
-              <span className="text-primary"> Truth Verification</span>
+              Powerful Features 
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               Comprehensive AI-powered tools to detect, verify, and combat misinformation across all digital platforms

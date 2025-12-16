@@ -8,6 +8,8 @@ import { SourcesSection } from "@/components/sources-section";
 import { useEffect } from "react";
 import FooterSection from "@/components/footer";
 import { Header } from "@/components/header";
+import Features from "@/components/features-10";
+import { UseCasesSection } from "@/components/use-cases-section";
 
 export default function LandingContent() {
   useEffect(() => {
@@ -28,6 +30,8 @@ export default function LandingContent() {
         <Header />
       <LandingHero />
       <HeroSubtitle />
+      <UseCasesSection />
+      <Features />
       <BentoFeatures />
       <SourcesSection />
       <CTASection />

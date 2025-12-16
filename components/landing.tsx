@@ -145,7 +145,7 @@ export function LandingHero() {
         {/* Footer Text */}
         <div className="mt-24 text-center">
             <p className={`text-xs md:text-sm tracking-widest text-muted-foreground uppercase opacity-60 ${departureMono.className}`}>
-                Trusted by 10,000+ organizations worldwide
+                Trusted by organizations worldwide
             </p>
         </div>
 
