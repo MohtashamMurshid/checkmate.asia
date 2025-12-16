@@ -29,15 +29,16 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', sectionId: 'home' },
+  { label: 'Research', sectionId: 'research' },
   { 
     label: 'Use Cases', 
     sectionId: 'use-cases',
     columns: [
        {
          items: [
-           { title: "News Reporting", description: "Automated fact-checking for newsrooms", icon: Newspaper, href: "/enterprisesolutions/newsreporting" },
-           { title: "Public Relations", description: "Monitor brand sentiment in real-time", icon: Users, href: "/enterprisesolutions/publicrelations" },
-           { title: "Data Compliance", description: "Regulatory boundaries for AI agents", icon: Shield, href: "/enterprisesolutions/datacompliance" }
+           { title: "News Reporting", description: "Automated fact-checking for newsrooms", icon: Newspaper, href: "/newsreporting" },
+           { title: "Public Relations", description: "Monitor brand sentiment in real-time", icon: Users, href: "/publicrelations" },
+           { title: "Data Compliance", description: "Regulatory boundaries for AI agents", icon: Shield, href: "/datacompliance" }
          ]
        }
     ]
@@ -91,6 +92,14 @@ export function Header() {
 
   const scrollToSection = (sectionId: string) => {
     setMenuState(false);
+    if (sectionId === 'research') {
+      window.location.href = '/research';
+      return;
+    }
+    if (sectionId === 'use-cases') {
+      window.location.href = '/use-cases';
+      return;
+    }
     if (pathname !== '/') {
       window.location.href = `/#${sectionId}`;
       return;
@@ -128,7 +137,7 @@ export function Header() {
                 <div className="relative flex flex-wrap items-center justify-between gap-6 lg:gap-0">
                     {/* Logo & Mobile Toggle */}
                     <div className="flex w-full justify-between lg:w-auto">
-                        <Logo />
+                        <Logo showText={!isScrolled} />
 
                         <button
                             onClick={() => setMenuState(!menuState)}
@@ -145,7 +154,7 @@ export function Header() {
                         "absolute left-1/2 -translate-x-1/2 hidden lg:block transition-all duration-300",
                         isScrolled ? "opacity-100" : "opacity-100"
                     )}>
-                        <ul className="flex gap-1 items-center">
+                        <ul className="flex gap-1 items-center justify-center">
                             {NAV_ITEMS.map((item) => (
                                 <li key={item.sectionId} onMouseEnter={() => setHoveredItem(item.label)}>
                                     <Button
