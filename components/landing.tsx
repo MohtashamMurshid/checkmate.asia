@@ -1,7 +1,8 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, AlertCircle, Activity, Database } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, CheckCircle2, AlertCircle, Activity, Database, Scale, Heart, Search, XCircle } from "lucide-react";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
@@ -85,15 +86,14 @@ export function LandingHero() {
                     <p className="text-xs text-foreground/90 leading-relaxed font-medium">
                       "Global renewable energy capacity grew by 50% in 2023."
                     </p>
-                    <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <AlertCircle className="size-4 text-red-500 shrink-0 mt-0.5" />
                   </div>
                   <div className="mt-2 flex items-center gap-2">
                     <div className="flex -space-x-1.5">
-                       <div className="size-4 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[6px]">1</div>
-                       <div className="size-4 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[6px]">2</div>
-                       <div className="size-4 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[6px]">3</div>
+                       <div className="size-4 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center text-[6px]">1</div>
+                       <div className="size-4 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-[6px]">2</div>
                     </div>
-                    <span className="text-[10px] text-muted-foreground">Verified across 3 sources</span>
+                    <span className="text-[10px] text-muted-foreground">Disputed across 2 sources</span>
                   </div>
                 </div>
 
@@ -116,31 +116,35 @@ export function LandingHero() {
                 </div>
               </div>
 
-              {/* Data Checking Visualization */}
-              <div className="relative h-20 w-full bg-muted/20 rounded-lg border border-border/10 overflow-hidden p-3">
-                  <div className="flex items-center justify-between mb-2">
-                     <div className="flex items-center gap-1.5">
-                        <Activity className="size-3 text-blue-500" />
-                        <span className="text-[10px] font-medium text-muted-foreground">Data Integrity Check</span>
-                     </div>
-                     <span className="text-[10px] text-emerald-500 animate-pulse flex items-center gap-1">
-                        <span className="relative flex h-1.5 w-1.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                        </span>
-                        Active
-                     </span>
+              {/* Data Row */}
+              <div className="space-y-2 mb-5">
+                <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Data Analysis</div>
+                
+                {/* Data Row 1 */}
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/30 border border-border/10 text-xs">
+                  <span className="text-muted-foreground shrink-0 w-8">#1</span>
+                  <span className="truncate flex-1 text-[10px]">Climate change impacts are accelerating...</span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4">2%</Badge>
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">pos</Badge>
+                    <CheckCircle2 className="size-3 text-emerald-500" />
                   </div>
-                  
-                  {/* Data flow bars */}
-                  <div className="flex items-end justify-between h-8 gap-0.5">
-                    {[40, 70, 45, 90, 60, 80, 50, 75, 60, 95, 85, 40, 60, 75, 45, 90, 55, 80].map((h, i) => (
-                         <div key={i} className="w-full bg-primary/20 rounded-t-[1px] relative overflow-hidden transition-all duration-1000 ease-in-out" style={{ height: `${h}%` }}>
-                             <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-t from-primary/30 to-transparent" />
-                         </div>
-                    ))}
+                </div>
+
+                {/* Data Row 2 */}
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/30 border border-border/10 text-xs">
+                  <span className="text-muted-foreground shrink-0 w-8">#2</span>
+                  <span className="truncate flex-1 text-[10px]">Economic forecasts show mixed signals...</span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4">45%</Badge>
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">neg</Badge>
+                    <AlertCircle className="size-3 text-red-500" />
                   </div>
+                </div>
+
+           
               </div>
+
 
             </div>
           </div>
