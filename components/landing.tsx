@@ -16,7 +16,7 @@ export function LandingHero() {
   };
 
   return (
-    <section className={`relative min-h-screen flex items-center overflow-hidden pt-20 ${instrumentSans.className}`}>
+    <section id="home" className={`relative min-h-screen flex items-center overflow-hidden pt-20 ${instrumentSans.className}`}>
       {/* Content Container */}
       <div className="container mx-auto max-w-7xl px-4 md:px-6 py-12 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">

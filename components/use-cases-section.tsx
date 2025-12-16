@@ -36,7 +36,7 @@ export function UseCasesSection() {
   ];
 
   return (
-    <section className={`py-20 md:py-32 bg-background ${instrumentSans.className}`}>
+    <section id="use-cases" className={`py-20 md:py-32 bg-background ${instrumentSans.className}`}>
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         
         {/* Header Section */}

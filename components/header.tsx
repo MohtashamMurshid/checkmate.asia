@@ -19,9 +19,11 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', sectionId: 'home' },
-  { label: 'Features', sectionId: 'features' },
+  { label: 'Use Cases', sectionId: 'use-cases' },
   { label: 'Solutions', sectionId: 'solutions' },
+  { label: 'Features', sectionId: 'features' },
   { label: 'Sources', sectionId: 'sources' },
+  { label: 'CTA', sectionId: 'cta' },
 ];
 
 export function Header() {
