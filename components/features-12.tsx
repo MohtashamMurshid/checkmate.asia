@@ -26,21 +26,21 @@ export default function Features() {
     }> = [
         {
             key: 'item-1',
-            icon: <FileText className="size-4 text-primary" />,
+            icon: <FileText className="size-4 text-foreground" />,
             title: 'Due diligence',
             description:
                 'Checkmate helps businesses validate claims and assumptions found in pitch decks, reports, or market research. It reviews external documents, identifies exaggeration or weak evidence, and provides clearer context to decision-makers.',
         },
         {
             key: 'item-2',
-            icon: <Network className="size-4 text-primary" />,
+            icon: <Network className="size-4 text-foreground" />,
             title: 'Source tracing & political bias',
             description:
                 'Checkmate maps how information spreads—tracing original sources, incentives, and potential agendas—to reveal bias and provide clearer context.',
         },
         {
             key: 'item-4',
-            icon: <CheckCircle2 className="size-4 text-primary" />,
+            icon: <CheckCircle2 className="size-4 text-foreground" />,
             title: 'Data Compliance',
             description:
                 'Checkmate integrates with your enterprise data to filter and correct inaccurate data, ensuring it reflects the real world.',

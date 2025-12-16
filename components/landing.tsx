@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2, AlertCircle, Activity, Database } from "lucide-react";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
@@ -25,13 +25,13 @@ export function LandingHero() {
           <div className="lg:col-span-7 flex flex-col gap-8 text-left z-10">
             {/* Headline */}
             <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-foreground leading-[1.1]">
-              Know What <br />
-              To Trust
+              Stop Guessing. <br />
+              Know What's Real.
             </h1>
             
             {/* Subheadline */}
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-              Checkmate analyzes information for factual accuracy, bias, and sentiment.
+              Paste any text or upload documents. Get instant fact-checking, bias detection, and sentiment analysis. Make confident decisions.
             </p>
 
             {/* CTA Button */}
@@ -42,7 +42,7 @@ export function LandingHero() {
                 className="bg-[#FCD34D] hover:bg-[#FCD34D]/90 text-black font-medium rounded-md h-12 px-8 text-base shadow-sm transition-transform hover:-translate-y-0.5"
               >
                 <Link href="/contact">
-                  GET A DEMO
+                  Try Free Analysis
                   <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>
@@ -58,7 +58,7 @@ export function LandingHero() {
             <div className="relative rounded-xl border border-border/40 bg-background/80 backdrop-blur-xl shadow-2xl overflow-hidden p-6 max-w-md mx-auto transform rotate-1 transition-transform hover:rotate-0 duration-500">
               
               {/* Card Header / Tabs */}
-              <div className="flex border-b border-border/10 pb-4 mb-6">
+              <div className="flex border-b border-border/10 pb-4 mb-4">
                  <div className="w-1/2 border-r border-border/10 pr-4">
                     <div className="text-xs font-medium text-muted-foreground mb-1">Trust Score</div>
                     <div className="flex items-baseline gap-2">
@@ -75,52 +75,66 @@ export function LandingHero() {
                  </div>
               </div>
 
-              {/* Chart Area (Abstract Scatter Plot) */}
-              <div className="relative h-48 w-full bg-transparent">
-                  {/* Axis Labels */}
-                  <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-muted-foreground/60 h-full py-2">
-                      <span>100</span>
-                      <span>80</span>
-                      <span>60</span>
-                      <span>40</span>
-                      <span>20</span>
-                      <span>0</span>
+              {/* Fact Analysis Stream */}
+              <div className="space-y-3 mb-5">
+                <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Live Fact Analysis</div>
+                
+                {/* Fact Item 1 */}
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/10">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-xs text-foreground/90 leading-relaxed font-medium">
+                      "Global renewable energy capacity grew by 50% in 2023."
+                    </p>
+                    <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex -space-x-1.5">
+                       <div className="size-4 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[6px]">1</div>
+                       <div className="size-4 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[6px]">2</div>
+                       <div className="size-4 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[6px]">3</div>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">Verified across 3 sources</span>
+                  </div>
+                </div>
+
+                 {/* Fact Item 2 */}
+                 <div className="bg-muted/30 rounded-lg p-3 border border-border/10">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-xs text-foreground/90 leading-relaxed font-medium">
+                      "New tax regulations impact 85% of small businesses immediately."
+                    </p>
+                    <AlertCircle className="size-4 text-amber-500 shrink-0 mt-0.5" />
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                     <span className="text-[10px] text-amber-500/90 font-medium">Context Missing</span>
+                     <span className="text-[10px] text-muted-foreground">• Needs clarification</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Checking Visualization */}
+              <div className="relative h-20 w-full bg-muted/20 rounded-lg border border-border/10 overflow-hidden p-3">
+                  <div className="flex items-center justify-between mb-2">
+                     <div className="flex items-center gap-1.5">
+                        <Activity className="size-3 text-blue-500" />
+                        <span className="text-[10px] font-medium text-muted-foreground">Data Integrity Check</span>
+                     </div>
+                     <span className="text-[10px] text-emerald-500 animate-pulse flex items-center gap-1">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                        </span>
+                        Active
+                     </span>
                   </div>
                   
-                  {/* Scatter Dots - Simulated Data */}
-                  <div className="absolute inset-0 ml-8">
-                      {/* Random distribution of dots to match the design's scatter plot feel */}
-                      {[...Array(40)].map((_, i) => (
-                          <div 
-                              key={i}
-                              className={`absolute rounded-full border ${Math.random() > 0.3 ? 'border-emerald-500/20 bg-emerald-500/10' : 'border-rose-500/20 bg-rose-500/10'}`}
-                              style={{
-                                  width: Math.random() > 0.7 ? '8px' : '6px',
-                                  height: Math.random() > 0.7 ? '8px' : '6px',
-                                  left: `${Math.random() * 90}%`,
-                                  top: `${Math.random() * 80 + 10}%`,
-                                  opacity: Math.random() * 0.5 + 0.3
-                              }}
-                          />
-                      ))}
-                      
-                      {/* Highlighted Insight Tooltip */}
-                      <div className="absolute bottom-8 right-0 bg-background border border-border/50 shadow-lg rounded-lg p-3 max-w-[200px] animate-in fade-in zoom-in duration-700 delay-300">
-                          <p className="text-xs text-foreground/80 leading-snug">
-                            3 potential inaccuracies detected in latest viral source analysis.
-                          </p>
-                          <div className="mt-2">
-                             <Button variant="outline" size="sm" className="h-6 text-[10px] px-2">
-                                View Report
-                             </Button>
-                          </div>
-                      </div>
-                  </div>
-                  
-                  {/* X Axis */}
-                  <div className="absolute bottom-0 left-8 right-0 border-t border-border/10 pt-1 flex justify-between text-[10px] text-muted-foreground/60">
-                      <span>SEP 1</span>
-                      <span>OCT 1</span>
+                  {/* Data flow bars */}
+                  <div className="flex items-end justify-between h-8 gap-0.5">
+                    {[40, 70, 45, 90, 60, 80, 50, 75, 60, 95, 85, 40, 60, 75, 45, 90, 55, 80].map((h, i) => (
+                         <div key={i} className="w-full bg-primary/20 rounded-t-[1px] relative overflow-hidden transition-all duration-1000 ease-in-out" style={{ height: `${h}%` }}>
+                             <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-t from-primary/30 to-transparent" />
+                         </div>
+                    ))}
                   </div>
               </div>
 
@@ -131,7 +145,7 @@ export function LandingHero() {
         {/* Footer Text */}
         <div className="mt-24 text-center">
             <p className={`text-xs md:text-sm tracking-widest text-muted-foreground uppercase opacity-60 ${departureMono.className}`}>
-                Trusted by leading organizations
+                Trusted by 10,000+ organizations worldwide
             </p>
         </div>
 

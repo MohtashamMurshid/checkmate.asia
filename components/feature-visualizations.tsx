@@ -19,14 +19,14 @@ export const EnterpriseApiVisual = ({ className }: VisualizationProps) => (
       width="100"
       height="100"
       rx="8"
-      className="stroke-primary fill-background"
+      className="stroke-foreground fill-background"
       strokeWidth="2"
     />
     <text
       x="200"
       y="155"
       textAnchor="middle"
-      className="fill-primary text-sm font-medium"
+      className="fill-foreground text-sm font-medium"
       fontSize="14"
     >
       API
@@ -34,36 +34,36 @@ export const EnterpriseApiVisual = ({ className }: VisualizationProps) => (
     
     {/* Connected Services/Nodes */}
     {/* Top Left */}
-    <circle cx="80" cy="60" r="20" className="stroke-primary fill-background" strokeWidth="2" />
-    <text x="80" y="64" textAnchor="middle" className="fill-primary text-[10px] font-medium">Client</text>
-    <line x1="100" y1="60" x2="150" y2="120" className="stroke-primary/40" strokeWidth="1.5" strokeDasharray="4 4" />
+    <circle cx="80" cy="60" r="20" className="stroke-foreground fill-background" strokeWidth="2" />
+    <text x="80" y="64" textAnchor="middle" className="fill-foreground text-[10px] font-medium">Client</text>
+    <line x1="100" y1="60" x2="150" y2="120" className="stroke-foreground/40" strokeWidth="1.5" strokeDasharray="4 4" />
     
     {/* Top Right */}
-    <circle cx="320" cy="60" r="20" className="stroke-primary fill-background" strokeWidth="2" />
-    <text x="320" y="64" textAnchor="middle" className="fill-primary text-[10px] font-medium">Server</text>
-    <line x1="300" y1="60" x2="250" y2="120" className="stroke-primary/40" strokeWidth="1.5" strokeDasharray="4 4" />
+    <circle cx="320" cy="60" r="20" className="stroke-foreground fill-background" strokeWidth="2" />
+    <text x="320" y="64" textAnchor="middle" className="fill-foreground text-[10px] font-medium">Server</text>
+    <line x1="300" y1="60" x2="250" y2="120" className="stroke-foreground/40" strokeWidth="1.5" strokeDasharray="4 4" />
     
     {/* Bottom Left */}
-    <circle cx="80" cy="240" r="20" className="stroke-primary fill-background" strokeWidth="2" />
-    <text x="80" y="244" textAnchor="middle" className="fill-primary text-[10px] font-medium">DB</text>
-    <line x1="100" y1="240" x2="150" y2="180" className="stroke-primary/40" strokeWidth="1.5" strokeDasharray="4 4" />
+    <circle cx="80" cy="240" r="20" className="stroke-foreground fill-background" strokeWidth="2" />
+    <text x="80" y="244" textAnchor="middle" className="fill-foreground text-[10px] font-medium">DB</text>
+    <line x1="100" y1="240" x2="150" y2="180" className="stroke-foreground/40" strokeWidth="1.5" strokeDasharray="4 4" />
     
     {/* Bottom Right */}
-    <circle cx="320" cy="240" r="20" className="stroke-primary fill-background" strokeWidth="2" />
-    <text x="320" y="244" textAnchor="middle" className="fill-primary text-[10px] font-medium">Auth</text>
+    <circle cx="320" cy="240" r="20" className="stroke-foreground fill-background" strokeWidth="2" />
+    <text x="320" y="244" textAnchor="middle" className="fill-foreground text-[10px] font-medium">Auth</text>
     
     {/* Data Flow Indicators */}
-    <circle cx="200" cy="80" r="3" className="fill-primary animate-pulse" />
-    <circle cx="200" cy="220" r="3" className="fill-primary animate-pulse" style={{ animationDelay: '0.5s' }} />
+    <circle cx="200" cy="80" r="3" className="fill-foreground animate-pulse" />
+    <circle cx="200" cy="220" r="3" className="fill-foreground animate-pulse" style={{ animationDelay: '0.5s' }} />
     
     {/* Request/Response Arrows */}
     <path
       d="M 180 100 L 160 90 L 165 100 L 160 110 Z"
-      className="fill-primary/60"
+      className="fill-foreground/60"
     />
     <path
       d="M 220 200 L 240 210 L 235 200 L 240 190 Z"
-      className="fill-primary/60"
+      className="fill-foreground/60"
     />
   </svg>
 )
@@ -83,53 +83,53 @@ export const AgentDeploymentVisual = ({ className }: VisualizationProps) => (
       width="200"
       height="140"
       rx="8"
-      className="stroke-primary fill-background/50"
+      className="stroke-foreground fill-background/50"
       strokeWidth="2"
     />
     
     {/* Server Racks/Units */}
-    <rect x="120" y="100" width="160" height="20" rx="2" className="fill-primary/20" />
-    <rect x="120" y="130" width="160" height="20" rx="2" className="fill-primary/20" />
-    <rect x="120" y="160" width="160" height="20" rx="2" className="fill-primary/20" />
-    <rect x="120" y="190" width="160" height="20" rx="2" className="fill-primary/20" />
+    <rect x="120" y="100" width="160" height="20" rx="2" className="fill-foreground/20" />
+    <rect x="120" y="130" width="160" height="20" rx="2" className="fill-foreground/20" />
+    <rect x="120" y="160" width="160" height="20" rx="2" className="fill-foreground/20" />
+    <rect x="120" y="190" width="160" height="20" rx="2" className="fill-foreground/20" />
     
     {/* Security Shield */}
     <path
       d="M 200 50 L 220 60 L 220 80 L 200 90 L 180 80 L 180 60 Z"
-      className="stroke-primary fill-primary/10"
+      className="stroke-foreground fill-foreground/10"
       strokeWidth="2"
     />
-    <circle cx="200" cy="70" r="8" className="fill-primary" />
+    <circle cx="200" cy="70" r="8" className="fill-foreground" />
     
     {/* Lock Icon */}
     <rect x="195" y="75" width="10" height="8" rx="1" className="fill-background" />
     <path d="M 197 75 L 197 72 L 203 72 L 203 75" className="stroke-background" strokeWidth="1.5" fill="none" />
-    <text x="240" y="75" className="fill-primary text-xs font-medium">Secure</text>
+    <text x="240" y="75" className="fill-foreground text-xs font-medium">Secure</text>
     
     {/* Connection Lines */}
-    <line x1="200" y1="50" x2="200" y2="80" className="stroke-primary/40" strokeWidth="1.5" />
+    <line x1="200" y1="50" x2="200" y2="80" className="stroke-foreground/40" strokeWidth="1.5" />
     
     {/* Local Network Indicators */}
-    <circle cx="60" cy="150" r="15" className="stroke-primary fill-background" strokeWidth="2" />
-    <text x="60" y="154" textAnchor="middle" className="fill-primary text-[10px] font-medium">Local</text>
-    <circle cx="60" cy="150" r="8" className="fill-primary/30" />
-    <line x1="75" y1="150" x2="100" y2="150" className="stroke-primary/40" strokeWidth="1.5" />
+    <circle cx="60" cy="150" r="15" className="stroke-foreground fill-background" strokeWidth="2" />
+    <text x="60" y="154" textAnchor="middle" className="fill-foreground text-[10px] font-medium">Local</text>
+    <circle cx="60" cy="150" r="8" className="fill-foreground/30" />
+    <line x1="75" y1="150" x2="100" y2="150" className="stroke-foreground/40" strokeWidth="1.5" />
     
-    <circle cx="340" cy="150" r="15" className="stroke-primary fill-background" strokeWidth="2" />
-    <text x="340" y="154" textAnchor="middle" className="fill-primary text-[10px] font-medium">LAN</text>
-    <line x1="325" y1="150" x2="300" y2="150" className="stroke-primary/40" strokeWidth="1.5" />
+    <circle cx="340" cy="150" r="15" className="stroke-foreground fill-background" strokeWidth="2" />
+    <text x="340" y="154" textAnchor="middle" className="fill-foreground text-[10px] font-medium">LAN</text>
+    <line x1="325" y1="150" x2="300" y2="150" className="stroke-foreground/40" strokeWidth="1.5" />
     
     {/* Data Flow */}
     <path
       d="M 200 220 Q 150 250, 100 270"
-      className="stroke-primary/30"
+      className="stroke-foreground/30"
       strokeWidth="2"
       fill="none"
       strokeDasharray="3 3"
     />
     <path
       d="M 200 220 Q 250 250, 300 270"
-      className="stroke-primary/30"
+      className="stroke-foreground/30"
       strokeWidth="2"
       fill="none"
       strokeDasharray="3 3"
@@ -413,36 +413,36 @@ export const DueDiligenceVisual = ({ className }: VisualizationProps) => (
     xmlns="http://www.w3.org/2000/svg"
   >
     {/* Document Base */}
-    <rect x="120" y="40" width="160" height="220" rx="4" className="stroke-primary fill-background" strokeWidth="2" />
-    <text x="200" y="60" textAnchor="middle" className="fill-primary text-[10px] font-bold opacity-80">REPORT</text>
+    <rect x="120" y="40" width="160" height="220" rx="4" className="stroke-foreground fill-background" strokeWidth="2" />
+    <text x="200" y="60" textAnchor="middle" className="fill-foreground text-[10px] font-bold opacity-80">REPORT</text>
     
     {/* Document Lines */}
-    <line x1="140" y1="70" x2="260" y2="70" className="stroke-primary/30" strokeWidth="2" />
-    <line x1="140" y1="90" x2="240" y2="90" className="stroke-primary/30" strokeWidth="2" />
-    <line x1="140" y1="110" x2="260" y2="110" className="stroke-primary/30" strokeWidth="2" />
-    <line x1="140" y1="130" x2="220" y2="130" className="stroke-primary/30" strokeWidth="2" />
+    <line x1="140" y1="70" x2="260" y2="70" className="stroke-foreground/30" strokeWidth="2" />
+    <line x1="140" y1="90" x2="240" y2="90" className="stroke-foreground/30" strokeWidth="2" />
+    <line x1="140" y1="110" x2="260" y2="110" className="stroke-foreground/30" strokeWidth="2" />
+    <line x1="140" y1="130" x2="220" y2="130" className="stroke-foreground/30" strokeWidth="2" />
     
     {/* Scanning Effect */}
-    <rect x="110" y="150" width="180" height="2" className="fill-primary animate-pulse" />
+    <rect x="110" y="150" width="180" height="2" className="fill-foreground animate-pulse" />
     <path
       d="M 110 150 L 290 150 L 290 180 L 110 180 Z"
-      className="fill-primary/10"
+      className="fill-foreground/10"
     />
     
     {/* Verified Stamp/Badge */}
-    <circle cx="240" cy="220" r="25" className="fill-background stroke-primary" strokeWidth="2" />
+    <circle cx="240" cy="220" r="25" className="fill-background stroke-foreground" strokeWidth="2" />
     <path
       d="M 230 220 L 238 228 L 255 210"
-      className="stroke-primary"
+      className="stroke-foreground"
       strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <text x="240" y="260" textAnchor="middle" className="fill-primary text-[10px] font-bold">ANALYZED</text>
+    <text x="240" y="260" textAnchor="middle" className="fill-foreground text-[10px] font-bold">ANALYZED</text>
     
     {/* Abstract Background Elements */}
-    <circle cx="80" cy="100" r="10" className="fill-primary/10" />
-    <circle cx="320" cy="200" r="15" className="fill-primary/10" />
+    <circle cx="80" cy="100" r="10" className="fill-foreground/10" />
+    <circle cx="320" cy="200" r="15" className="fill-foreground/10" />
   </svg>
 )
 
@@ -455,38 +455,38 @@ export const SourceTracingVisual = ({ className }: VisualizationProps) => (
     xmlns="http://www.w3.org/2000/svg"
   >
     {/* Main Source Node */}
-    <circle cx="200" cy="250" r="20" className="stroke-primary fill-background" strokeWidth="2" />
-    <circle cx="200" cy="250" r="8" className="fill-primary" />
-    <text x="200" y="285" textAnchor="middle" className="fill-primary text-xs font-bold">ORIGIN</text>
+    <circle cx="200" cy="250" r="20" className="stroke-foreground fill-background" strokeWidth="2" />
+    <circle cx="200" cy="250" r="8" className="fill-foreground" />
+    <text x="200" y="285" textAnchor="middle" className="fill-foreground text-xs font-bold">ORIGIN</text>
     
     {/* Level 1 Nodes */}
-    <circle cx="100" cy="180" r="15" className="stroke-primary/80 fill-background" strokeWidth="2" />
-    <circle cx="300" cy="180" r="15" className="stroke-primary/80 fill-background" strokeWidth="2" />
+    <circle cx="100" cy="180" r="15" className="stroke-foreground/80 fill-background" strokeWidth="2" />
+    <circle cx="300" cy="180" r="15" className="stroke-foreground/80 fill-background" strokeWidth="2" />
     
     {/* Level 2 Nodes */}
-    <circle cx="60" cy="100" r="10" className="stroke-primary/60 fill-background" strokeWidth="1.5" />
-    <circle cx="140" cy="100" r="10" className="stroke-primary/60 fill-background" strokeWidth="1.5" />
-    <circle cx="260" cy="100" r="10" className="stroke-primary/60 fill-background" strokeWidth="1.5" />
-    <circle cx="340" cy="100" r="10" className="stroke-primary/60 fill-background" strokeWidth="1.5" />
+    <circle cx="60" cy="100" r="10" className="stroke-foreground/60 fill-background" strokeWidth="1.5" />
+    <circle cx="140" cy="100" r="10" className="stroke-foreground/60 fill-background" strokeWidth="1.5" />
+    <circle cx="260" cy="100" r="10" className="stroke-foreground/60 fill-background" strokeWidth="1.5" />
+    <circle cx="340" cy="100" r="10" className="stroke-foreground/60 fill-background" strokeWidth="1.5" />
     
     {/* Level 3 Nodes (Faint) */}
-    <text x="200" y="30" textAnchor="middle" className="fill-primary text-[10px] font-medium opacity-50">SPREAD</text>
-    <circle cx="40" cy="40" r="6" className="fill-primary/20" />
-    <circle cx="80" cy="40" r="6" className="fill-primary/20" />
-    <circle cx="120" cy="40" r="6" className="fill-primary/20" />
-    <circle cx="280" cy="40" r="6" className="fill-primary/20" />
+    <text x="200" y="30" textAnchor="middle" className="fill-foreground text-[10px] font-medium opacity-50">SPREAD</text>
+    <circle cx="40" cy="40" r="6" className="fill-foreground/20" />
+    <circle cx="80" cy="40" r="6" className="fill-foreground/20" />
+    <circle cx="120" cy="40" r="6" className="fill-foreground/20" />
+    <circle cx="280" cy="40" r="6" className="fill-foreground/20" />
     
     {/* Connections */}
-    <path d="M 200 230 L 100 195" className="stroke-primary/60" strokeWidth="1.5" />
-    <path d="M 200 230 L 300 195" className="stroke-primary/60" strokeWidth="1.5" />
+    <path d="M 200 230 L 100 195" className="stroke-foreground/60" strokeWidth="1.5" />
+    <path d="M 200 230 L 300 195" className="stroke-foreground/60" strokeWidth="1.5" />
     
-    <path d="M 100 165 L 60 110" className="stroke-primary/40" strokeWidth="1" />
-    <path d="M 100 165 L 140 110" className="stroke-primary/40" strokeWidth="1" />
-    <path d="M 300 165 L 260 110" className="stroke-primary/40" strokeWidth="1" />
-    <path d="M 300 165 L 340 110" className="stroke-primary/40" strokeWidth="1" />
+    <path d="M 100 165 L 60 110" className="stroke-foreground/40" strokeWidth="1" />
+    <path d="M 100 165 L 140 110" className="stroke-foreground/40" strokeWidth="1" />
+    <path d="M 300 165 L 260 110" className="stroke-foreground/40" strokeWidth="1" />
+    <path d="M 300 165 L 340 110" className="stroke-foreground/40" strokeWidth="1" />
     
     {/* Spread Indicators */}
-    <circle cx="200" cy="250" r="40" className="stroke-primary/20 animate-ping" strokeWidth="1" />
+    <circle cx="200" cy="250" r="40" className="stroke-foreground/20 animate-ping" strokeWidth="1" />
   </svg>
 )
 
@@ -503,35 +503,35 @@ export const DataComplianceVisual = ({ className }: VisualizationProps) => (
       d="M 100 80 L 100 220 C 100 240, 300 240, 300 220 L 300 80"
       className="fill-background/50"
     />
-    <ellipse cx="200" cy="80" rx="100" ry="20" className="stroke-primary fill-background" strokeWidth="2" />
-    <path d="M 100 80 C 100 100, 300 100, 300 80" className="stroke-primary fill-background/10" strokeWidth="2" />
+    <ellipse cx="200" cy="80" rx="100" ry="20" className="stroke-foreground fill-background" strokeWidth="2" />
+    <path d="M 100 80 C 100 100, 300 100, 300 80" className="stroke-foreground fill-background/10" strokeWidth="2" />
     
-    <path d="M 100 130 C 100 150, 300 150, 300 130" className="stroke-primary/30" strokeWidth="1.5" />
-    <path d="M 100 180 C 100 200, 300 200, 300 180" className="stroke-primary/30" strokeWidth="1.5" />
-    <path d="M 100 220 C 100 240, 300 240, 300 220" className="stroke-primary" strokeWidth="2" />
-    <line x1="100" y1="80" x2="100" y2="220" className="stroke-primary" strokeWidth="2" />
-    <line x1="300" y1="80" x2="300" y2="220" className="stroke-primary" strokeWidth="2" />
-    <text x="200" y="70" textAnchor="middle" className="fill-primary text-xs font-bold">DATABASE</text>
+    <path d="M 100 130 C 100 150, 300 150, 300 130" className="stroke-foreground/30" strokeWidth="1.5" />
+    <path d="M 100 180 C 100 200, 300 200, 300 180" className="stroke-foreground/30" strokeWidth="1.5" />
+    <path d="M 100 220 C 100 240, 300 240, 300 220" className="stroke-foreground" strokeWidth="2" />
+    <line x1="100" y1="80" x2="100" y2="220" className="stroke-foreground" strokeWidth="2" />
+    <line x1="300" y1="80" x2="300" y2="220" className="stroke-foreground" strokeWidth="2" />
+    <text x="200" y="70" textAnchor="middle" className="fill-foreground text-xs font-bold">DATABASE</text>
     
     {/* Data Rows with Status */}
-    <rect x="130" y="100" width="140" height="8" rx="2" className="fill-primary/20" />
+    <rect x="130" y="100" width="140" height="8" rx="2" className="fill-foreground/20" />
     <circle cx="290" cy="104" r="4" className="fill-chart-2" />
     
-    <rect x="130" y="150" width="140" height="8" rx="2" className="fill-primary/20" />
+    <rect x="130" y="150" width="140" height="8" rx="2" className="fill-foreground/20" />
     <circle cx="290" cy="154" r="4" className="fill-chart-2" />
     
-    <rect x="130" y="200" width="140" height="8" rx="2" className="fill-primary/20" />
+    <rect x="130" y="200" width="140" height="8" rx="2" className="fill-foreground/20" />
     <circle cx="290" cy="204" r="4" className="fill-chart-2" />
     
     {/* Filter/Shield Icon Overlay */}
-    <circle cx="200" cy="150" r="40" className="fill-background/90 stroke-primary" strokeWidth="2" />
+    <circle cx="200" cy="150" r="40" className="fill-background/90 stroke-foreground" strokeWidth="2" />
     <path
       d="M 185 150 L 195 160 L 215 140"
-      className="stroke-primary"
+      className="stroke-foreground"
       strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <text x="200" y="205" textAnchor="middle" className="fill-primary text-[10px] font-bold">CLEANSED</text>
+    <text x="200" y="205" textAnchor="middle" className="fill-foreground text-[10px] font-bold">CLEANSED</text>
   </svg>
 )
