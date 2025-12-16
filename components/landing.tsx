@@ -31,7 +31,7 @@ export function LandingHero() {
             
             {/* Subheadline */}
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-               Get instant fact-checking, bias detection, and sentiment analysis. Make confident decisions.
+               Get instant fact-checking, bias detection, and sentiment analysis. Make Data verified decisions.
             </p>
 
             {/* CTA Button */}
@@ -101,13 +101,17 @@ export function LandingHero() {
                  <div className="bg-muted/30 rounded-lg p-3 border border-border/10">
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-xs text-foreground/90 leading-relaxed font-medium">
-                      "New tax regulations impact 85% of small businesses immediately."
+                      "The world’s largest solar power plant is located in India."
                     </p>
-                    <AlertCircle className="size-4 text-amber-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
                   </div>
                   <div className="mt-2 flex items-center gap-2">
-                     <span className="text-[10px] text-amber-500/90 font-medium">Context Missing</span>
-                     <span className="text-[10px] text-muted-foreground">• Needs clarification</span>
+                     <div className="flex -space-x-1.5">
+                        <div className="size-4 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-[6px]">1</div>
+                        <div className="size-4 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[6px]">2</div>
+                        <div className="size-4 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[6px]">3</div>
+                     </div>
+                     <span className="text-[10px] text-muted-foreground">Verified across 3 sources</span>
                   </div>
                 </div>
               </div>
@@ -145,7 +149,8 @@ export function LandingHero() {
         {/* Footer Text */}
         <div className="mt-24 text-center">
             <p className={`text-xs md:text-sm tracking-widest text-muted-foreground uppercase opacity-60 ${departureMono.className}`}>
-                Trusted by organizations worldwide
+                Noisy world, noisy data 
+
             </p>
         </div>
 

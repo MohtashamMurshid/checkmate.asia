@@ -29,23 +29,25 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', sectionId: 'home' },
-  { label: 'Research', sectionId: 'research' },
   { 
-    label: 'Use Cases', 
-    sectionId: 'use-cases',
+    label: 'Product', 
+    sectionId: 'features',
     columns: [
-       {
-         items: [
-           { title: "News Reporting", description: "Automated fact-checking for newsrooms", icon: Newspaper, href: "/newsreporting" },
-           { title: "Public Relations", description: "Monitor brand sentiment in real-time", icon: Users, href: "/publicrelations" },
-           { title: "Data Compliance", description: "Regulatory boundaries for AI agents", icon: Shield, href: "/datacompliance" }
-         ]
-       }
+      {
+        items: [
+          { title: "Fact Verification", description: "Cross-reference claims against verified global sources", icon: ShieldCheck, href: "/investigate" },
+          { title: "Bias Detection", description: "Uncover hidden political and corporate biases", icon: Activity, href: "/investigate" },
+          { title: "Sentiment Analysis", description: "Decode emotional undercurrents and predict reactions", icon: TrendingUp, href: "/investigate" },
+          { title: "Source Tracing", description: "Map the complete genealogy of stories", icon: Globe, href: "/investigate" },
+          { title: "Creator Profiling", description: "Analyze creator credibility and accuracy records", icon: User, href: "/investigate" },
+          { title: "Entity Background", description: "Deep-dive verification of companies and organizations", icon: Building2, href: "/investigate" }
+        ]
+      }
     ]
   },
   { 
-    label: 'Solutions', 
-    sectionId: 'solutions',
+    label: 'Usage', 
+    sectionId: 'usage',
     columns: [
       {
         items: [
@@ -56,29 +58,8 @@ const NAV_ITEMS: NavItem[] = [
       }
     ]
   },
-  { 
-    label: 'Features', 
-    sectionId: 'features',
-    columns: [
-      {
-        title: "Analysis",
-        items: [
-           { title: "Fact Check", description: "Verified sources < 2 min", icon: ShieldCheck },
-           { title: "Bias Detection", description: "Political & personal bias", icon: Activity },
-           { title: "Sentiment Analysis", description: "Emotional tone mapping", icon: TrendingUp }
-        ]
-      },
-      {
-        title: "Intelligence",
-        items: [
-           { title: "Origin Map", description: "Trace citation lineage", icon: Globe },
-           { title: "Creator Background", description: "Profile & social norms", icon: User },
-           { title: "Company Background", description: "Entity verification", icon: Building2 }
-        ]
-      }
-    ]
-  },
   { label: 'Sources', sectionId: 'sources' },
+  { label: 'Research', sectionId: 'research' },
 ];
 
 export function Header() {

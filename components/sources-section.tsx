@@ -51,9 +51,7 @@ export function SourcesSection() {
     <section id="sources" className="py-20 md:py-32 bg-muted/30">
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="mb-16 md:mb-24 text-center space-y-4">
-          <h2 className={`text-sm md:text-base text-primary uppercase tracking-wider `}>
-            Data Integrity
-          </h2>
+         
           <h3 className="text-3xl md:text-5xl font-medium tracking-tight text-foreground leading-[1.1] text-balance">
             Checkmate cites <span className="text-primary">ONLY</span> from{" "}
             <span className="text-primary">REAL SOURCES</span>

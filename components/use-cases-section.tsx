@@ -13,7 +13,7 @@ const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 export function UseCasesSection() {
   const cases = [
     {
-      title: "News Reporting",
+      title: "News & Media",
       description: "Automated fact-checking and bias detection for modern newsrooms.",
       icon: Newspaper,
       href: "/newsreporting",
@@ -42,14 +42,13 @@ export function UseCasesSection() {
         {/* Header Section */}
         <div className="text-center space-y-4 mb-16 md:mb-24">
           <h2 className={`text-sm md:text-base text-primary uppercase tracking-wider ${departureMono.className}`}>
-            Full-Stack Enterprise Solutions
           </h2>
           <h3 className="text-3xl md:text-5xl font-medium tracking-tight text-foreground">
-                       Use Cases
-
+                       
+        Enterprise Solutions
           </h3>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            We show what's trustworthy through our comprehensive suite of verification tools.
+            We show what's trustworthy through our comprehensive suite of verification tools
           </p>
         </div>
 

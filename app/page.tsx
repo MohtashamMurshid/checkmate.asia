@@ -29,10 +29,9 @@ export default function LandingContent() {
     <div className="relative">
         <Header />
       <LandingHero />
-      <HeroSubtitle />
-      <UseCasesSection />
+       <BentoFeatures />
       <Features />
-      <BentoFeatures />
+      <UseCasesSection />
       <SourcesSection />
       <CTASection />
       <FooterSection />

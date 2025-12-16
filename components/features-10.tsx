@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { LucideIcon, Code, Server, Globe, Shield, Terminal, Activity, Users, Lock, ChevronRight, LayoutDashboard, Settings, FileText } from 'lucide-react'
+import { LucideIcon, Code, Server, Globe, Shield} from 'lucide-react'
 import { ReactNode } from 'react'
 import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
@@ -10,11 +10,11 @@ const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 export default function Features10() {
     return (
-        <section id="solutions" className="bg-muted/30 py-16 md:py-24 lg:py-32">
+        <section id="usage" className="bg-muted/30 py-16 md:py-24 lg:py-32">
             <div className="mx-auto max-w-2xl px-4 md:px-6 lg:max-w-6xl">
                 <div className="mb-12 space-y-4 text-center md:mb-16">
                     <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-foreground leading-[1.1]">
-                        Solutions
+                       Usage
                     </h1>
                     <p className={`text-lg text-muted-foreground ${instrumentSans.className}`}>
                         Comprehensive AI-powered tools to detect, verify, and combat misinformation across all digital platforms
