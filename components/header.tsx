@@ -2,28 +2,82 @@
 
 import * as React from 'react';
 import { useTheme } from "next-themes";
-import { Moon, Sun, Menu, X } from "lucide-react";
+import { Moon, Sun, Menu, X, ChevronDown, Newspaper, Users, Shield, Globe, Code, Server, ShieldCheck, Activity, TrendingUp, User, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { Instrument_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "motion/react";
 
 const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 interface NavItem {
   label: string;
   sectionId: string;
+  columns?: {
+    title?: string;
+    items: {
+      title: string;
+      description?: string;
+      icon: React.ComponentType<{ className?: string }>;
+      href?: string;
+    }[];
+  }[];
 }
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', sectionId: 'home' },
-  { label: 'Use Cases', sectionId: 'use-cases' },
-  { label: 'Solutions', sectionId: 'solutions' },
-  { label: 'Features', sectionId: 'features' },
+  { 
+    label: 'Use Cases', 
+    sectionId: 'use-cases',
+    columns: [
+       {
+         items: [
+           { title: "News Reporting", description: "Automated fact-checking for newsrooms", icon: Newspaper, href: "/enterprisesolutions/newsreporting" },
+           { title: "Public Relations", description: "Monitor brand sentiment in real-time", icon: Users, href: "/enterprisesolutions/publicrelations" },
+           { title: "Data Compliance", description: "Regulatory boundaries for AI agents", icon: Shield, href: "/enterprisesolutions/datacompliance" }
+         ]
+       }
+    ]
+  },
+  { 
+    label: 'Solutions', 
+    sectionId: 'solutions',
+    columns: [
+      {
+        items: [
+           { title: "SAAS Enterprise", description: "Fully managed cloud solution", icon: Globe },
+           { title: "Enterprise API", description: "Integrate with existing infra", icon: Code },
+           { title: "On-prem Agents", description: "Complete data control", icon: Server }
+        ]
+      }
+    ]
+  },
+  { 
+    label: 'Features', 
+    sectionId: 'features',
+    columns: [
+      {
+        title: "Analysis",
+        items: [
+           { title: "Fact Check", description: "Verified sources < 2 min", icon: ShieldCheck },
+           { title: "Bias Detection", description: "Political & personal bias", icon: Activity },
+           { title: "Sentiment Analysis", description: "Emotional tone mapping", icon: TrendingUp }
+        ]
+      },
+      {
+        title: "Intelligence",
+        items: [
+           { title: "Origin Map", description: "Trace citation lineage", icon: Globe },
+           { title: "Creator Background", description: "Profile & social norms", icon: User },
+           { title: "Company Background", description: "Entity verification", icon: Building2 }
+        ]
+      }
+    ]
+  },
   { label: 'Sources', sectionId: 'sources' },
-  { label: 'CTA', sectionId: 'cta' },
 ];
 
 export function Header() {
@@ -31,6 +85,7 @@ export function Header() {
   const pathname = usePathname();
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
@@ -60,9 +115,9 @@ export function Header() {
 
   return (
     <header className={cn("fixed top-0 z-50 w-full", instrumentSans.className)}>
-        <nav className="w-full px-2 mt-4">
+        <nav className="w-full px-2 mt-4" onMouseLeave={() => setHoveredItem(null)}>
             <div className={cn(
-                'mx-auto transition-all duration-300 ease-in-out',
+                'mx-auto transition-all duration-300 ease-in-out relative',
                 // Scrolled state (pill shape) vs Default state (wide)
                 isScrolled && !menuState
                     ? 'bg-background/80 max-w-4xl rounded-2xl border border-border/60 backdrop-blur-md shadow-md py-2 px-6' 
@@ -92,14 +147,15 @@ export function Header() {
                     )}>
                         <ul className="flex gap-1 items-center">
                             {NAV_ITEMS.map((item) => (
-                                <li key={item.sectionId}>
+                                <li key={item.sectionId} onMouseEnter={() => setHoveredItem(item.label)}>
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                                        className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors group"
                                         onClick={() => scrollToSection(item.sectionId)}
                                     >
                                         {item.label}
+                                        {item.columns && <ChevronDown className="ml-1 size-3 transition-transform group-hover:rotate-180" />}
                                     </Button>
                                 </li>
                             ))}
@@ -167,6 +223,64 @@ export function Header() {
                         </div>
                     </div>
                 </div>
+
+                {/* Mega Menu Dropdown */}
+                <AnimatePresence>
+                    {hoveredItem && NAV_ITEMS.find(item => item.label === hoveredItem)?.columns && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute top-full left-0 right-0 pt-4 mx-auto w-full max-w-4xl z-50"
+                        >
+                            <div className="bg-background/95 backdrop-blur-xl border border-border/60 rounded-xl shadow-2xl overflow-hidden p-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {NAV_ITEMS.find(item => item.label === hoveredItem)?.columns?.map((column, idx) => (
+                                        <div key={idx} className={cn("space-y-4", 
+                                            // If only 1 column, maybe span more?
+                                            NAV_ITEMS.find(item => item.label === hoveredItem)?.columns?.length === 1 ? "col-span-full" : ""
+                                        )}>
+                                            {column.title && (
+                                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                                                    {column.title}
+                                                </h4>
+                                            )}
+                                            <div className="grid gap-4">
+                                                {column.items.map((subItem, subIdx) => (
+                                                    <Link 
+                                                        key={subIdx} 
+                                                        href={subItem.href || `#${NAV_ITEMS.find(item => item.label === hoveredItem)?.sectionId}`}
+                                                        onClick={() => {
+                                                            setHoveredItem(null);
+                                                            // If it's a hash link, scroll to it? Or just navigation.
+                                                            if (!subItem.href) scrollToSection(NAV_ITEMS.find(item => item.label === hoveredItem)?.sectionId || '');
+                                                        }}
+                                                        className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
+                                                    >
+                                                        <div className="mt-1 p-2 rounded-md bg-primary/10 text-primary group-hover/item:bg-primary/20 transition-colors">
+                                                            <subItem.icon className="size-5" />
+                                                        </div>
+                                                        <div>
+                                                            <h5 className="font-medium text-foreground group-hover/item:text-primary transition-colors">
+                                                                {subItem.title}
+                                                            </h5>
+                                                            {subItem.description && (
+                                                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                                                    {subItem.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </nav>
     </header>
