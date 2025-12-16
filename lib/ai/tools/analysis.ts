@@ -199,7 +199,7 @@ Be objective and base your analysis on the actual content, not assumptions.`;
 
   research_query: tool({
     description:
-      'Performs comprehensive research on a topic using authoritative sources. This tool can query business databases, economic data, academic papers, factual knowledge bases, and historical records. Use this when you need to gather factual information, verify claims, or find authoritative sources about companies, economics, science, history, or general knowledge.',
+      'Uses Exa Research API to conduct comprehensive research on any topic. Exa automatically explores the web, gathers sources, synthesizes findings, and returns results with citations. Use this for deep research on companies, economics, science, history, or general knowledge.',
     inputSchema: z.object({
       query: z
         .string()
@@ -212,35 +212,76 @@ Be objective and base your analysis on the actual content, not assumptions.`;
     execute: async ({ query, context }) => {
       const startTime = Date.now();
       try {
-        console.log('[research_query] Starting research query:', query.substring(0, 100));
+        console.log('[research_query] Starting Exa Research:', query.substring(0, 100));
         
-        // Import and run the research agent
-        const { runResearchAgent } = await import('../research-agent');
-        
-        // Build the research query with context if provided
-        let researchQuery = query;
-        if (context) {
-          researchQuery = `${query}\n\nContext: ${context}`;
+        const exaApiKey = process.env.EXA_API_KEY;
+        if (!exaApiKey) {
+          return JSON.stringify({
+            error: 'EXA_API_KEY not configured',
+            query: query.substring(0, 200),
+          });
         }
 
-        // Run the research agent with timeout protection
-        // This prevents the tool from hanging the entire stream
-        const researchResult = await Promise.race([
-          runResearchAgent(researchQuery),
-          new Promise<string>((_, reject) => {
-            setTimeout(() => {
-              reject(new Error('Research query timed out after 18 seconds'));
-            }, 18000); // Slightly longer than research agent timeout (15s)
+        // Build instructions with context if provided
+        const instructions = context 
+          ? `${query}\n\nContext: ${context}`
+          : query;
+        
+        // Create research task
+        const createResponse = await fetch('https://api.exa.ai/research/v1', {
+          method: 'POST',
+          headers: {
+            'x-api-key': exaApiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            instructions,
+            model: 'exa-research', // Use 'exa-research-pro' for deeper analysis
           }),
-        ]);
+        });
 
-        const duration = Date.now() - startTime;
-        console.log(`[research_query] Completed in ${duration}ms`);
-        return researchResult;
+        if (!createResponse.ok) {
+          const errorData = await createResponse.json().catch(() => ({}));
+          throw new Error(`Exa Research API error: ${createResponse.statusText} - ${JSON.stringify(errorData)}`);
+        }
+
+        const { researchId } = await createResponse.json();
+        console.log(`[research_query] Created research task: ${researchId}`);
+        
+        // Poll for completion (max 60 seconds)
+        const maxWaitTime = 60000; // 60 seconds
+        const pollInterval = 2000; // Poll every 2 seconds
+        const startPollTime = Date.now();
+        
+        while (Date.now() - startPollTime < maxWaitTime) {
+          const statusResponse = await fetch(`https://api.exa.ai/research/v1/${researchId}`, {
+            headers: { 'x-api-key': exaApiKey },
+          });
+
+          if (!statusResponse.ok) {
+            throw new Error(`Failed to check research status: ${statusResponse.statusText}`);
+          }
+
+          const result = await statusResponse.json();
+          
+          if (result.status === 'completed') {
+            const duration = Date.now() - startTime;
+            console.log(`[research_query] Completed in ${duration}ms`);
+            // Return the markdown report with citations
+            return result.output || result.result || 'Research completed but no output available';
+          } else if (result.status === 'failed' || result.status === 'canceled') {
+            throw new Error(`Research ${result.status}: ${result.error || 'Unknown error'}`);
+          }
+          
+          // Still running, wait before next poll
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+        }
+
+        // Timeout reached
+        throw new Error('Research timed out after 60 seconds');
       } catch (error) {
         const duration = Date.now() - startTime;
         console.error(`[research_query] Failed after ${duration}ms:`, error);
-        // Return error as string instead of JSON to avoid double-stringification
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return `Research query failed: ${errorMessage}\n\nQuery: ${query.substring(0, 200)}${context ? `\n\nContext: ${context.substring(0, 200)}` : ''}`;
       }

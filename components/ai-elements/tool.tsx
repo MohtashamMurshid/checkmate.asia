@@ -43,6 +43,7 @@ export const Tool = ({ className, ...props }: ToolProps) => (
   />
 );
 
+
 export type ToolHeaderProps = {
   title?: string;
   type: ToolUIPart["type"];
@@ -68,6 +69,7 @@ export const getToolIcon = (toolType: string): ReactNode => {
     analyze_and_summarize: <FileTextIcon className="size-4 text-muted-foreground shrink-0" />,
     get_company_info: <BuildingIcon className="size-4 text-muted-foreground shrink-0" />,
     analyze_text: <ClipboardListIcon className="size-4 text-muted-foreground shrink-0" />,
+    research_query: <FileSearchIcon className="size-4 text-muted-foreground shrink-0" />,
   };
 
   return iconMap[toolName] || <WrenchIcon className="size-4 text-muted-foreground shrink-0" />;
@@ -109,6 +111,7 @@ export const getToolDisplayName = (toolType: string, input?: any): string => {
     analyze_and_summarize: "Analyze & Summarize",
     get_company_info: "Get Company Information",
     analyze_text: "Analyze Text",
+    research_query: "Research with Exa",
   };
 
   return nameMap[toolName] || toolName.split("_").map(word => 

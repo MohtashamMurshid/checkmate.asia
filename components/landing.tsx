@@ -1,8 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { DottedSurface } from "@/components/dotted";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
@@ -17,96 +16,127 @@ export function LandingHero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28">
-      {/* Dotted Surface Background */}
-      <DottedSurface className="absolute inset-0" />
-      
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 md:px-6 py-24 md:py-32">
-        <div className="max-w-5xl mx-auto text-center space-y-8">
-          {/* Top badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1 backdrop-blur-sm">
-            <span className={`text-xs sm:text-sm text-muted-foreground ${instrumentSans.className}`}>
-              AI-powered information investigation
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className={`max-w-3xl mx-auto text-4xl md:text-5xl font-semibold tracking-tight mb-2 ${departureMono.className}`}>
-            Investigate Information <br /> in <br /> Seconds
-          </h1>
-          {/* Subheadline */}
-          <p className={`text-base md:text-lg text-muted-foreground max-w-2xl mx-auto ${instrumentSans.className}`}>
-            Leverage ultra AI analysis and scalable APIs for real-time
-            misinformation detection. 
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <Button asChild size="lg">
-              <Link href="/contact">
-               Book a Demo
-                <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" onClick={scrollToFeatures} className="border-border/60 bg-transparent hover:bg-muted/50">
-              Features 
-            </Button>
+    <section className={`relative min-h-screen flex items-center overflow-hidden pt-20 ${instrumentSans.className}`}>
+      {/* Content Container */}
+      <div className="container mx-auto px-4 md:px-6 py-12 md:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          
+          {/* Left Column: Text Content */}
+          <div className="lg:col-span-7 flex flex-col gap-8 text-left z-10">
+            {/* Headline */}
+            <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-foreground leading-[1.1]">
+              Know What <br />
+              To Trust
+            </h1>
             
-          </div>
+            {/* Subheadline */}
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
+              Checkmate analyzes information for factual accuracy, bias, and sentiment.
+            </p>
 
-          {/* Floating demo card */}
-          <div className="relative mx-auto mt-12 w-full max-w-3xl">
-            <div className="rounded-xl border border-border/70 bg-background/60 p-5 text-left shadow-xl backdrop-blur-md">
-              <div className="flex items-center justify-between">
-                <p className={`text-sm text-muted-foreground ${instrumentSans.className}`}>Welcome to Checkmate — your truth companion.</p>
-                <div className={`inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground ${instrumentSans.className}`}>
-                  Mohtasham
-                  <span className="relative inline-flex h-2 w-2 items-center justify-center">
-                    <span className="absolute inline-flex h-2 w-2 rounded-full bg-primary opacity-80" />
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                
-                <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-transparent hover:bg-muted/50" asChild>
-                  <Link href="/api">
-                    Enterprise API
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-transparent hover:bg-muted/50" asChild>
-                  <Link href="/investigate/dashboard/analyze">
-                    Data Analysis
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-transparent hover:bg-muted/50" asChild>
-                  <Link href="/investigate">
-                   Investigation 
-                  </Link>
-                </Button>
-                <Button aria-label="Play" variant="outline" size="icon" className="ml-auto size-9 rounded-full">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-muted-foreground">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </Button>
-              </div>
+            {/* CTA Button */}
+            <div className="flex flex-wrap gap-4 pt-2">
+               <Button 
+                asChild 
+                size="lg" 
+                className="bg-[#FCD34D] hover:bg-[#FCD34D]/90 text-black font-medium rounded-md h-12 px-8 text-base shadow-sm transition-transform hover:-translate-y-0.5"
+              >
+                <Link href="/contact">
+                  GET A DEMO
+                  <ArrowRight className="ml-2 size-4" />
+                </Link>
+              </Button>
             </div>
           </div>
 
-          {/* Sponsors strip */}
-          <div className="mx-auto mt-14 w-full max-w-5xl border-t border-border/60 pt-8">
-            <div className={`flex justify-center gap-6 text-sm text-muted-foreground ${instrumentSans.className}`}>
-              <div className="opacity-80">x.com</div>
-              <div className="opacity-80">tiktok</div>
-              <div className="opacity-80">web</div>
-              <div className="opacity-80">api</div>
-              <div className="opacity-80">mobile</div>
+          {/* Right Column: Visualization */}
+          <div className="lg:col-span-5 relative z-0 mt-12 lg:mt-0 transform scale-110 md:scale-125 origin-center">
+             {/* Orange Ambient Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-orange-400/30 blur-[100px] rounded-full pointer-events-none opacity-60 dark:opacity-40" />
+
+            {/* Dashboard Card */}
+            <div className="relative rounded-xl border border-border/40 bg-background/80 backdrop-blur-xl shadow-2xl overflow-hidden p-6 max-w-md mx-auto transform rotate-1 transition-transform hover:rotate-0 duration-500">
+              
+              {/* Card Header / Tabs */}
+              <div className="flex border-b border-border/10 pb-4 mb-6">
+                 <div className="w-1/2 border-r border-border/10 pr-4">
+                    <div className="text-xs font-medium text-muted-foreground mb-1">Trust Score</div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-semibold">94.2</span>
+                        <span className="text-xs font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">High</span>
+                    </div>
+                 </div>
+                 <div className="w-1/2 pl-4">
+                    <div className="text-xs font-medium text-muted-foreground mb-1">Bias Detected</div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-semibold">1.2%</span>
+                        <span className="text-xs font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">Low</span>
+                    </div>
+                 </div>
+              </div>
+
+              {/* Chart Area (Abstract Scatter Plot) */}
+              <div className="relative h-48 w-full bg-transparent">
+                  {/* Axis Labels */}
+                  <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-muted-foreground/60 h-full py-2">
+                      <span>100</span>
+                      <span>80</span>
+                      <span>60</span>
+                      <span>40</span>
+                      <span>20</span>
+                      <span>0</span>
+                  </div>
+                  
+                  {/* Scatter Dots - Simulated Data */}
+                  <div className="absolute inset-0 ml-8">
+                      {/* Random distribution of dots to match the design's scatter plot feel */}
+                      {[...Array(40)].map((_, i) => (
+                          <div 
+                              key={i}
+                              className={`absolute rounded-full border ${Math.random() > 0.3 ? 'border-emerald-500/20 bg-emerald-500/10' : 'border-rose-500/20 bg-rose-500/10'}`}
+                              style={{
+                                  width: Math.random() > 0.7 ? '8px' : '6px',
+                                  height: Math.random() > 0.7 ? '8px' : '6px',
+                                  left: `${Math.random() * 90}%`,
+                                  top: `${Math.random() * 80 + 10}%`,
+                                  opacity: Math.random() * 0.5 + 0.3
+                              }}
+                          />
+                      ))}
+                      
+                      {/* Highlighted Insight Tooltip */}
+                      <div className="absolute bottom-8 right-0 bg-background border border-border/50 shadow-lg rounded-lg p-3 max-w-[200px] animate-in fade-in zoom-in duration-700 delay-300">
+                          <p className="text-xs text-foreground/80 leading-snug">
+                            3 potential inaccuracies detected in latest viral source analysis.
+                          </p>
+                          <div className="mt-2">
+                             <Button variant="outline" size="sm" className="h-6 text-[10px] px-2">
+                                View Report
+                             </Button>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  {/* X Axis */}
+                  <div className="absolute bottom-0 left-8 right-0 border-t border-border/10 pt-1 flex justify-between text-[10px] text-muted-foreground/60">
+                      <span>SEP 1</span>
+                      <span>OCT 1</span>
+                  </div>
+              </div>
+
             </div>
           </div>
         </div>
+        
+        {/* Footer Text */}
+        <div className="mt-24 text-center">
+            <p className={`text-xs md:text-sm tracking-widest text-muted-foreground uppercase opacity-60 ${departureMono.className}`}>
+                Trusted by leading organizations
+            </p>
+        </div>
+
       </div>
 
     </section>
   );
 }
-

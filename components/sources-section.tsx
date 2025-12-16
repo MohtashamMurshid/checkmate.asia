@@ -1,7 +1,5 @@
-import localFont from "next/font/local";
 import { Instrument_Sans } from "next/font/google";
 
-const departureMono = localFont({ src: "../fonts/DepartureMono-Regular.woff2" });
 const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 export function SourcesSection() {
@@ -46,7 +44,7 @@ export function SourcesSection() {
     <section id="sources" className="py-16 md:py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="relative mx-auto max-w-3xl space-y-4 text-center">
-          <h2 className={`text-balance text-3xl font-semibold md:text-5xl tracking-tight ${departureMono.className}`}>
+          <h2 className={`text-balance text-3xl font-semibold md:text-5xl tracking-tight ${instrumentSans.className}`}>
             Checkmate cites <span className="text-primary">ONLY</span> from{" "}
             <span className="text-primary">REAL SOURCES</span>
           </h2>
@@ -61,7 +59,7 @@ export function SourcesSection() {
               key={category.title}
               className="bg-background/60 backdrop-blur-sm hover:bg-background/80 transition-colors rounded-xl border border-border/60 p-5 md:p-6 shadow-xl"
             >
-              <h3 className={`text-lg font-semibold mb-4 tracking-tight ${departureMono.className}`}>{category.title}</h3>
+              <h3 className={`text-lg font-semibold mb-4 tracking-tight ${instrumentSans.className}`}>{category.title}</h3>
               <div className="space-y-3">
                 {category.items.map((item) => (
                   <div key={item.label}>

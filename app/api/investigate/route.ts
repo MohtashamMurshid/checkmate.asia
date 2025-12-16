@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Prepare message for agent with extracted content and workflow instructions
+    // Simplified workflow prompt with Exa Research
     const analysisPrompt = `I have extracted the following content for analysis:
 
 **Source Type:** ${extractedContent.sourceType}
@@ -75,61 +75,45 @@ ${extractedContent.content}
 
 ${Object.keys(extractedContent.metadata).length > 0
   ? `**Metadata:**\n${JSON.stringify(extractedContent.metadata, null, 2)}\n\n`
-  : ''}Please follow this investigation workflow in order:
+  : ''}Please follow this streamlined investigation workflow:
 
-1. **Web Search** (MUST RUN FIRST): Use the search_news_parallel tool with the extracted content and sourceType to find related news articles. This will return citations and a summary. WAIT for this to complete before proceeding.
+**Step 1: Content Extraction & Display**
+- The content has been extracted above. Display it clearly.
 
-2. **Research** (MUST WAIT FOR STEP 1): After web search completes, use the research_query tool to gather factual information from authoritative sources. Identify key claims, entities, or facts mentioned in the content that need verification:
-   - Company names → Research company information
-   - Economic data → Query economic indicators
-   - Scientific claims → Search academic papers
-   - Historical facts → Query historical databases
-   - General facts → Search Wikipedia/Wikidata
-   
-   Pass the web search summary and key claims from the content as context. The research agent will automatically select appropriate APIs. WAIT for this to complete.
+**Step 2: Research (Parallel with Step 3)**
+- Use the research_query tool with Exa Research API to conduct comprehensive research on the topic.
+- Pass the extracted content and any key claims or entities mentioned.
+- Exa will automatically explore the web, gather sources, and synthesize findings with citations.
+- This can run in parallel with claim extraction.
 
-3. **Analyze & Classify** (MUST WAIT FOR STEPS 1 AND 2): After both web search and research complete:
-   a. Use the analyze_sentiment_political tool to analyze the summary from the web search results. Pass the summary text from step 1 and include context mentioning "web search results" or "news coverage".
-   b. Use the analyze_sentiment_political tool to analyze the sentiment and political leaning of the initial extracted content above. Include context about the source type (twitter, tiktok, blog, or text).
-   c. Use the compare_sources_comprehensive tool to compare:
-      - User Context (if provided) vs. External Search Results
-      - Initial Search Results vs. Deep Research Findings
-      Pass the summaries from previous steps.
-      IMPORTANT: You MUST provide the comparison arrays (userContextComparison and searchVsResearchComparison) with actual comparison points. Each comparison point should have:
-      - category: A descriptive category name
-      - userSource/searchSource: The claim or fact from the user/search source
-      - externalSource/researchSource: The corresponding claim or fact from external/research source
-      - match: A boolean indicating if they match
-      Do NOT call this tool with empty arrays - you must generate actual comparison points based on the content you've analyzed.
-   d. If any social media profiles are identified (in metadata or content), use evaluate_source_credibility for each.
-   e. For key sources found in web search or research, use classify_source_type to label them as Primary or Secondary.
-   
-   These analyses can run in parallel, but must wait for steps 1 and 2.
+**Step 3: Extract Claims (Parallel with Step 2)**
+- Identify key claims, facts, or assertions from the extracted content.
+- List them clearly for verification.
 
-4. **Visualize** (MUST WAIT FOR STEP 3): After analyses complete:
-   a. Use the generate_visualization tool. Pass the sentiment/political analysis results AND the citations/summary from Step 1 (Web Search) into the tool's inputs.
-   b. Use the generate_evolution_graph tool to create a visual timeline of events found in research and web search.
+**Step 4: Visualize**
+- After research completes, use analyze_sentiment_political to analyze:
+  a. The original extracted content (include source type context)
+  b. The research summary from Exa (include "research results" context)
+- Use generate_visualization tool with both sentiment analyses and citations from research.
+- Use generate_evolution_graph to create a timeline from research sources.
 
-5. **Generate Comprehensive Text Report** (MUST WAIT FOR ALL PREVIOUS STEPS): After all tools have completed, you MUST provide a comprehensive textual report that:
-   - Summarizes the extracted source content and its type
-   - Explains all findings from web search, research, and analysis
-   - Details the sentiment and political bias analysis results
-   - Explains the source comparison findings (user context vs external, search vs research)
-   - Summarizes credibility assessments if any were performed
-   - Provides a clear conclusion synthesizing all findings
-   - Uses proper markdown formatting with headers, bullet points, and clear sections
-   
-   This report should be comprehensive and explain everything that was discovered during the investigation. It should be written as a final summary text response, not as a tool call.
+**Step 5: Generate Summary**
+- Write a comprehensive markdown report synthesizing:
+  - The extracted content and its type
+  - Key findings from Exa research
+  - Sentiment and political bias analysis
+  - Source comparisons and credibility
+  - Clear conclusions
 
-IMPORTANT WORKFLOW ORDER:
-- Step 1 (Web Search) → Step 2 (Research) → Step 3 (Analyze) → Step 4 (Visualize) → Step 5 (Text Report)
-- Step 2 MUST wait for step 1 to complete
-- Step 3 MUST wait for both steps 1 and 2 to complete
-- Step 4 MUST wait for step 3 to complete
-- Step 5 MUST wait for step 4 to complete (provide comprehensive text report)
-- Within step 3, the analyses can run in parallel
+**Step 6: Evolution Graph**
+- The evolution graph should already be generated in Step 4.
 
-All tools are optional - if any step fails, continue with the next step. Present the final visualization and analysis results clearly, incorporating both web search findings and research verification.`;
+**Workflow Notes:**
+- Steps 2 and 3 can run in parallel
+- Step 4 waits for Step 2 (research) to complete
+- Step 5 waits for Step 4 (visualization) to complete
+- All tools are optional - continue even if one fails
+- Use Exa Research API (research_query tool) for comprehensive investigation`;
 
     // Get model configuration
     const modelConfig = getModelConfig(model);
@@ -152,15 +136,6 @@ All tools are optional - if any step fails, continue with the next step. Present
     ];
 
     // Stream the response with tools
-    // Include extracted content in the initial system context so it can be extracted by the client
-    console.log('[CROSS-CHECK] API Route: Starting investigation');
-    console.log('[CROSS-CHECK] Extracted content:', {
-      sourceType: extractedContent.sourceType,
-      contentLength: extractedContent.content.length,
-      hasMetadata: Object.keys(extractedContent.metadata).length > 0,
-    });
-    console.log('[CROSS-CHECK] Available tools:', Object.keys(investigateTools));
-    
     const result = streamText({
       model: provider.chat(modelConfig.model),
       system: `${AI_CONFIG.systemPrompt}\n\n[EXTRACTED_CONTENT]${JSON.stringify({
@@ -170,17 +145,7 @@ All tools are optional - if any step fails, continue with the next step. Present
       })}[/EXTRACTED_CONTENT]`,
       messages: convertToModelMessages(analysisMessages),
       tools: investigateTools,
-      stopWhen: stepCountIs(15), // Increased for parallel workflow (4 main steps + tool calls)
-      onStepFinish: (step) => {
-        if (step.toolCalls) {
-          step.toolCalls.forEach((call: any) => {
-            if (call.toolName === 'compare_sources_comprehensive') {
-              console.log('[CROSS-CHECK] API Route: Tool called in onStepFinish');
-              console.log('[CROSS-CHECK] Tool call args:', JSON.stringify(call.args, null, 2));
-            }
-          });
-        }
-      },
+      stopWhen: stepCountIs(10), // Reduced for streamlined workflow
     });
 
     return result.toUIMessageStreamResponse();
