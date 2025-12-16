@@ -58,6 +58,7 @@ const NAV_ITEMS: NavItem[] = [
       }
     ]
   },
+  { label: 'Solutions', sectionId: 'use-cases' },
   { label: 'Sources', sectionId: 'sources' },
   { label: 'Research', sectionId: 'research' },
 ];
