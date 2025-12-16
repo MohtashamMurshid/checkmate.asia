@@ -18,7 +18,7 @@ export function LandingHero() {
   return (
     <section className={`relative min-h-screen flex items-center overflow-hidden pt-20 ${instrumentSans.className}`}>
       {/* Content Container */}
-      <div className="container mx-auto px-4 md:px-6 py-12 md:py-20">
+      <div className="container mx-auto max-w-7xl px-4 md:px-6 py-12 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           
           {/* Left Column: Text Content */}
@@ -31,7 +31,7 @@ export function LandingHero() {
             
             {/* Subheadline */}
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-              Paste any text or upload documents. Get instant fact-checking, bias detection, and sentiment analysis. Make confident decisions.
+               Get instant fact-checking, bias detection, and sentiment analysis. Make confident decisions.
             </p>
 
             {/* CTA Button */}
@@ -42,7 +42,7 @@ export function LandingHero() {
                 className="bg-[#FCD34D] hover:bg-[#FCD34D]/90 text-black font-medium rounded-md h-12 px-8 text-base shadow-sm transition-transform hover:-translate-y-0.5"
               >
                 <Link href="/contact">
-                  Try Free Analysis
+                  Try Demo 
                   <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>

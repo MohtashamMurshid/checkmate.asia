@@ -3,8 +3,7 @@
 import { LandingHero } from "@/components/landing";
 import { HeroSubtitle } from "@/components/hero-subtitle";
 import { CTASection } from "@/components/cta-section";
-import Features from "@/components/features-12";
-import Features10 from "@/components/features-10";
+import { BentoFeatures } from "@/components/bento-features";
 import { SourcesSection } from "@/components/sources-section";
 import { useEffect } from "react";
 import FooterSection from "@/components/footer";
@@ -29,8 +28,7 @@ export default function LandingContent() {
         <Header />
       <LandingHero />
       <HeroSubtitle />
-      <Features />
-      <Features10 />
+      <BentoFeatures />
       <SourcesSection />
       <CTASection />
       <FooterSection />

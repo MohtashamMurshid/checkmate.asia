@@ -14,7 +14,7 @@ export default function Features10() {
         <section id="solutions" className="bg-muted/30 py-16 md:py-24 lg:py-32 dark:bg-transparent">
             <div className="mx-auto max-w-2xl px-4 md:px-6 lg:max-w-6xl">
                 <div className="mb-12 space-y-4 text-center md:mb-16">
-                    <h1 className={`text-3xl md:text-5xl font-semibold tracking-tight ${departureMono.className}`}>
+                    <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-foreground leading-[1.1]">
                         Solutions
                     </h1>
                     <p className={`text-lg text-muted-foreground ${instrumentSans.className}`}>
