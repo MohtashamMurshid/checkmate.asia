@@ -96,10 +96,7 @@ export function Header() {
       window.location.href = '/research';
       return;
     }
-    if (sectionId === 'use-cases') {
-      window.location.href = '/use-cases';
-      return;
-    }
+   
     if (pathname !== '/') {
       window.location.href = `/#${sectionId}`;
       return;
