@@ -58,7 +58,19 @@ const NAV_ITEMS: NavItem[] = [
       }
     ]
   },
-  { label: 'Solutions', sectionId: 'use-cases' },
+  { 
+    label: 'Solutions', 
+    sectionId: 'use-cases',
+    columns: [
+      {
+        items: [
+          { title: "News & Media", description: "Automated fact-checking for newsrooms", icon: Newspaper, href: "/newsreporting" },
+          { title: "Public Relations", description: "Monitor brand sentiment in real-time", icon: Users, href: "/publicrelations" },
+          { title: "Data Compliance", description: "Regulatory boundaries for AI agents", icon: Shield, href: "/datacompliance" }
+        ]
+      }
+    ]
+  },
   { label: 'Sources', sectionId: 'sources' },
   { label: 'Research', sectionId: 'research' },
 ];
