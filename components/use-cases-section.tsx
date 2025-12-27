@@ -45,7 +45,7 @@ export function UseCasesSection() {
           </h2>
           <h3 className="text-3xl md:text-5xl font-medium tracking-tight text-foreground">
                        
-        Enterprise Solutions
+        Use Cases
           </h3>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             We show what's trustworthy through our comprehensive suite of verification tools

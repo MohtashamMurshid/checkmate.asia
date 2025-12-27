@@ -10,11 +10,11 @@ const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
 
 export default function Features10() {
     return (
-        <section id="usage" className="bg-muted/30 py-16 md:py-24 lg:py-32">
+        <section id="deployment" className="bg-muted/30 py-16 md:py-24 lg:py-32">
             <div className="mx-auto max-w-2xl px-4 md:px-6 lg:max-w-6xl">
                 <div className="mb-12 space-y-4 text-center md:mb-16">
                     <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-foreground leading-[1.1]">
-                       Usage
+                       Deployment
                     </h1>
                     <p className={`text-lg text-muted-foreground ${instrumentSans.className}`}>
                         Comprehensive AI-powered tools to detect, verify, and combat misinformation across all digital platforms
@@ -31,7 +31,7 @@ export default function Features10() {
                         </CardHeader>
 
                         <CardContent className="pt-0 pb-6 relative z-10 px-0">
-                            <div className="relative mx-6 h-[200px] overflow-hidden rounded-lg border border-border bg-muted/50 shadow-sm">
+                            <div className="relative mx-6 h-[200px] overflow-hidden rounded-lg border-2 border-foreground/20 bg-muted/50 shadow-md ring-1 ring-foreground/10">
                                 <SaaSDashboardVisual />
                             </div>
                         </CardContent>
@@ -47,7 +47,7 @@ export default function Features10() {
                         </CardHeader>
 
                         <CardContent className="pt-0 pb-6 relative z-10 px-0">
-                            <div className="relative mx-6 h-[200px] overflow-hidden rounded-lg border border-border bg-muted/50 shadow-sm">
+                            <div className="relative mx-6 h-[200px] overflow-hidden rounded-lg border-2 border-foreground/20 bg-muted/50 shadow-md ring-1 ring-foreground/10">
                                 <ApiInterfaceVisual />
                             </div>
                         </CardContent>
@@ -63,7 +63,7 @@ export default function Features10() {
                         </CardHeader>
 
                         <CardContent className="pt-0 pb-6 relative z-10 px-0">
-                            <div className="relative mx-6 h-[200px] overflow-hidden rounded-lg border border-border bg-muted/50 shadow-sm">
+                            <div className="relative mx-6 h-[200px] overflow-hidden rounded-lg border-2 border-foreground/20 bg-muted/50 shadow-md ring-1 ring-foreground/10">
                                 <SecurityMapVisual />
                             </div>
                         </CardContent>

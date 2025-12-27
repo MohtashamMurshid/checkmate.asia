@@ -30,7 +30,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', sectionId: 'home' },
   { 
-    label: 'Product', 
+    label: 'Features', 
     sectionId: 'features',
     columns: [
       {
@@ -46,8 +46,8 @@ const NAV_ITEMS: NavItem[] = [
     ]
   },
   { 
-    label: 'Usage', 
-    sectionId: 'usage',
+    label: 'Deployment', 
+    sectionId: 'deployment',
     columns: [
       {
         items: [
@@ -59,7 +59,7 @@ const NAV_ITEMS: NavItem[] = [
     ]
   },
   { 
-    label: 'Solutions', 
+    label: 'Use Cases', 
     sectionId: 'use-cases',
     columns: [
       {
@@ -71,7 +71,6 @@ const NAV_ITEMS: NavItem[] = [
       }
     ]
   },
-  { label: 'Sources', sectionId: 'sources' },
   { label: 'Research', sectionId: 'research' },
 ];
 

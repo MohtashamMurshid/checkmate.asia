@@ -108,7 +108,7 @@ export default function Features() {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 6, scale: 0.98 }}
                                     transition={{ duration: 0.2 }}
-                                    className="size-full overflow-hidden rounded-xl border border-border/60 bg-card shadow-xl">
+                                    className="size-full overflow-hidden rounded-xl border-2 border-foreground/20 bg-card shadow-xl ring-1 ring-foreground/10">
                                     <div className="size-full p-8 flex items-center justify-center">
                                         {(() => {
                                             const VisualComponent = visuals[activeItem]

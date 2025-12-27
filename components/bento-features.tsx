@@ -86,7 +86,7 @@ export function BentoFeatures() {
           {/* Section Header */}
           <div className="text-center space-y-6">
             <h2 className="text-5xl md:text-6xl font-medium tracking-tight text-foreground">
-              Products
+              Features
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Equip your organization with comprehensive AI tools designed to detect, verify, and analyze information integrity across the digital landscape.
