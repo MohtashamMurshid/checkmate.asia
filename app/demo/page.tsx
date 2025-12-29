@@ -11,17 +11,24 @@ import {
   PromptInputFooter,
   PromptInputSubmit,
 } from '@/components/ai-elements/prompt-input';
-  import { 
-    AlertCircle, 
-    CheckCircle2, 
-    AlertTriangle, 
-    ExternalLink, 
-    ChevronRight,
-    XCircle,
-    HelpCircle,
-    Link2,
-    User,
-  } from 'lucide-react';
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  AlertTriangle, 
+  ExternalLink, 
+  ChevronRight,
+  XCircle,
+  HelpCircle,
+  Link2,
+  User,
+  BookOpen,
+  FileText,
+  Database,
+  Scale,
+  Clock,
+  TrendingUp,
+  Newspaper,
+} from 'lucide-react';
 
 interface Source {
   url: string;
@@ -43,6 +50,60 @@ interface CheckmateVerification {
   reasoning: string;
 }
 
+interface RelatedArticle {
+  url: string;
+  title: string;
+  source: string;
+  relevance: string;
+}
+
+interface PrimarySource {
+  url: string;
+  title: string;
+  type: string;
+  description: string;
+}
+
+interface FurtherReading {
+  relatedArticles: RelatedArticle[];
+  primarySources: PrimarySource[];
+}
+
+interface SourceReport {
+  source: string;
+  url: string;
+  reportedAs: string;
+  agreesWithOriginal: boolean;
+}
+
+interface FactComparison {
+  fact: string;
+  sourceReports: SourceReport[];
+  consensusLevel: string;
+}
+
+interface SourceConsistency {
+  overallConsistency: string;
+  consistencyScore: number;
+  factComparisons: FactComparison[];
+  summary: string;
+}
+
+interface TimelineEvent {
+  date: string;
+  event: string;
+  source: string;
+  url: string;
+  significance: string;
+}
+
+interface StoryEvolution {
+  timeline: TimelineEvent[];
+  originDate: string;
+  latestUpdate: string;
+  evolutionSummary: string;
+}
+
 interface ApiData {
   overallBias: string;
   biasScore: number;
@@ -53,6 +114,9 @@ interface ApiData {
   summary: string;
   recommendations: string[];
   checkmateVerification: CheckmateVerification;
+  furtherReading?: FurtherReading;
+  sourceConsistency?: SourceConsistency;
+  storyEvolution?: StoryEvolution;
 }
 
 interface ApiResponse {
@@ -63,6 +127,9 @@ interface ApiResponse {
     articleLength: number;
     claimsAnalyzed: number;
     sourcesFound: number;
+    furtherReadingSourcesFound?: number;
+    consistencyScore?: number;
+    timelineSpan?: string;
     timestamp: string;
     usage: {
       inputTokens: number;
@@ -179,6 +246,53 @@ export default function DemoPage() {
   };
 
   const getBiasPosition = (score: number) => ((score + 1) / 2) * 100;
+
+  const getConsistencyColor = (level: string) => {
+    switch (level.toLowerCase()) {
+      case 'high':
+      case 'unanimous':
+        return 'text-green-500 border-green-500/50 bg-green-500/10';
+      case 'medium':
+      case 'majority':
+        return 'text-yellow-500 border-yellow-500/50 bg-yellow-500/10';
+      default:
+        return 'text-red-500 border-red-500/50 bg-red-500/10';
+    }
+  };
+
+  const getSignificanceColor = (significance: string) => {
+    switch (significance.toLowerCase()) {
+      case 'breaking':
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'development':
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'update':
+        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'follow_up':
+        return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getSourceTypeIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'government_doc':
+        return <FileText className="size-4" />;
+      case 'data_source':
+        return <Database className="size-4" />;
+      default:
+        return <BookOpen className="size-4" />;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -400,60 +514,6 @@ export default function DemoPage() {
                </CardContent>
              </Card>
 
-             {/* Bias & Sentiment */}
-             <Card>
-               <CardContent className="pt-6 space-y-6">
-                 <div className="space-y-3">
-                   <div className="flex justify-between items-baseline">
-                     <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Political Bias</span>
-                     <span className="text-base font-semibold capitalize">{result.data.overallBias}</span>
-                   </div>
-                   <div className="relative h-3 bg-gradient-to-r from-blue-500 via-gray-400 to-red-500 rounded-full">
-                     <div 
-                       className="absolute top-1/2 -translate-y-1/2 size-4 bg-foreground rounded-full border-2 border-background shadow-lg"
-                       style={{ left: `${getBiasPosition(result.data.biasScore)}%` }}
-                     />
-                   </div>
-                   <div className="flex justify-between text-[10px] text-muted-foreground/60 font-medium">
-                     <span>LEFT</span>
-                     <span>CENTER</span>
-                     <span>RIGHT</span>
-                   </div>
-                 </div>
-
-                 <div className="space-y-3">
-                   <div className="flex justify-between items-baseline">
-                     <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Sentiment</span>
-                     <span className="text-base font-semibold capitalize">{result.data.sentiment}</span>
-                   </div>
-                   <Progress value={((result.data.sentimentScore + 1) / 2) * 100} className="h-3" />
-                   <div className="flex justify-between text-[10px] text-muted-foreground/60 font-medium">
-                     <span>NEGATIVE</span>
-                     <span>NEUTRAL</span>
-                     <span>POSITIVE</span>
-                   </div>
-                 </div>
-
-                 {result.data.emotionalLanguage.length > 0 && (
-                   <div className="pt-2 space-y-2">
-                     <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Emotional Phrases</span>
-                     <div className="flex flex-wrap gap-1.5">
-                       {result.data.emotionalLanguage.slice(0, 4).map((phrase, idx) => (
-                         <Badge key={idx} variant="secondary" className="text-xs font-normal">
-                           {phrase}
-                         </Badge>
-                       ))}
-                       {result.data.emotionalLanguage.length > 4 && (
-                         <Badge variant="secondary" className="text-xs font-medium">
-                           +{result.data.emotionalLanguage.length - 4}
-                         </Badge>
-                       )}
-                     </div>
-                   </div>
-                 )}
-               </CardContent>
-             </Card>
-
              {/* Summary */}
              <Card>
                <CardHeader className="pb-3">
@@ -564,26 +624,360 @@ export default function DemoPage() {
                </Card>
              )}
 
-             {/* Recommendations */}
-             {result.data.recommendations.length > 0 && (
-               <Card>
-                 <CardHeader className="pb-3">
-                   <CardTitle className="text-base font-semibold uppercase tracking-wide text-muted-foreground">Recommendations</CardTitle>
-                 </CardHeader>
-                 <CardContent>
-                   <ul className="space-y-2">
-                     {result.data.recommendations.map((rec, idx) => (
-                       <li key={idx} className="flex items-start gap-2.5 text-sm">
-                         <CheckCircle2 className="size-4 text-primary shrink-0 mt-0.5" />
-                         <span className="leading-relaxed">{rec}</span>
-                       </li>
-                     ))}
-                   </ul>
-                 </CardContent>
-               </Card>
-             )}
-          </div>
-        )}
+            {/* Source Consistency */}
+            {result.data.sourceConsistency && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+                      <Scale className="size-4" />
+                      Source Consistency
+                    </CardTitle>
+                    <Badge 
+                      variant="outline" 
+                      className={`${getConsistencyColor(result.data.sourceConsistency.overallConsistency)} text-xs font-bold`}
+                    >
+                      {result.data.sourceConsistency.consistencyScore}% Consistent
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {result.data.sourceConsistency.summary}
+                  </p>
+                  
+                  {result.data.sourceConsistency.factComparisons.length > 0 && (
+                    <div className="space-y-3">
+                      {result.data.sourceConsistency.factComparisons.map((comparison, idx) => (
+                        <div key={idx} className="border border-border/50 rounded-lg p-4 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm font-medium flex-1">{comparison.fact}</p>
+                            <Badge 
+                              variant="outline" 
+                              className={`${getConsistencyColor(comparison.consensusLevel)} text-xs capitalize shrink-0`}
+                            >
+                              {comparison.consensusLevel}
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {comparison.sourceReports.map((report, reportIdx) => (
+                              <a
+                                key={reportIdx}
+                                href={report.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-start gap-3 p-2.5 rounded-md bg-muted/30 hover:bg-muted/50 transition-colors group"
+                              >
+                                <div className={`shrink-0 size-6 rounded-full flex items-center justify-center ${
+                                  report.agreesWithOriginal 
+                                    ? 'bg-green-500/20 text-green-500' 
+                                    : 'bg-red-500/20 text-red-500'
+                                }`}>
+                                  {report.agreesWithOriginal ? (
+                                    <CheckCircle2 className="size-3.5" />
+                                  ) : (
+                                    <XCircle className="size-3.5" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-semibold text-muted-foreground group-hover:text-primary transition-colors">
+                                    {report.source}
+                                  </p>
+                                  <p className="text-sm leading-relaxed line-clamp-2">
+                                    {report.reportedAs}
+                                  </p>
+                                </div>
+                                <ExternalLink className="size-3.5 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Story Evolution Diagram */}
+            {result.data.storyEvolution && result.data.storyEvolution.timeline.length > 0 && (
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+                      <Clock className="size-4" />
+                      Story Evolution
+                    </CardTitle>
+                    <div className="flex items-center gap-3">
+                      {/* Legend */}
+                      <div className="hidden sm:flex items-center gap-2 text-[10px]">
+                        <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-red-500" /> Breaking</span>
+                        <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-blue-500" /> Development</span>
+                        <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-yellow-500" /> Update</span>
+                        <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-purple-500" /> Follow-up</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {result.data.storyEvolution.evolutionSummary}
+                  </p>
+                  
+                  {/* Horizontal Timeline Diagram */}
+                  <div className="relative pt-2 pb-4">
+                    {/* Main horizontal line */}
+                    <div className="absolute left-0 right-0 top-[42px] h-1 bg-gradient-to-r from-muted via-border to-muted rounded-full" />
+                    
+                    {/* Timeline nodes */}
+                    <div className="relative flex justify-between items-start gap-2 overflow-x-auto pb-2">
+                      {result.data.storyEvolution.timeline.map((event, idx) => {
+                        const isFirst = idx === 0;
+                        const isLast = idx === result.data.storyEvolution!.timeline.length - 1;
+                        const significanceColor = event.significance === 'breaking' 
+                          ? 'bg-red-500 shadow-red-500/40' 
+                          : event.significance === 'development'
+                          ? 'bg-blue-500 shadow-blue-500/40'
+                          : event.significance === 'update'
+                          ? 'bg-yellow-500 shadow-yellow-500/40'
+                          : 'bg-purple-500 shadow-purple-500/40';
+                        
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`flex flex-col items-center min-w-[120px] flex-1 ${
+                              isFirst ? 'items-start' : isLast ? 'items-end' : 'items-center'
+                            }`}
+                          >
+                            {/* Date label */}
+                            <span className="text-[10px] font-mono text-muted-foreground mb-2 whitespace-nowrap">
+                              {formatDate(event.date)}
+                            </span>
+                            
+                            {/* Node */}
+                            <a
+                              href={event.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group relative"
+                            >
+                              <div className={`size-5 rounded-full ${significanceColor} shadow-lg ring-4 ring-background transition-transform group-hover:scale-125`} />
+                              
+                              {/* Connector line down */}
+                              <div className="absolute top-5 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-border" />
+                            </a>
+                            
+                            {/* Event card */}
+                            <a
+                              href={event.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`mt-6 p-3 rounded-lg border border-border/50 bg-card hover:border-primary/50 hover:bg-accent/50 transition-all group max-w-[160px] ${
+                                isFirst ? 'text-left' : isLast ? 'text-right' : 'text-center'
+                              }`}
+                            >
+                              <Badge 
+                                variant="outline" 
+                                className={`${getSignificanceColor(event.significance)} text-[9px] uppercase tracking-wider mb-2`}
+                              >
+                                {event.significance.replace('_', ' ')}
+                              </Badge>
+                              <p className="text-xs font-medium leading-snug line-clamp-3 group-hover:text-primary transition-colors">
+                                {event.event}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1 justify-center">
+                                <span>{event.source}</span>
+                                <ExternalLink className="size-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </p>
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Start/End markers */}
+                    <div className="flex justify-between mt-2 text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wider">
+                      <span className="flex items-center gap-1">
+                        <div className="size-1.5 rounded-full bg-muted-foreground/40" />
+                        Origin
+                      </span>
+                      <span className="flex items-center gap-1">
+                        Latest
+                        <div className="size-1.5 rounded-full bg-primary" />
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Bias & Sentiment */}
+            <Card>
+              <CardContent className="pt-6 space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Political Bias</span>
+                    <span className="text-base font-semibold capitalize">{result.data.overallBias}</span>
+                  </div>
+                  <div className="relative h-3 bg-gradient-to-r from-blue-500 via-gray-400 to-red-500 rounded-full">
+                    <div 
+                      className="absolute top-1/2 -translate-y-1/2 size-4 bg-foreground rounded-full border-2 border-background shadow-lg"
+                      style={{ left: `${getBiasPosition(result.data.biasScore)}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground/60 font-medium">
+                    <span>LEFT</span>
+                    <span>CENTER</span>
+                    <span>RIGHT</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Sentiment</span>
+                    <span className="text-base font-semibold capitalize">{result.data.sentiment}</span>
+                  </div>
+                  <Progress value={((result.data.sentimentScore + 1) / 2) * 100} className="h-3" />
+                  <div className="flex justify-between text-[10px] text-muted-foreground/60 font-medium">
+                    <span>NEGATIVE</span>
+                    <span>NEUTRAL</span>
+                    <span>POSITIVE</span>
+                  </div>
+                </div>
+
+                {result.data.emotionalLanguage.length > 0 && (
+                  <div className="pt-2 space-y-2">
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Emotional Phrases</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.data.emotionalLanguage.slice(0, 4).map((phrase, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs font-normal">
+                          {phrase}
+                        </Badge>
+                      ))}
+                      {result.data.emotionalLanguage.length > 4 && (
+                        <Badge variant="secondary" className="text-xs font-medium">
+                          +{result.data.emotionalLanguage.length - 4}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Further Reading */}
+            {result.data.furtherReading && (
+              (result.data.furtherReading.relatedArticles.length > 0 || 
+               result.data.furtherReading.primarySources.length > 0) && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
+                    <BookOpen className="size-4" />
+                    Further Reading
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Related Articles */}
+                  {result.data.furtherReading.relatedArticles.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Newspaper className="size-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                          Related Articles
+                        </span>
+                      </div>
+                      <div className="grid gap-2">
+                        {result.data.furtherReading.relatedArticles.map((article, idx) => (
+                          <a
+                            key={idx}
+                            href={article.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-accent/40 transition-all group"
+                          >
+                            <div className="shrink-0 size-9 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                              <ExternalLink className="size-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <p className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
+                                {article.title}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span className="font-medium">{article.source}</span>
+                                <span className="text-muted-foreground/50">•</span>
+                                <span className="line-clamp-1">{article.relevance}</span>
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Primary Sources */}
+                  {result.data.furtherReading.primarySources.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <FileText className="size-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                          Primary Sources
+                        </span>
+                      </div>
+                      <div className="grid gap-2">
+                        {result.data.furtherReading.primarySources.map((source, idx) => (
+                          <a
+                            key={idx}
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all group"
+                          >
+                            <div className="shrink-0 size-9 rounded-md bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors text-blue-500">
+                              {getSourceTypeIcon(source.type)}
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-sm group-hover:text-blue-500 transition-colors line-clamp-1">
+                                  {source.title}
+                                </p>
+                                <Badge variant="outline" className="text-[10px] uppercase tracking-wider shrink-0">
+                                  {source.type.replace('_', ' ')}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                                {source.description}
+                              </p>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+
+           {/* Recommendations */}
+           {result.data.recommendations.length > 0 && (
+             <Card>
+               <CardHeader className="pb-3">
+                 <CardTitle className="text-base font-semibold uppercase tracking-wide text-muted-foreground">Recommendations</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <ul className="space-y-2">
+                   {result.data.recommendations.map((rec, idx) => (
+                     <li key={idx} className="flex items-start gap-2.5 text-sm">
+                       <CheckCircle2 className="size-4 text-primary shrink-0 mt-0.5" />
+                       <span className="leading-relaxed">{rec}</span>
+                     </li>
+                   ))}
+                 </ul>
+               </CardContent>
+             </Card>
+           )}
+        </div>
+      )}
 
         {/* Example prompts when no result */}
         {!result && !loading && (
