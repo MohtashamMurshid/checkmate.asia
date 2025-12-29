@@ -42,7 +42,7 @@ export function LandingHero() {
                 size="lg" 
                 className="bg-[#FCD34D] hover:bg-[#FCD34D]/90 text-black font-medium rounded-md h-12 px-8 text-base shadow-sm transition-transform hover:-translate-y-0.5"
               >
-                <Link href="/contact">
+                <Link href="/demo">
                   Try Demo 
                   <ArrowRight className="ml-2 size-4" />
                 </Link>
