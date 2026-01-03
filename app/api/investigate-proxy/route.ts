@@ -4,15 +4,16 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // Validate input - either content or imageBase64 must be provided
+    // Validate input - either content, contents array, or image must be provided
     const hasContent = body.content && typeof body.content === 'string' && body.content.trim();
+    const hasContents = body.contents && Array.isArray(body.contents) && body.contents.length > 0;
     const hasImage = body.imageBase64 || body.image;
     
-    if (!hasContent && !hasImage) {
+    if (!hasContent && !hasContents && !hasImage) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'content (or newsArticle) is required and must be a string. Can be text, a URL, a TikTok link, or a Twitter/X tweet link. Alternatively, provide an image via "imageBase64".' 
+          error: 'At least one content source is required. Provide "content" (single string), "contents" (array of sources), or an image. Each can be text, a URL, a TikTok link, or a Twitter/X tweet link.' 
         },
         { 
           status: 400,

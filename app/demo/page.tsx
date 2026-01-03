@@ -32,7 +32,22 @@ import {
   TrendingUp,
   Newspaper,
   ImageIcon,
+  Layers,
 } from 'lucide-react';
+
+// Helper to extract URLs from text
+function extractUrls(text: string): string[] {
+  const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+  const matches = text.match(urlRegex) || [];
+  // Deduplicate
+  return [...new Set(matches)];
+}
+
+// Helper to get remaining text after removing URLs
+function getTextWithoutUrls(text: string): string {
+  const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+  return text.replace(urlRegex, '').trim().replace(/\s+/g, ' ');
+}
 
 interface Source {
   url: string;
@@ -123,6 +138,14 @@ interface ApiData {
   storyEvolution?: StoryEvolution;
 }
 
+interface SourceInfo {
+  label: string;
+  type: string;
+  url?: string;
+  author?: string;
+  platform?: string;
+}
+
 interface ApiResponse {
   success: boolean;
   data: ApiData;
@@ -141,12 +164,16 @@ interface ApiResponse {
       totalTokens: number;
       cost: number;
     };
-    inputType: string;
+    inputType?: string;
     sourceUrl?: string;
     sourceAuthor?: string;
     sourcePlatform?: string;
+    // Multi-source metadata
+    sourceCount?: number;
+    sources?: SourceInfo[];
   };
 }
+
 
 // Image upload button component that uses PromptInput's attachment system
 function ImageUploadButton({ disabled }: { disabled?: boolean }) {
@@ -174,27 +201,74 @@ export default function DemoPage() {
 
   const handleSubmit = async ({ text, files }: { text: string; files?: Array<{ url?: string; mediaType?: string }> }) => {
     // Check for image files from PromptInput's built-in attachment system
-    const imageFile = files?.find(f => f.mediaType?.startsWith('image/') && f.url);
+    const imageFiles = files?.filter(f => f.mediaType?.startsWith('image/') && f.url) || [];
     
     // Allow submission with just image, just text, or both
-    if (!text.trim() && !imageFile) return;
+    if (!text.trim() && imageFiles.length === 0) return;
     
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const requestBody: { content?: string; imageBase64?: string; imageCaption?: string } = {};
+      // Extract URLs from the text input
+      const urls = extractUrls(text);
+      const remainingText = getTextWithoutUrls(text);
       
-      if (text.trim()) {
-        requestBody.content = text;
-      }
+      // Build request body - auto-detect multiple sources
+      let requestBody: { 
+        content?: string; 
+        contents?: Array<{ content: string; label?: string }>;
+        imageBase64?: string; 
+        imageCaption?: string 
+      } = {};
       
-      // Use image from PromptInput's attachment system (already converted to data URL)
-      if (imageFile?.url) {
-        requestBody.imageBase64 = imageFile.url;
+      // Determine if we have multiple sources
+      const hasMultipleUrls = urls.length > 1;
+      const hasMultipleImages = imageFiles.length > 1;
+      const hasUrlAndImage = urls.length > 0 && imageFiles.length > 0;
+      const isMultiSource = hasMultipleUrls || hasMultipleImages || hasUrlAndImage;
+      
+      if (isMultiSource) {
+        // Multi-source mode: automatically build contents array
+        const allContents: Array<{ content: string; label?: string }> = [];
+        
+        // Add each URL as a separate source
+        urls.forEach((url, idx) => {
+          allContents.push({ 
+            content: url, 
+            label: urls.length > 1 ? `Link ${idx + 1}` : undefined 
+          });
+        });
+        
+        // Add remaining text if any (as context/claim to verify)
+        if (remainingText) {
+          allContents.push({ content: remainingText, label: 'Text' });
+        }
+        
+        // Add images as sources
+        imageFiles.forEach((img, idx) => {
+          if (img.url) {
+            allContents.push({ 
+              content: img.url, 
+              label: imageFiles.length > 1 ? `Image ${idx + 1}` : 'Image' 
+            });
+          }
+        });
+        
+        requestBody.contents = allContents;
+      } else {
+        // Single source mode - send as-is
         if (text.trim()) {
-          requestBody.imageCaption = text;
+          requestBody.content = text;
+        }
+        
+        // Single image
+        if (imageFiles.length === 1 && imageFiles[0].url) {
+          requestBody.imageBase64 = imageFiles[0].url;
+          if (remainingText) {
+            requestBody.imageCaption = remainingText;
+          }
         }
       }
       
@@ -368,7 +442,7 @@ export default function DemoPage() {
             </PromptInputAttachments>
             
             <PromptInputTextarea 
-              placeholder="Paste text, X.com link, TikTok link, or upload an image..."
+              placeholder="Paste text, links, or upload images... (multiple links will be compared automatically)"
               className="min-h-24"
               disabled={loading}
             />
@@ -463,8 +537,68 @@ export default function DemoPage() {
         {/* Results */}
         {result && !loading && (
           <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-            {/* Source Attribution */}
-            {(result.metadata.sourceUrl || result.metadata.sourceAuthor || result.metadata.sourcePlatform || result.metadata.inputType === 'image') && (
+            {/* Source Attribution - Multi-source or Single-source */}
+            {result.metadata.sources && result.metadata.sources.length > 1 ? (
+              // Multi-source display
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="shrink-0 size-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <Layers className="size-5 text-primary" />
+                      </div>
+                      <div>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                          Comparing Multiple Sources
+                        </span>
+                        <p className="text-sm font-semibold">
+                          {result.metadata.sourceCount} sources analyzed
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      {result.metadata.sources.map((source, idx) => (
+                        <div 
+                          key={idx}
+                          className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/30"
+                        >
+                          <Badge variant="outline" className="shrink-0 text-xs">
+                            {source.label}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs capitalize">
+                            {source.type}
+                          </Badge>
+                          {source.platform && (
+                            <Badge variant="outline" className="text-xs capitalize bg-primary/10">
+                              {source.platform}
+                            </Badge>
+                          )}
+                          {source.author && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <User className="size-3" />
+                              @{source.author}
+                            </span>
+                          )}
+                          {source.url && (
+                            <a
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-auto text-xs text-primary hover:underline flex items-center gap-1"
+                            >
+                              <span className="truncate max-w-[150px]">{new URL(source.url).hostname}</span>
+                              <ExternalLink className="size-3" />
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (result.metadata.sourceUrl || result.metadata.sourceAuthor || result.metadata.sourcePlatform || result.metadata.inputType === 'image') && (
+              // Single source display
               <Card className="border-primary/20 bg-primary/5">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
@@ -1069,9 +1203,16 @@ export default function DemoPage() {
               </Badge>
               <Badge variant="outline" className="cursor-default text-xs font-normal flex items-center gap-1">
                 <ImageIcon className="size-3" />
-                Upload an image
+                Upload images
+              </Badge>
+              <Badge variant="outline" className="cursor-default text-xs font-normal flex items-center gap-1 bg-primary/5 border-primary/30">
+                <Layers className="size-3" />
+                Multiple links
               </Badge>
             </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-3">
+              Paste multiple links to automatically compare coverage from different sources
+            </p>
           </div>
         )}
       </main>
