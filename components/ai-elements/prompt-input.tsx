@@ -656,14 +656,26 @@ export const PromptInput = ({
   };
 
   const convertBlobUrlToDataUrl = async (url: string): Promise<string> => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn('Failed to fetch blob URL:', url);
+        return url; // Return original URL if fetch fails
+      }
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => {
+          console.warn('Failed to read blob as data URL');
+          resolve(url); // Return original URL if reading fails
+        };
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.warn('Error converting blob URL to data URL:', error);
+      return url; // Return original URL on any error
+    }
   };
 
   const ctx = useMemo<AttachmentsContext>(
@@ -689,6 +701,9 @@ export const PromptInput = ({
           return (formData.get("message") as string) || "";
         })();
 
+    // Capture a stable copy of files before any async operations or state changes
+    const currentFiles = [...files];
+
     // Reset form immediately after capturing text to avoid race condition
     // where user input during async blob conversion would be lost
     if (!usingProvider) {
@@ -697,7 +712,7 @@ export const PromptInput = ({
 
     // Convert blob URLs to data URLs asynchronously
     Promise.all(
-      files.map(async ({ id, ...item }) => {
+      currentFiles.map(async ({ id, ...item }) => {
         if (item.url && item.url.startsWith("blob:")) {
           return {
             ...item,

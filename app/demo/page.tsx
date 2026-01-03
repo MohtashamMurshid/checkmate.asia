@@ -10,6 +10,9 @@ import {
   PromptInputTextarea,
   PromptInputFooter,
   PromptInputSubmit,
+  PromptInputAttachments,
+  PromptInputAttachment,
+  usePromptInputAttachments,
 } from '@/components/ai-elements/prompt-input';
 import { 
   AlertCircle, 
@@ -28,6 +31,7 @@ import {
   Clock,
   TrendingUp,
   Newspaper,
+  ImageIcon,
 } from 'lucide-react';
 
 interface Source {
@@ -144,24 +148,60 @@ interface ApiResponse {
   };
 }
 
+// Image upload button component that uses PromptInput's attachment system
+function ImageUploadButton({ disabled }: { disabled?: boolean }) {
+  const attachments = usePromptInputAttachments();
+  const hasImage = attachments.files.some(f => f.mediaType?.startsWith('image/'));
+  
+  return (
+    <button
+      type="button"
+      onClick={() => attachments.openFileDialog()}
+      disabled={disabled}
+      className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors disabled:opacity-50"
+    >
+      <ImageIcon className="size-4" />
+      <span>{hasImage ? 'Change' : 'Image'}</span>
+    </button>
+  );
+}
+
 export default function DemoPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [collapsedClaims, setCollapsedClaims] = useState<Set<number>>(new Set());
 
-  const handleSubmit = async ({ text }: { text: string }) => {
-    if (!text.trim()) return;
+  const handleSubmit = async ({ text, files }: { text: string; files?: Array<{ url?: string; mediaType?: string }> }) => {
+    // Check for image files from PromptInput's built-in attachment system
+    const imageFile = files?.find(f => f.mediaType?.startsWith('image/') && f.url);
+    
+    // Allow submission with just image, just text, or both
+    if (!text.trim() && !imageFile) return;
     
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
+      const requestBody: { content?: string; imageBase64?: string; imageCaption?: string } = {};
+      
+      if (text.trim()) {
+        requestBody.content = text;
+      }
+      
+      // Use image from PromptInput's attachment system (already converted to data URL)
+      if (imageFile?.url) {
+        requestBody.imageBase64 = imageFile.url;
+        if (text.trim()) {
+          requestBody.imageCaption = text;
+        }
+      }
+      
       const response = await fetch('/api/investigate-proxy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -169,7 +209,7 @@ export default function DemoPage() {
       if (data.success) {
         setResult(data);
       } else {
-        setError('Analysis failed. Please try again.');
+        setError(data.error || 'Analysis failed. Please try again.');
       }
     } catch {
       setError('Failed to connect. Check your connection.');
@@ -311,7 +351,7 @@ export default function DemoPage() {
           <p className={`text-muted-foreground transition-all duration-500 ${
             !result && !loading ? 'text-base' : 'text-sm'
           }`}>
-            Verify text, tweets, or TikToks for bias and accuracy
+            Verify text, tweets, TikToks, or images for bias and accuracy
           </p>
         </div>
 
@@ -320,16 +360,26 @@ export default function DemoPage() {
           <PromptInput
             onSubmit={handleSubmit}
             className="rounded-xl border-border/50"
+            accept="image/*"
           >
+            {/* Show attached images */}
+            <PromptInputAttachments className="px-3 pt-3">
+              {(attachment) => <PromptInputAttachment data={attachment} />}
+            </PromptInputAttachments>
+            
             <PromptInputTextarea 
-              placeholder="Paste text, X.com link, or TikTok link..."
+              placeholder="Paste text, X.com link, TikTok link, or upload an image..."
               className="min-h-24"
               disabled={loading}
             />
             <PromptInputFooter>
-              <span className="text-xs text-muted-foreground">
-                {loading && 'Investigating...'}
-              </span>
+              <div className="flex items-center gap-2">
+                {/* Image upload button using PromptInput's attachment system */}
+                <ImageUploadButton disabled={loading} />
+                <span className="text-xs text-muted-foreground">
+                  {loading && 'Investigating...'}
+                </span>
+              </div>
               <PromptInputSubmit disabled={loading}>
                 {loading ? <Loader className="size-4" /> : null}
               </PromptInputSubmit>
@@ -414,21 +464,30 @@ export default function DemoPage() {
         {result && !loading && (
           <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
             {/* Source Attribution */}
-            {(result.metadata.sourceUrl || result.metadata.sourceAuthor || result.metadata.sourcePlatform) && (
+            {(result.metadata.sourceUrl || result.metadata.sourceAuthor || result.metadata.sourcePlatform || result.metadata.inputType === 'image') && (
               <Card className="border-primary/20 bg-primary/5">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
                     <div className="shrink-0 size-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <Link2 className="size-5 text-primary" />
+                      {result.metadata.inputType === 'image' ? (
+                        <ImageIcon className="size-5 text-primary" />
+                      ) : (
+                        <Link2 className="size-5 text-primary" />
+                      )}
                     </div>
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                          Analyzing Content From
+                          {result.metadata.inputType === 'image' ? 'Analyzing Image' : 'Analyzing Content From'}
                         </span>
                         {result.metadata.sourcePlatform && (
                           <Badge variant="outline" className="text-xs capitalize">
                             {result.metadata.sourcePlatform}
+                          </Badge>
+                        )}
+                        {result.metadata.inputType && (
+                          <Badge variant="outline" className="text-xs capitalize bg-primary/10">
+                            {result.metadata.inputType}
                           </Badge>
                         )}
                       </div>
@@ -441,15 +500,30 @@ export default function DemoPage() {
                       )}
                       
                       {result.metadata.sourceUrl && (
-                        <a
-                          href={result.metadata.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-primary hover:underline group"
-                        >
-                          <span className="truncate max-w-md">{result.metadata.sourceUrl}</span>
-                          <ExternalLink className="size-3.5 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                        </a>
+                        result.metadata.inputType === 'image' ? (
+                          <a
+                            href={result.metadata.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                          >
+                            <img 
+                              src={result.metadata.sourceUrl} 
+                              alt="Analyzed image" 
+                              className="max-h-48 rounded-lg border border-border/50 object-contain hover:opacity-90 transition-opacity"
+                            />
+                          </a>
+                        ) : (
+                          <a
+                            href={result.metadata.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-primary hover:underline group"
+                          >
+                            <span className="truncate max-w-md">{result.metadata.sourceUrl}</span>
+                            <ExternalLink className="size-3.5 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                          </a>
+                        )
                       )}
                     </div>
                   </div>
@@ -992,6 +1066,10 @@ export default function DemoPage() {
               </Badge>
               <Badge variant="outline" className="cursor-default text-xs font-normal">
                 x.com/user/status/123
+              </Badge>
+              <Badge variant="outline" className="cursor-default text-xs font-normal flex items-center gap-1">
+                <ImageIcon className="size-3" />
+                Upload an image
               </Badge>
             </div>
           </div>
