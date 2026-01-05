@@ -27,9 +27,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward the request to the API (use local for dev, production for prod)
-    const apiUrl = process.env.NODE_ENV === 'development' 
+    const isDev = process.env.NODE_ENV === 'development';
+    const apiUrl = isDev 
       ? 'http://localhost:3000/api/investigate'
       : 'https://api.checkmate.asia/api/investigate';
+    
+    console.log('[PROXY] Environment:', process.env.NODE_ENV);
+    console.log('[PROXY] Using API:', isDev ? 'LOCAL (localhost:3000)' : 'PRODUCTION (api.checkmate.asia)');
+    console.log('[PROXY] Full URL:', apiUrl);
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -52,6 +57,16 @@ export async function POST(request: NextRequest) {
       } else {
         data = { success: true, rawResponse: responseText };
       }
+    }
+
+    // DEBUG: Log the API response
+    console.log('[PROXY] API response status:', response.status);
+    console.log('[PROXY] API response success:', data.success);
+    if (data.data?.factualClaims) {
+      console.log('[PROXY] Claims count:', data.data.factualClaims.length);
+      data.data.factualClaims.forEach((claim: any, i: number) => {
+        console.log(`[PROXY] Claim ${i + 1} reasoning length: ${claim.reasoning?.length || 0}`);
+      });
     }
 
     // Return the response with CORS headers

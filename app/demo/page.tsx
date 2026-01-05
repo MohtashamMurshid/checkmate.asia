@@ -58,6 +58,7 @@ interface Source {
 interface FactualClaim {
   claim: string;
   assessment: string;
+  score?: number;
   sources: Source[];
   reasoning: string;
 }
@@ -123,6 +124,11 @@ interface StoryEvolution {
   evolutionSummary: string;
 }
 
+interface SummaryPoint {
+  point: string;
+  disagreementReasons: string;
+}
+
 interface ApiData {
   overallBias: string;
   biasScore: number;
@@ -130,7 +136,7 @@ interface ApiData {
   sentimentScore: number;
   emotionalLanguage: string[];
   factualClaims: FactualClaim[];
-  summary: string;
+  summary: SummaryPoint[] | string; // Support both new array format and legacy string
   recommendations: string[];
   checkmateVerification: CheckmateVerification;
   furtherReading?: FurtherReading;
@@ -280,6 +286,30 @@ export default function DemoPage() {
 
       const data = await response.json();
       
+      // DEBUG: Log the full response to see claim analysis details
+      console.log('[DEMO] Full API response:', JSON.stringify(data, null, 2));
+      if (data.data?.factualClaims) {
+        console.log('[DEMO] ========== CLAIMS ANALYSIS DEBUG ==========');
+        data.data.factualClaims.forEach((claim: any, i: number) => {
+          console.log(`[DEMO] Claim ${i + 1}: "${claim.claim?.substring(0, 60)}..."`);
+          console.log(`[DEMO] Claim ${i + 1} assessment: ${claim.assessment}`);
+          console.log(`[DEMO] Claim ${i + 1} reasoning LENGTH: ${claim.reasoning?.length || 0} chars`);
+          console.log(`[DEMO] Claim ${i + 1} reasoning CONTENT:\n${claim.reasoning}`);
+          console.log(`[DEMO] Claim ${i + 1} sources count: ${claim.sources?.length || 0}`);
+          if (claim.sources?.length > 0) {
+            claim.sources.forEach((src: any, j: number) => {
+              console.log(`[DEMO]   Source ${j + 1}: ${src.title}`);
+              console.log(`[DEMO]   Source ${j + 1} excerpt LENGTH: ${src.excerpt?.length || 0} chars`);
+              console.log(`[DEMO]   Source ${j + 1} excerpt: ${src.excerpt}`);
+              console.log(`[DEMO]   Source ${j + 1} publishedDate: ${src.publishedDate || 'N/A'}`);
+              console.log(`[DEMO]   Source ${j + 1} sourceType: ${src.sourceType || 'N/A'}`);
+            });
+          }
+          console.log('[DEMO] ---');
+        });
+        console.log('[DEMO] ============================================');
+      }
+      
       if (data.success) {
         setResult(data);
       } else {
@@ -294,27 +324,81 @@ export default function DemoPage() {
 
   const getVerdictColor = (verdict: string) => {
     switch (verdict.toLowerCase()) {
-      case 'trustworthy':
       case 'verified':
         return 'text-green-500 border-green-500/50 bg-green-500/10';
-      case 'questionable':
-      case 'needs verification':
+      case 'unverified':
         return 'text-yellow-500 border-yellow-500/50 bg-yellow-500/10';
-      default:
+      case 'disputed':
+        return 'text-orange-500 border-orange-500/50 bg-orange-500/10';
+      case 'false':
+      case 'misleading':
         return 'text-red-500 border-red-500/50 bg-red-500/10';
+      // Legacy support for old verdicts
+      case 'trustworthy':
+        return 'text-green-500 border-green-500/50 bg-green-500/10';
+      case 'mostly-trustworthy':
+      case 'questionable':
+        return 'text-yellow-500 border-yellow-500/50 bg-yellow-500/10';
+      case 'unreliable':
+      case 'untrustworthy':
+        return 'text-red-500 border-red-500/50 bg-red-500/10';
+      default:
+        return 'text-gray-500 border-gray-500/50 bg-gray-500/10';
     }
   };
 
   const getVerdictIcon = (verdict: string) => {
     switch (verdict.toLowerCase()) {
-      case 'trustworthy':
       case 'verified':
         return <CheckCircle2 className="size-4" />;
-      case 'questionable':
-      case 'needs verification':
+      case 'unverified':
+        return <HelpCircle className="size-4" />;
+      case 'disputed':
         return <AlertTriangle className="size-4" />;
+      case 'false':
+        return <XCircle className="size-4" />;
+      case 'misleading':
+        return <AlertCircle className="size-4" />;
+      // Legacy support for old verdicts
+      case 'trustworthy':
+        return <CheckCircle2 className="size-4" />;
+      case 'mostly-trustworthy':
+        return <CheckCircle2 className="size-4" />;
+      case 'questionable':
+        return <AlertTriangle className="size-4" />;
+      case 'unreliable':
+      case 'untrustworthy':
+        return <XCircle className="size-4" />;
       default:
         return <AlertCircle className="size-4" />;
+    }
+  };
+
+  const getVerdictLabel = (verdict: string) => {
+    switch (verdict.toLowerCase()) {
+      case 'verified':
+        return 'Verified';
+      case 'unverified':
+        return 'Unverified';
+      case 'disputed':
+        return 'Disputed';
+      case 'false':
+        return 'False';
+      case 'misleading':
+        return 'Misleading';
+      // Legacy support for old verdicts
+      case 'trustworthy':
+        return 'Trustworthy';
+      case 'mostly-trustworthy':
+        return 'Mostly Trustworthy';
+      case 'questionable':
+        return 'Questionable';
+      case 'unreliable':
+        return 'Unreliable';
+      case 'untrustworthy':
+        return 'Untrustworthy';
+      default:
+        return verdict.charAt(0).toUpperCase() + verdict.slice(1);
     }
   };
 
@@ -323,11 +407,25 @@ export default function DemoPage() {
       case 'true':
       case 'verified':
         return 'border-green-500/50 bg-green-500/10 text-green-400';
+      case 'missing-context':
+        return 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400';
+      case 'mostly-false':
+        return 'border-orange-500/50 bg-orange-500/10 text-orange-400';
+      case 'checkmate':
+        return 'border-red-500/50 bg-red-500/10 text-red-400';
+      case 'disputed':
+        return 'border-purple-500/50 bg-purple-500/10 text-purple-400';
+      case 'unknown':
+        return 'border-gray-500/50 bg-gray-500/10 text-gray-400';
+      // Legacy support
       case 'misleading':
       case 'questionable':
+      case 'unverified':
         return 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400';
-      default:
+      case 'false':
         return 'border-red-500/50 bg-red-500/10 text-red-400';
+      default:
+        return 'border-gray-500/50 bg-gray-500/10 text-gray-400';
     }
   };
 
@@ -336,8 +434,20 @@ export default function DemoPage() {
       case 'true':
       case 'verified':
         return <CheckCircle2 className="size-5" />;
+      case 'missing-context':
+        return <AlertTriangle className="size-5" />;
+      case 'mostly-false':
+        return <AlertCircle className="size-5" />;
+      case 'checkmate':
+        return <XCircle className="size-5" />;
+      case 'disputed':
+        return <AlertTriangle className="size-5" />;
+      case 'unknown':
+        return <HelpCircle className="size-5" />;
+      // Legacy support
       case 'misleading':
       case 'questionable':
+      case 'unverified':
         return <AlertTriangle className="size-5" />;
       case 'false':
         return <XCircle className="size-5" />;
@@ -351,11 +461,55 @@ export default function DemoPage() {
       case 'true':
       case 'verified':
         return 'border-l-4 border-l-green-500';
+      case 'missing-context':
+        return 'border-l-4 border-l-yellow-500';
+      case 'mostly-false':
+        return 'border-l-4 border-l-orange-500';
+      case 'checkmate':
+        return 'border-l-4 border-l-red-500';
+      case 'disputed':
+        return 'border-l-4 border-l-purple-500';
+      case 'unknown':
+        return 'border-l-4 border-l-gray-500';
+      // Legacy support
       case 'misleading':
       case 'questionable':
+      case 'unverified':
         return 'border-l-4 border-l-yellow-500';
-      default:
+      case 'false':
         return 'border-l-4 border-l-red-500';
+      default:
+        return 'border-l-4 border-l-gray-500';
+    }
+  };
+
+  const getAssessmentLabel = (assessment: string) => {
+    switch (assessment.toLowerCase()) {
+      case 'true':
+        return 'True';
+      case 'missing-context':
+        return 'Missing Context';
+      case 'mostly-false':
+        return 'Mostly False';
+      case 'checkmate':
+        return 'Checkmate';
+      case 'disputed':
+        return 'Disputed';
+      case 'unknown':
+        return 'Unknown';
+      // Legacy support
+      case 'verified':
+        return 'Verified';
+      case 'unverified':
+        return 'Unverified';
+      case 'misleading':
+        return 'Misleading';
+      case 'questionable':
+        return 'Questionable';
+      case 'false':
+        return 'False';
+      default:
+        return assessment.charAt(0).toUpperCase() + assessment.slice(1).replace(/-/g, ' ');
     }
   };
 
@@ -707,7 +861,7 @@ export default function DemoPage() {
                        >
                          {getVerdictIcon(result.data.checkmateVerification.verdict)}
                          <span className="font-semibold uppercase tracking-wide">
-                           {result.data.checkmateVerification.verdict}
+                           {getVerdictLabel(result.data.checkmateVerification.verdict)}
                          </span>
                        </Badge>
                      </div>
@@ -722,17 +876,35 @@ export default function DemoPage() {
                </CardContent>
              </Card>
 
-             {/* Summary */}
-             <Card>
-               <CardHeader className="pb-3">
-                 <CardTitle className="text-base font-semibold uppercase tracking-wide text-muted-foreground">Summary</CardTitle>
-               </CardHeader>
-               <CardContent>
-                 <p className="text-[15px] leading-relaxed font-medium">
-                   {result.data.summary}
-                 </p>
-               </CardContent>
-             </Card>
+            {/* Summary */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold uppercase tracking-wide text-muted-foreground">Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {Array.isArray(result.data.summary) ? (
+                  <ul className="space-y-4">
+                    {result.data.summary.map((item, idx) => (
+                      <li key={idx} className="flex gap-3">
+                        <span className="text-primary mt-1.5">•</span>
+                        <div className="space-y-1.5">
+                          <p className="text-[15px] leading-relaxed font-medium">
+                            {item.point}
+                          </p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            <span className="font-medium text-amber-600 dark:text-amber-500">Why some disagree:</span> {item.disagreementReasons}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[15px] leading-relaxed font-medium">
+                    {result.data.summary}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
 
              {/* Claims */}
              {result.data.factualClaims.length > 0 && (
@@ -767,13 +939,21 @@ export default function DemoPage() {
                          </div>
                          
                          <div className="flex-1 min-w-0 space-y-2">
-                           <div className="flex items-start gap-2">
+                           <div className="flex items-start gap-2 flex-wrap">
                              <Badge 
                                variant="outline" 
-                               className={`${getAssessmentColor(claim.assessment)} text-xs capitalize shrink-0 font-bold px-2.5 py-0.5`}
+                               className={`${getAssessmentColor(claim.assessment)} text-xs shrink-0 font-bold px-2.5 py-0.5`}
                              >
-                               {claim.assessment}
+                               {getAssessmentLabel(claim.assessment)}
                              </Badge>
+                             {claim.score !== undefined && (
+                               <Badge 
+                                 variant="outline" 
+                                 className="text-xs shrink-0 font-mono px-2.5 py-0.5"
+                               >
+                                 Score: {claim.score}/10
+                               </Badge>
+                             )}
                            </div>
                            <p className="text-sm font-medium leading-relaxed">{claim.claim}</p>
                          </div>
@@ -786,38 +966,56 @@ export default function DemoPage() {
                        </button>
 
                        {!collapsedClaims.has(idx) && (
-                         <div className="px-4 py-4 border-t border-border/50 bg-muted/20 space-y-4">
-                           <div className="space-y-2">
+                         <div className="px-4 py-5 border-t border-border/50 bg-muted/20 space-y-5">
+                           <div className="space-y-3">
                              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                                Analysis
                              </p>
-                             <p className="text-sm leading-relaxed">{claim.reasoning}</p>
+                             <div className="text-sm leading-relaxed whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
+                               {claim.reasoning}
+                             </div>
                            </div>
                            
                            {claim.sources.length > 0 && (
-                             <div className="space-y-2">
+                             <div className="space-y-3">
                                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                                  Sources ({claim.sources.length})
                                </p>
-                               <div className="space-y-2">
-                                 {claim.sources.map((source, sourceIdx) => (
+                               <div className="space-y-3">
+                                 {claim.sources.map((source: any, sourceIdx: number) => (
                                    <a
                                      key={sourceIdx}
                                      href={source.url}
                                      target="_blank"
                                      rel="noopener noreferrer"
-                                     className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-accent/40 transition-all group/source"
+                                     className="block p-4 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-accent/40 transition-all group/source"
                                    >
-                                     <div className="shrink-0 size-8 rounded-md bg-primary/10 flex items-center justify-center group-hover/source:bg-primary/20 transition-colors">
-                                       <ExternalLink className="size-4 text-primary" />
-                                     </div>
-                                     <div className="flex-1 min-w-0 space-y-1">
-                                       <p className="font-medium text-sm group-hover/source:text-primary transition-colors line-clamp-1">
-                                         {source.title}
-                                       </p>
-                                       <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                         {source.excerpt}
-                                       </p>
+                                     <div className="flex items-start gap-3">
+                                       <div className="shrink-0 size-8 rounded-md bg-primary/10 flex items-center justify-center group-hover/source:bg-primary/20 transition-colors">
+                                         <ExternalLink className="size-4 text-primary" />
+                                       </div>
+                                       <div className="flex-1 min-w-0 space-y-2">
+                                         <div className="flex items-start justify-between gap-2">
+                                           <p className="font-medium text-sm group-hover/source:text-primary transition-colors line-clamp-2">
+                                             {source.title}
+                                           </p>
+                                           <div className="flex items-center gap-2 shrink-0">
+                                             {source.sourceType && (
+                                               <Badge variant="outline" className="text-[10px] capitalize px-1.5 py-0">
+                                                 {source.sourceType.replace('_', ' ')}
+                                               </Badge>
+                                             )}
+                                           </div>
+                                         </div>
+                                         {source.publishedDate && (
+                                           <p className="text-[11px] text-muted-foreground/70">
+                                             Published: {source.publishedDate}
+                                           </p>
+                                         )}
+                                         <p className="text-xs text-muted-foreground leading-relaxed">
+                                           {source.excerpt}
+                                         </p>
+                                       </div>
                                      </div>
                                    </a>
                                  ))}
