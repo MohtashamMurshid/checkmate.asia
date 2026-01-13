@@ -8,9 +8,12 @@
  * @module
  */
 
+import type * as auditLog from "../auditLog.js";
+import type * as briefs from "../briefs.js";
 import type * as contacts from "../contacts.js";
 import type * as datasetAnalyses from "../datasetAnalyses.js";
 import type * as investigations from "../investigations.js";
+import type * as signals from "../signals.js";
 
 import type {
   ApiFromModules,
@@ -27,9 +30,12 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  auditLog: typeof auditLog;
+  briefs: typeof briefs;
   contacts: typeof contacts;
   datasetAnalyses: typeof datasetAnalyses;
   investigations: typeof investigations;
+  signals: typeof signals;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

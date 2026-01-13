@@ -62,5 +62,183 @@ export default defineSchema({
     lastAccessedAt: v.number(),
     accessCount: v.number(),
   }).index("by_hash", ["hash"]),
+
+  // ============================================
+  // NPREWS - Narrative & Policy Regime Early-Warning System
+  // ============================================
+
+  // Narrative signals from NarrativeAgent (Module 5.1)
+  narrativeSignals: defineTable({
+    agentName: v.string(),
+    hypothesis: v.string(),
+    confidence: v.number(),
+    frame: v.string(),
+    frameType: v.union(
+      v.literal("emergence"),
+      v.literal("reframing"),
+      v.literal("responsibility"),
+      v.literal("solution")
+    ),
+    previousFrame: v.optional(v.string()),
+    sectors: v.array(v.string()),
+    riskTypes: v.array(v.string()),
+    nationalPriorities: v.array(v.string()),
+    evidence: v.array(
+      v.object({
+        source: v.string(),
+        quote: v.string(),
+        url: v.optional(v.string()),
+        publishedAt: v.optional(v.string()),
+        sourceType: v.string(),
+      })
+    ),
+    createdAt: v.number(),
+    clusterId: v.optional(v.id("narrativeClusters")),
+  })
+    .index("by_sector", ["sectors"])
+    .index("by_frameType", ["frameType"])
+    .index("by_createdAt", ["createdAt"]),
+
+  // Actor signals from ActorLegitimacyAgent (Module 5.3)
+  actorSignals: defineTable({
+    agentName: v.string(),
+    hypothesis: v.string(),
+    confidence: v.number(),
+    actors: v.array(
+      v.object({
+        name: v.string(),
+        category: v.string(),
+        role: v.string(),
+        legitimacyScore: v.number(),
+        quote: v.optional(v.string()),
+      })
+    ),
+    legitimacyTransfer: v.optional(
+      v.object({
+        from: v.string(),
+        to: v.string(),
+        narrative: v.string(),
+      })
+    ),
+    evidence: v.array(
+      v.object({
+        source: v.string(),
+        quote: v.string(),
+        url: v.optional(v.string()),
+        sourceType: v.string(),
+      })
+    ),
+    createdAt: v.number(),
+    narrativeSignalId: v.optional(v.id("narrativeSignals")),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_hasLegitimacyTransfer", ["legitimacyTransfer"]),
+
+  // Cluster signals from ClusterAgent (Module 5.2)
+  narrativeClusters: defineTable({
+    agentName: v.string(),
+    hypothesis: v.string(),
+    confidence: v.number(),
+    coreThesis: v.string(),
+    supportingArguments: v.array(v.string()),
+    counterArguments: v.array(v.string()),
+    moralFraming: v.string(),
+    narrativeSignalIds: v.array(v.id("narrativeSignals")),
+    clusterSize: v.number(),
+    centroidEmbedding: v.optional(v.array(v.number())),
+    evidence: v.array(
+      v.object({
+        source: v.string(),
+        quote: v.string(),
+        sourceType: v.string(),
+      })
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_clusterSize", ["clusterSize"]),
+
+  // Narrative Briefs - main output from SynthesizerAgent
+  narrativeBriefs: defineTable({
+    title: v.string(),
+    summary: v.string(),
+    whyItMatters: v.string(),
+    sectors: v.array(v.string()),
+    riskTypes: v.array(v.string()),
+    nationalPriorities: v.array(v.string()),
+    regimeBand: v.union(
+      v.literal("dormant"),
+      v.literal("emerging"),
+      v.literal("normalising"),
+      v.literal("pre_formal"),
+      v.literal("imminent")
+    ),
+    confidence: v.number(),
+    contributingSignalIds: v.array(v.string()),
+    actors: v.array(
+      v.object({
+        name: v.string(),
+        category: v.string(),
+        role: v.string(),
+        legitimacyScore: v.number(),
+      })
+    ),
+    evidence: v.array(
+      v.object({
+        source: v.string(),
+        quote: v.string(),
+        url: v.optional(v.string()),
+        sourceType: v.string(),
+      })
+    ),
+    recommendedAction: v.union(
+      v.literal("monitor"),
+      v.literal("review"),
+      v.literal("escalate")
+    ),
+    reviewStatus: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("dismissed"),
+      v.literal("escalated")
+    ),
+    reviewedBy: v.optional(v.string()),
+    reviewedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_regimeBand", ["regimeBand"])
+    .index("by_reviewStatus", ["reviewStatus"])
+    .index("by_createdAt", ["createdAt"])
+    .index("by_recommendedAction", ["recommendedAction"]),
+
+  // Known actors database for legitimacy scoring
+  knownActors: defineTable({
+    name: v.string(),
+    category: v.string(),
+    institutionalAuthority: v.number(),
+    policyInfluence: v.number(),
+    mediaCredibility: v.number(),
+    legitimacyScore: v.number(),
+    narrativeSignalIds: v.array(v.id("narrativeSignals")),
+    firstSeenAt: v.number(),
+    lastSeenAt: v.number(),
+  })
+    .index("by_name", ["name"])
+    .index("by_category", ["category"])
+    .index("by_legitimacyScore", ["legitimacyScore"]),
+
+  // Audit log for traceability
+  nprewsAuditLog: defineTable({
+    action: v.string(),
+    entityType: v.string(),
+    entityId: v.string(),
+    details: v.any(),
+    userId: v.optional(v.string()),
+    timestamp: v.number(),
+  })
+    .index("by_entityType", ["entityType"])
+    .index("by_entityId", ["entityId"])
+    .index("by_timestamp", ["timestamp"]),
 });
 
