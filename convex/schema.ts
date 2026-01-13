@@ -240,5 +240,61 @@ export default defineSchema({
     .index("by_entityType", ["entityType"])
     .index("by_entityId", ["entityId"])
     .index("by_timestamp", ["timestamp"]),
+
+  // ============================================
+  // SIGNALS - Portfolio Monitoring System
+  // ============================================
+
+  // Portfolio companies being monitored
+  portfolioCompanies: defineTable({
+    name: v.string(),
+    region: v.string(),
+    sector: v.string(),
+    description: v.string(),
+    riskLevel: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    activeSignalCount: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_region", ["region"])
+    .index("by_sector", ["sector"])
+    .index("by_riskLevel", ["riskLevel"]),
+
+  // Signals - events/mentions that could affect portfolio companies
+  signals: defineTable({
+    title: v.string(),
+    summary: v.string(),
+    category: v.union(
+      v.literal("geopolitical"),
+      v.literal("economic"),
+      v.literal("regulatory"),
+      v.literal("supply_chain"),
+      v.literal("climate"),
+      v.literal("market"),
+      v.literal("operational")
+    ),
+    severity: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("critical")
+    ),
+    companyIds: v.array(v.id("portfolioCompanies")),
+    relevanceReason: v.string(),
+    source: v.string(),
+    sourceUrl: v.optional(v.string()),
+    isBookmarked: v.boolean(),
+    status: v.union(
+      v.literal("new"),
+      v.literal("tracking"),
+      v.literal("resolved")
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_category", ["category"])
+    .index("by_severity", ["severity"])
+    .index("by_status", ["status"])
+    .index("by_isBookmarked", ["isBookmarked"])
+    .index("by_createdAt", ["createdAt"]),
 });
 

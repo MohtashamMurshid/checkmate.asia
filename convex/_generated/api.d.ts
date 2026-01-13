@@ -13,7 +13,10 @@ import type * as briefs from "../briefs.js";
 import type * as contacts from "../contacts.js";
 import type * as datasetAnalyses from "../datasetAnalyses.js";
 import type * as investigations from "../investigations.js";
+import type * as portfolio from "../portfolio.js";
+import type * as seed from "../seed.js";
 import type * as signals from "../signals.js";
+import type * as signalsData from "../signalsData.js";
 
 import type {
   ApiFromModules,
@@ -35,7 +38,10 @@ declare const fullApi: ApiFromModules<{
   contacts: typeof contacts;
   datasetAnalyses: typeof datasetAnalyses;
   investigations: typeof investigations;
+  portfolio: typeof portfolio;
+  seed: typeof seed;
   signals: typeof signals;
+  signalsData: typeof signalsData;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
