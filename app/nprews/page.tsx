@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -14,16 +14,14 @@ import { LegitimacyTransferCard } from '@/components/nprews/actor-table';
 import { PortfolioOverview } from '@/components/nprews/portfolio-card';
 import { SignalFeed } from '@/components/nprews/signal-feed';
 import {
-  AlertTriangle,
-  FileText,
-  TrendingUp,
-  Activity,
   Plus,
   Loader2,
   Search,
   Building2,
   Bookmark,
   Zap,
+  FileText,
+  TrendingUp,
 } from 'lucide-react';
 import {
   Dialog,
@@ -76,7 +74,6 @@ export default function NPREWSDashboard() {
       const result = await response.json();
       console.log('Analysis result:', result);
 
-      // Close dialog and refresh
       setAnalyzeOpen(false);
       setInputText('');
       setInputUrl('');
@@ -88,55 +85,53 @@ export default function NPREWSDashboard() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Risk Intelligence Dashboard</h1>
-          <p className="text-muted-foreground">
-            Portfolio monitoring & narrative early-warning system
+          <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            Risk Intelligence
+          </h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            Portfolio monitoring and signal detection
           </p>
         </div>
         <Dialog open={analyzeOpen} onOpenChange={setAnalyzeOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button size="sm" className="h-9">
               <Plus className="h-4 w-4 mr-2" />
-              Analyze Content
+              Analyze
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-xl">
             <DialogHeader>
-              <DialogTitle>Analyze New Content</DialogTitle>
-              <DialogDescription>
-                Enter text or a URL to analyze for risk signals.
+              <DialogTitle className="text-lg font-medium">Analyze Content</DialogTitle>
+              <DialogDescription className="text-sm text-zinc-500">
+                Enter a URL or paste text to analyze for risk signals.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
+            <div className="space-y-4 pt-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium">URL (optional)</label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    className="flex-1 px-3 py-2 border rounded-md text-sm"
-                    value={inputUrl}
-                    onChange={(e) => setInputUrl(e.target.value)}
-                  />
-                </div>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">URL</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-md text-sm bg-white dark:bg-zinc-900"
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                />
               </div>
-              <div className="relative">
+              <div className="relative py-2">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t border-zinc-200 dark:border-zinc-700" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or paste text
-                  </span>
+                <div className="relative flex justify-center">
+                  <span className="bg-white dark:bg-zinc-900 px-3 text-xs text-zinc-400">or</span>
                 </div>
               </div>
               <Textarea
-                placeholder="Paste speech, article, or policy document text here..."
-                className="min-h-[200px]"
+                placeholder="Paste text content..."
+                className="min-h-[180px] text-sm resize-none"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
               />
@@ -144,16 +139,17 @@ export default function NPREWSDashboard() {
                 onClick={handleAnalyze}
                 disabled={analyzing || (!inputText && !inputUrl)}
                 className="w-full"
+                size="sm"
               >
                 {analyzing ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing with AI Agents...
+                    Analyzing...
                   </>
                 ) : (
                   <>
                     <Search className="h-4 w-4 mr-2" />
-                    Analyze Content
+                    Analyze
                   </>
                 )}
               </Button>
@@ -162,126 +158,86 @@ export default function NPREWSDashboard() {
         </Dialog>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Portfolio</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {portfolioStats?.totalCompanies ?? '-'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {portfolioStats?.highRiskCompanies ?? 0} high risk
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Signals</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {portfolioStats?.totalSignals ?? '-'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {portfolioStats?.newSignals ?? 0} new today
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Critical</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {portfolioStats?.criticalSignals ?? '-'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Requires attention
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tracking</CardTitle>
-            <Bookmark className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {portfolioStats?.bookmarkedSignals ?? '-'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Bookmarked signals
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Narrative Briefs</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats?.briefsThisWeek ?? '-'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {stats?.pendingReview ?? 0} pending review
-            </p>
-          </CardContent>
-        </Card>
+      {/* Stats Row */}
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+        <StatCard
+          label="Portfolio"
+          value={portfolioStats?.totalCompanies ?? 0}
+          subtext={`${portfolioStats?.highRiskCompanies ?? 0} elevated`}
+        />
+        <StatCard
+          label="Active Signals"
+          value={portfolioStats?.totalSignals ?? 0}
+          subtext={`${portfolioStats?.newSignals ?? 0} new`}
+          highlight={portfolioStats?.newSignals ? portfolioStats.newSignals > 0 : false}
+        />
+        <StatCard
+          label="Critical"
+          value={portfolioStats?.criticalSignals ?? 0}
+          subtext="Require attention"
+          alert={portfolioStats?.criticalSignals ? portfolioStats.criticalSignals > 0 : false}
+        />
+        <StatCard
+          label="Tracking"
+          value={portfolioStats?.bookmarkedSignals ?? 0}
+          subtext="Bookmarked"
+        />
+        <StatCard
+          label="Briefs"
+          value={stats?.briefsThisWeek ?? 0}
+          subtext={`${stats?.pendingReview ?? 0} pending`}
+        />
       </div>
 
       {/* Main Tabs */}
-      <Tabs defaultValue="signals" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="signals" className="flex items-center gap-2">
-            <Zap className="h-4 w-4" />
+      <Tabs defaultValue="signals" className="space-y-6">
+        <TabsList className="bg-zinc-100 dark:bg-zinc-800 p-1 h-10">
+          <TabsTrigger
+            value="signals"
+            className="text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm px-4"
+          >
             Signals
             {portfolioStats?.newSignals ? (
-              <Badge variant="secondary" className="ml-1">
-                {portfolioStats.newSignals}
-              </Badge>
+              <span className="ml-2 text-xs text-zinc-500">{portfolioStats.newSignals}</span>
             ) : null}
           </TabsTrigger>
-          <TabsTrigger value="portfolio" className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
+          <TabsTrigger
+            value="portfolio"
+            className="text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm px-4"
+          >
             Portfolio
           </TabsTrigger>
-          <TabsTrigger value="bookmarks" className="flex items-center gap-2">
-            <Bookmark className="h-4 w-4" />
+          <TabsTrigger
+            value="bookmarks"
+            className="text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm px-4"
+          >
             Tracking
             {bookmarkedSignals?.length ? (
-              <Badge variant="secondary" className="ml-1">
-                {bookmarkedSignals.length}
-              </Badge>
+              <span className="ml-2 text-xs text-zinc-500">{bookmarkedSignals.length}</span>
             ) : null}
           </TabsTrigger>
-          <TabsTrigger value="briefs" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+          <TabsTrigger
+            value="briefs"
+            className="text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm px-4"
+          >
             Briefs
           </TabsTrigger>
         </TabsList>
 
         {/* Signals Tab */}
-        <TabsContent value="signals" className="space-y-6">
-          {/* Portfolio Overview - Clickable to filter signals */}
+        <TabsContent value="signals" className="space-y-6 mt-6">
+          {/* Portfolio Overview */}
           {companies && companies.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Portfolio Companies</h2>
+                <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                  Portfolio Companies
+                </h2>
                 {selectedCompanyId && (
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="h-8 text-xs text-zinc-500"
                     onClick={() => setSelectedCompanyId(undefined)}
                   >
                     Clear filter
@@ -308,22 +264,18 @@ export default function NPREWSDashboard() {
             />
           )}
 
-          {/* Empty state if no signals */}
+          {/* Empty state */}
           {(!signals || signals.length === 0) && (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <Zap className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg">No Signals Yet</h3>
-                <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                  Seed demo data by running: npx convex run seed:seedDemoData
-                </p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Zap}
+              title="No Signals"
+              description="Run: npx convex run seed:seedDemoData"
+            />
           )}
         </TabsContent>
 
         {/* Portfolio Tab */}
-        <TabsContent value="portfolio" className="space-y-4">
+        <TabsContent value="portfolio" className="mt-6">
           {companies && companies.length > 0 ? (
             <PortfolioOverview
               companies={companies}
@@ -331,20 +283,16 @@ export default function NPREWSDashboard() {
               onSelectCompany={setSelectedCompanyId}
             />
           ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg">No Portfolio Companies</h3>
-                <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                  Seed demo data by running: npx convex run seed:seedDemoData
-                </p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Building2}
+              title="No Portfolio Companies"
+              description="Run: npx convex run seed:seedDemoData"
+            />
           )}
         </TabsContent>
 
-        {/* Bookmarks/Tracking Tab */}
-        <TabsContent value="bookmarks" className="space-y-4">
+        {/* Bookmarks Tab */}
+        <TabsContent value="bookmarks" className="mt-6">
           {bookmarkedSignals && bookmarkedSignals.length > 0 ? (
             <SignalFeed
               signals={bookmarkedSignals}
@@ -353,28 +301,26 @@ export default function NPREWSDashboard() {
               maxHeight="600px"
             />
           ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg">No Tracked Signals</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Bookmark signals to track developing situations
-                </p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Bookmark}
+              title="No Tracked Signals"
+              description="Bookmark signals to track developments"
+            />
           )}
         </TabsContent>
 
         {/* Briefs Tab */}
-        <TabsContent value="briefs" className="space-y-6">
+        <TabsContent value="briefs" className="space-y-6 mt-6">
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Pending Briefs */}
             <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Pending Review</h2>
-                <Badge variant="outline">
+                <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                  Pending Review
+                </h2>
+                <span className="text-xs text-zinc-500">
                   {pendingBriefs?.length ?? 0} briefs
-                </Badge>
+                </span>
               </div>
 
               {pendingBriefs && pendingBriefs.length > 0 ? (
@@ -396,21 +342,19 @@ export default function NPREWSDashboard() {
                   ))}
                 </div>
               ) : (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                    <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="font-medium">No Pending Briefs</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Analyze content to generate narrative briefs
-                    </p>
-                  </CardContent>
-                </Card>
+                <EmptyState
+                  icon={FileText}
+                  title="No Pending Briefs"
+                  description="Analyze content to generate briefs"
+                />
               )}
             </div>
 
-            {/* Recent Legitimacy Transfers */}
+            {/* Legitimacy Transfers */}
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Legitimacy Transfers</h2>
+              <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                Legitimacy Transfers
+              </h2>
 
               {actorSignals && actorSignals.length > 0 ? (
                 <div className="space-y-3">
@@ -426,19 +370,77 @@ export default function NPREWSDashboard() {
                   )}
                 </div>
               ) : (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-                    <TrendingUp className="h-8 w-8 text-muted-foreground mb-3" />
-                    <p className="text-sm text-muted-foreground">
-                      No legitimacy transfers detected yet
-                    </p>
-                  </CardContent>
-                </Card>
+                <EmptyState
+                  icon={TrendingUp}
+                  title="No Transfers"
+                  description="No legitimacy transfers detected"
+                  compact
+                />
               )}
             </div>
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// Stat Card Component
+function StatCard({
+  label,
+  value,
+  subtext,
+  highlight,
+  alert,
+}: {
+  label: string;
+  value: number;
+  subtext: string;
+  highlight?: boolean;
+  alert?: boolean;
+}) {
+  return (
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+        {label}
+      </p>
+      <p
+        className={`text-2xl font-semibold mt-1 ${
+          alert
+            ? 'text-red-600 dark:text-red-500'
+            : highlight
+            ? 'text-zinc-900 dark:text-zinc-100'
+            : 'text-zinc-900 dark:text-zinc-100'
+        }`}
+      >
+        {value}
+      </p>
+      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{subtext}</p>
+    </div>
+  );
+}
+
+// Empty State Component
+function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  compact,
+}: {
+  icon: typeof Zap;
+  title: string;
+  description: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg flex flex-col items-center justify-center text-center ${
+        compact ? 'py-8' : 'py-16'
+      }`}
+    >
+      <Icon className="h-8 w-8 text-zinc-300 dark:text-zinc-600 mb-3" />
+      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{title}</p>
+      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{description}</p>
     </div>
   );
 }

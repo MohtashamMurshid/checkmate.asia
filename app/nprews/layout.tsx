@@ -9,27 +9,24 @@ import {
   FileText,
   Users,
   Activity,
-  Settings,
   ChevronLeft,
   ChevronRight,
-  Shield,
-  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const navigation = [
   {
-    name: 'Dashboard',
+    name: 'Overview',
     href: '/nprews',
     icon: LayoutDashboard,
   },
   {
-    name: 'Narrative Briefs',
+    name: 'Briefs',
     href: '/nprews/briefs',
     icon: FileText,
   },
   {
-    name: 'Actor Map',
+    name: 'Actors',
     href: '/nprews/actors',
     icon: Users,
   },
@@ -49,36 +46,35 @@ export default function NPREWSLayout({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950">
       {/* Sidebar */}
       <aside
         className={cn(
-          'border-r bg-card transition-all duration-300 flex flex-col',
-          collapsed ? 'w-16' : 'w-64'
+          'bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-200 flex flex-col',
+          collapsed ? 'w-16' : 'w-56'
         )}
       >
         {/* Header */}
-        <div className="h-16 border-b flex items-center justify-between px-4">
+        <div className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center px-4">
           {!collapsed && (
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                <Shield className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
+                <span className="text-xs font-semibold text-white dark:text-zinc-900">RI</span>
               </div>
               <div>
-                <h1 className="text-sm font-semibold">NPREWS</h1>
-                <p className="text-[10px] text-muted-foreground">Khazanah Risk</p>
+                <h1 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Risk Intel</h1>
               </div>
             </div>
           )}
           {collapsed && (
-            <div className="p-1.5 rounded-lg bg-primary/10 mx-auto">
-              <Shield className="h-5 w-5 text-primary" />
+            <div className="h-7 w-7 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center mx-auto">
+              <span className="text-xs font-semibold text-white dark:text-zinc-900">RI</span>
             </div>
           )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -86,10 +82,10 @@ export default function NPREWSLayout({
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+                  'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
                   isActive
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                 )}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
@@ -100,11 +96,11 @@ export default function NPREWSLayout({
         </nav>
 
         {/* Collapse toggle */}
-        <div className="p-2 border-t">
+        <div className="p-3 border-t border-zinc-200 dark:border-zinc-800">
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-center"
+            className="w-full justify-center h-8 text-zinc-500 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -117,7 +113,7 @@ export default function NPREWSLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto bg-zinc-50 dark:bg-zinc-950">{children}</main>
     </div>
   );
 }

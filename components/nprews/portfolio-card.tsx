@@ -1,9 +1,6 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Building2, MapPin, AlertTriangle, TrendingUp } from 'lucide-react';
 import type { Id } from '@/convex/_generated/dataModel';
 
 interface PortfolioCardProps {
@@ -19,21 +16,9 @@ interface PortfolioCardProps {
 }
 
 const riskConfig = {
-  low: {
-    label: 'Low Risk',
-    color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-    dotColor: 'bg-green-500',
-  },
-  medium: {
-    label: 'Medium Risk',
-    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    dotColor: 'bg-amber-500',
-  },
-  high: {
-    label: 'High Risk',
-    color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-    dotColor: 'bg-red-500',
-  },
+  low: { dot: 'bg-zinc-400', text: 'text-zinc-500' },
+  medium: { dot: 'bg-amber-500', text: 'text-amber-600' },
+  high: { dot: 'bg-red-500', text: 'text-red-600' },
 };
 
 export function PortfolioCard({
@@ -50,54 +35,48 @@ export function PortfolioCard({
   const risk = riskConfig[riskLevel];
 
   return (
-    <Card
+    <div
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md',
-        selected && 'ring-2 ring-primary'
+        'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 cursor-pointer transition-all',
+        selected && 'ring-2 ring-zinc-900 dark:ring-zinc-100 ring-offset-2 ring-offset-zinc-50 dark:ring-offset-zinc-950',
+        !selected && 'hover:border-zinc-300 dark:hover:border-zinc-700'
       )}
       onClick={onClick}
     >
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Building2 className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm leading-tight">{name}</h3>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                <MapPin className="h-3 w-3" />
-                {region}
-              </div>
-            </div>
-          </div>
-          {activeSignalCount > 0 && (
-            <Badge
-              variant="secondary"
-              className={cn(
-                'shrink-0',
-                activeSignalCount >= 5 && 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-              )}
-            >
-              <TrendingUp className="h-3 w-3 mr-1" />
-              {activeSignalCount}
-            </Badge>
-          )}
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{name}</h3>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{region}</p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>
-        <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs">
-            {sector}
-          </Badge>
-          <Badge className={cn('text-xs', risk.color)}>
-            <div className={cn('h-1.5 w-1.5 rounded-full mr-1', risk.dotColor)} />
-            {risk.label}
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
+        {activeSignalCount > 0 && (
+          <span
+            className={cn(
+              'text-xs font-medium px-2 py-0.5 rounded-full',
+              activeSignalCount >= 5
+                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+            )}
+          >
+            {activeSignalCount} signal{activeSignalCount !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
+      {/* Description */}
+      <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
+        {description}
+      </p>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400">{sector}</span>
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className={cn('h-1.5 w-1.5 rounded-full', risk.dot)} />
+          <span className={cn('capitalize', risk.text)}>{riskLevel}</span>
+        </span>
+      </div>
+    </div>
   );
 }
 

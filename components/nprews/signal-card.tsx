@@ -1,23 +1,12 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Bookmark,
   BookmarkCheck,
   ExternalLink,
-  Building2,
   Clock,
-  AlertTriangle,
-  Globe,
-  TrendingUp,
-  FileText,
-  Truck,
-  Cloud,
-  Store,
-  Settings,
 } from 'lucide-react';
 import type { Id } from '@/convex/_generated/dataModel';
 
@@ -50,86 +39,21 @@ interface SignalCardProps {
   onMarkTracking?: () => void;
 }
 
-const categoryConfig: Record<
-  SignalCategory,
-  { label: string; icon: typeof Globe; color: string }
-> = {
-  geopolitical: {
-    label: 'Geopolitical',
-    icon: Globe,
-    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  },
-  economic: {
-    label: 'Economic',
-    icon: TrendingUp,
-    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  },
-  regulatory: {
-    label: 'Regulatory',
-    icon: FileText,
-    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  },
-  supply_chain: {
-    label: 'Supply Chain',
-    icon: Truck,
-    color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  },
-  climate: {
-    label: 'Climate',
-    icon: Cloud,
-    color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  },
-  market: {
-    label: 'Market',
-    icon: Store,
-    color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-  },
-  operational: {
-    label: 'Operational',
-    icon: Settings,
-    color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-  },
+const categoryLabels: Record<SignalCategory, string> = {
+  geopolitical: 'Geopolitical',
+  economic: 'Economic',
+  regulatory: 'Regulatory',
+  supply_chain: 'Supply Chain',
+  climate: 'Climate',
+  market: 'Market',
+  operational: 'Operational',
 };
 
-const severityConfig: Record<
-  SignalSeverity,
-  { label: string; color: string; dotColor: string }
-> = {
-  low: {
-    label: 'Low',
-    color: 'text-slate-600',
-    dotColor: 'bg-slate-400',
-  },
-  medium: {
-    label: 'Medium',
-    color: 'text-amber-600',
-    dotColor: 'bg-amber-500',
-  },
-  high: {
-    label: 'High',
-    color: 'text-orange-600',
-    dotColor: 'bg-orange-500',
-  },
-  critical: {
-    label: 'Critical',
-    color: 'text-red-600',
-    dotColor: 'bg-red-500',
-  },
-};
-
-const statusConfig: Record<SignalStatus, { label: string; color: string }> = {
-  new: {
-    label: 'New',
-    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  },
-  tracking: {
-    label: 'Tracking',
-    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  },
-  resolved: {
-    label: 'Resolved',
-    color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  },
+const severityConfig: Record<SignalSeverity, { dot: string; text: string }> = {
+  low: { dot: 'bg-zinc-400', text: 'text-zinc-500' },
+  medium: { dot: 'bg-amber-500', text: 'text-amber-600' },
+  high: { dot: 'bg-orange-500', text: 'text-orange-600' },
+  critical: { dot: 'bg-red-500', text: 'text-red-600' },
 };
 
 export function SignalCard({
@@ -148,122 +72,120 @@ export function SignalCard({
   onToggleBookmark,
   onMarkTracking,
 }: SignalCardProps) {
-  const cat = categoryConfig[category];
   const sev = severityConfig[severity];
-  const stat = statusConfig[status];
-  const CategoryIcon = cat.icon;
-
   const timeAgo = formatTimeAgo(createdAt);
 
   return (
-    <Card
+    <div
       className={cn(
-        'transition-all',
-        severity === 'critical' && 'border-red-200 dark:border-red-800',
-        status === 'new' && 'border-l-4 border-l-blue-500'
+        'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 transition-colors',
+        status === 'new' && 'border-l-2 border-l-blue-500'
       )}
     >
-      <CardContent className="pt-4 space-y-3">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Badge className={cn('text-xs', cat.color)}>
-              <CategoryIcon className="h-3 w-3 mr-1" />
-              {cat.label}
-            </Badge>
-            <Badge className={cn('text-xs', stat.color)}>{stat.label}</Badge>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className={cn('h-2 w-2 rounded-full', sev.dotColor)} />
-            <span className={cn('text-xs font-medium', sev.color)}>
-              {sev.label}
-            </span>
-          </div>
+      {/* Top row */}
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="flex items-center gap-3 text-xs">
+          <span className="text-zinc-500 dark:text-zinc-400">
+            {categoryLabels[category]}
+          </span>
+          <span className="text-zinc-300 dark:text-zinc-600">·</span>
+          <span className="flex items-center gap-1.5">
+            <span className={cn('h-1.5 w-1.5 rounded-full', sev.dot)} />
+            <span className={cn('capitalize', sev.text)}>{severity}</span>
+          </span>
+          {status === 'new' && (
+            <>
+              <span className="text-zinc-300 dark:text-zinc-600">·</span>
+              <span className="text-blue-600 dark:text-blue-500 font-medium">New</span>
+            </>
+          )}
         </div>
-
-        {/* Title & Summary */}
-        <div>
-          <h3 className="font-semibold text-sm leading-tight">{title}</h3>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-            {summary}
-          </p>
-        </div>
-
-        {/* Relevance */}
-        <div className="p-2 rounded-md bg-muted/50 border-l-2 border-primary">
-          <p className="text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">Why it matters:</span>{' '}
-            {relevanceReason}
-          </p>
-        </div>
-
-        {/* Affected Companies */}
-        {companyNames && companyNames.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {companyNames.map((name) => (
-              <Badge key={name} variant="outline" className="text-xs">
-                <Building2 className="h-3 w-3 mr-1" />
-                {name.split(' ')[0]}
-              </Badge>
-            ))}
-          </div>
+        {onToggleBookmark && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 -mr-1 text-zinc-400 hover:text-zinc-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleBookmark();
+            }}
+          >
+            {isBookmarked ? (
+              <BookmarkCheck className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+          </Button>
         )}
+      </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{source}</span>
-            {sourceUrl && (
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {timeAgo}
+      {/* Title */}
+      <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 leading-snug mb-1.5">
+        {title}
+      </h3>
+
+      {/* Summary */}
+      <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2 mb-3">
+        {summary}
+      </p>
+
+      {/* Relevance */}
+      <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded px-3 py-2 mb-3">
+        <p className="text-xs text-zinc-600 dark:text-zinc-400">
+          <span className="font-medium text-zinc-700 dark:text-zinc-300">Relevance: </span>
+          {relevanceReason}
+        </p>
+      </div>
+
+      {/* Companies */}
+      {companyNames && companyNames.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {companyNames.map((name) => (
+            <span
+              key={name}
+              className="text-xs px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+            >
+              {name.split(' ')[0]}
             </span>
-          </div>
-          <div className="flex items-center gap-1">
-            {status === 'new' && onMarkTracking && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMarkTracking();
-                }}
-              >
-                Track
-              </Button>
-            )}
-            {onToggleBookmark && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleBookmark();
-                }}
-              >
-                {isBookmarked ? (
-                  <BookmarkCheck className="h-4 w-4 text-primary" />
-                ) : (
-                  <Bookmark className="h-4 w-4" />
-                )}
-              </Button>
-            )}
-          </div>
+          ))}
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+          <span>{source}</span>
+          {sourceUrl && (
+            <a
+              href={sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-zinc-700 dark:hover:text-zinc-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {timeAgo}
+          </span>
+        </div>
+        {status === 'new' && onMarkTracking && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMarkTracking();
+            }}
+          >
+            Track
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -271,8 +193,8 @@ function formatTimeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
 
   if (seconds < 60) return 'Just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
   return new Date(timestamp).toLocaleDateString();
 }

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { SignalCard } from './signal-card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -13,13 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Activity,
-  Filter,
-  AlertTriangle,
-  Bookmark,
-  RefreshCw,
-} from 'lucide-react';
+import { Activity, RefreshCw } from 'lucide-react';
 import type { Id } from '@/convex/_generated/dataModel';
 
 type SignalCategory =
@@ -75,103 +68,86 @@ export function SignalFeed({
   className,
   maxHeight = '600px',
 }: SignalFeedProps) {
-  const [categoryFilter, setCategoryFilter] = useState<SignalCategory | 'all'>(
-    'all'
-  );
-  const [severityFilter, setSeverityFilter] = useState<SignalSeverity | 'all'>(
-    'all'
-  );
+  const [categoryFilter, setCategoryFilter] = useState<SignalCategory | 'all'>('all');
+  const [severityFilter, setSeverityFilter] = useState<SignalSeverity | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<SignalStatus | 'all'>('all');
 
   // Filter signals
   let filteredSignals = signals;
 
-  // Filter by selected company
   if (selectedCompanyId) {
     filteredSignals = filteredSignals.filter((s) =>
       s.companyIds.includes(selectedCompanyId)
     );
   }
 
-  // Filter by category
   if (categoryFilter !== 'all') {
-    filteredSignals = filteredSignals.filter(
-      (s) => s.category === categoryFilter
-    );
+    filteredSignals = filteredSignals.filter((s) => s.category === categoryFilter);
   }
 
-  // Filter by severity
   if (severityFilter !== 'all') {
-    filteredSignals = filteredSignals.filter(
-      (s) => s.severity === severityFilter
-    );
+    filteredSignals = filteredSignals.filter((s) => s.severity === severityFilter);
   }
 
-  // Filter by status
   if (statusFilter !== 'all') {
     filteredSignals = filteredSignals.filter((s) => s.status === statusFilter);
   }
 
-  // Sort by creation date (newest first)
-  filteredSignals = [...filteredSignals].sort(
-    (a, b) => b.createdAt - a.createdAt
-  );
+  // Sort by creation date
+  filteredSignals = [...filteredSignals].sort((a, b) => b.createdAt - a.createdAt);
 
-  // Get company name map
+  // Company name map
   const companyMap = new Map(companies.map((c) => [c._id, c.name]));
 
   // Stats
   const newCount = signals.filter((s) => s.status === 'new').length;
   const criticalCount = signals.filter((s) => s.severity === 'critical').length;
-  const bookmarkedCount = signals.filter((s) => s.isBookmarked).length;
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Header with stats */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold">Signal Feed</h2>
-          <Badge variant="secondary">{filteredSignals.length}</Badge>
-        </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+            Signal Feed
+          </h2>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+            {filteredSignals.length} of {signals.length}
+          </span>
           {newCount > 0 && (
-            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+            <span className="text-xs text-blue-600 dark:text-blue-500">
               {newCount} new
-            </Badge>
+            </span>
           )}
           {criticalCount > 0 && (
-            <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-              <AlertTriangle className="h-3 w-3 mr-1" />
+            <span className="text-xs text-red-600 dark:text-red-500">
               {criticalCount} critical
-            </Badge>
-          )}
-          {bookmarkedCount > 0 && (
-            <Badge variant="outline">
-              <Bookmark className="h-3 w-3 mr-1" />
-              {bookmarkedCount}
-            </Badge>
-          )}
-          {onRefresh && (
-            <Button variant="ghost" size="icon" onClick={onRefresh}>
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+            </span>
           )}
         </div>
+        {onRefresh && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-zinc-500"
+            onClick={onRefresh}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
-        <Filter className="h-4 w-4 text-muted-foreground" />
         <Select
           value={categoryFilter}
           onValueChange={(v) => setCategoryFilter(v as SignalCategory | 'all')}
         >
-          <SelectTrigger className="w-32 h-8 text-xs">
+          <SelectTrigger className="w-28 h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="all">All types</SelectItem>
             <SelectItem value="geopolitical">Geopolitical</SelectItem>
             <SelectItem value="economic">Economic</SelectItem>
             <SelectItem value="regulatory">Regulatory</SelectItem>
@@ -186,11 +162,11 @@ export function SignalFeed({
           value={severityFilter}
           onValueChange={(v) => setSeverityFilter(v as SignalSeverity | 'all')}
         >
-          <SelectTrigger className="w-28 h-8 text-xs">
+          <SelectTrigger className="w-24 h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
             <SelectValue placeholder="Severity" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Severity</SelectItem>
+            <SelectItem value="all">All levels</SelectItem>
             <SelectItem value="critical">Critical</SelectItem>
             <SelectItem value="high">High</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
@@ -202,31 +178,29 @@ export function SignalFeed({
           value={statusFilter}
           onValueChange={(v) => setStatusFilter(v as SignalStatus | 'all')}
         >
-          <SelectTrigger className="w-28 h-8 text-xs">
+          <SelectTrigger className="w-24 h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all">All status</SelectItem>
             <SelectItem value="new">New</SelectItem>
             <SelectItem value="tracking">Tracking</SelectItem>
             <SelectItem value="resolved">Resolved</SelectItem>
           </SelectContent>
         </Select>
 
-        {(categoryFilter !== 'all' ||
-          severityFilter !== 'all' ||
-          statusFilter !== 'all') && (
+        {(categoryFilter !== 'all' || severityFilter !== 'all' || statusFilter !== 'all') && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 text-xs"
+            className="h-8 text-xs text-zinc-500 hover:text-zinc-700"
             onClick={() => {
               setCategoryFilter('all');
               setSeverityFilter('all');
               setStatusFilter('all');
             }}
           >
-            Clear filters
+            Clear
           </Button>
         )}
       </div>
@@ -253,9 +227,7 @@ export function SignalFeed({
                   .map((id) => companyMap.get(id))
                   .filter(Boolean) as string[]}
                 onToggleBookmark={
-                  onToggleBookmark
-                    ? () => onToggleBookmark(signal._id)
-                    : undefined
+                  onToggleBookmark ? () => onToggleBookmark(signal._id) : undefined
                 }
                 onMarkTracking={
                   onMarkTracking && signal.status === 'new'
@@ -265,9 +237,9 @@ export function SignalFeed({
               />
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Activity className="h-10 w-10 text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">No signals match filters</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg flex flex-col items-center justify-center py-12 text-center">
+              <Activity className="h-8 w-8 text-zinc-300 dark:text-zinc-600 mb-3" />
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">No signals match filters</p>
             </div>
           )}
         </div>
